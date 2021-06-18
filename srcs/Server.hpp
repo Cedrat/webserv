@@ -33,9 +33,10 @@ class Server
     int     _socket;
     int     _port;
     int     _host;
-
-    //fd_set              _master;
     struct  sockaddr_in _address;
+    //fd_set              _master;
+    //struct  pollfd      _master[1000];
+
 
 };
 
