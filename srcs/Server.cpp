@@ -67,7 +67,10 @@ int Server::init()
       return (-1);
     }
 
-    /*int option = 1;
+    /*
+    Set socket to non-blocking
+    */
+    int option = 1;
     if ((setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option))) < 0)
     {
       std::cerr << "setsockopt() failed" << std::endl;
@@ -80,7 +83,7 @@ int Server::init()
       std::cerr << "ioctl() failed" << std::endl;
       close(this->_socket);
       return (-1);
-    }*/
+    }
 
     return (1);
 }
@@ -139,13 +142,15 @@ int Server::accept_connections()
 {
   char buffer[80];
   int current_size = _nfds;
-  int new_fd = -1;
+  int new_fd = 0;
 
-  for (int i = 0; i < _nfds; i++)
+  for (int i = 0; i < current_size; i++)
   {
+    if (this->_master[i].revents == 0)
+      continue;
     if (_master[i].fd == this->_socket)
     {
-      while(1)
+      while(this->_nfds != -1)
       {
         if (this->_nfds < 1000)
           new_fd = accept(this->_socket, NULL, NULL);
@@ -154,7 +159,6 @@ int Server::accept_connections()
           std::cerr << "Max number of clients reached" << std::endl;
           break;
         }
-
         if (new_fd < 0)
         {
           if (errno != EWOULDBLOCK)
@@ -167,123 +171,19 @@ int Server::accept_connections()
 
         if (send(new_fd, "Hello !\n", strlen("Hello !\n"), 0) != strlen("Hello !\n"))
           std::cerr << "Error sending greeting message" << std::endl;
-        std::cout << "Greeting message sent successfully !" << std::endl;
+        std::cout << "Greeting message sent successfully !\n" << std::endl;
         add_client(new_fd);
-        break; //ou while (new_fd != -1) si non blocking socket)
       }
     }
     else
-      actions(i);
+      receive_data(i);
   }
   return 1;
 }
-
-int Server::actions( int i )
-{
-  int rc;
-  char buffer[1024];
-
-  while (1)
-  {
-    rc = recv(this->_master[i].fd, buffer, sizeof(buffer), 0);
-    if (rc < 0)
-    {
-      if (errno != EWOULDBLOCK)
-        std::cerr << "recv() failed" << std::endl;
-        //close_conn = true;
-      return (-1);
-    }
-    if (rc == 0)
-    {
-      std::cout << "Host disconnected" << std::endl;
-      close(_master[i].fd);
-      //close_conn = true;
-      return (1);
-    }
-    std::cout << rc << " bytes received" << std::endl;
-  }
-
-  return 1;
-}
-
-
-/*
-void Server::accept_connections(int this->_nfds)
-{
-  //One or more fd readables. Need to determine wich ones
-  bool   compress_array = false;
-  bool   close_conn = false;
-  int    new_fd = 0;
-
-  for (int i = 0; i < this->_nfds; i++)
-  {
-    //Loop through to find the descriptors that returned POLLIN
-    //and determine whether it's the listening or the active connection
-    if (this->_master[i].revents == 0)
-      continue;
-
-    //If revents is not POLLIN it's an unexpected result, log and end server
-    if (this->_master[i].revents != POLLIN)
-    {
-      std::cerr << "Error revents !" << std::endl;
-      this->_running = false;
-      break ;
-    }
-
-    if (this->_master[i].fd == this->_socket)  //Listening descriptor is readable
-    {
-      std::cout << "Listening descriptor is readable" << std::endl;
-
-      //Accept all incoming conenctions that are queued up on the listening
-      //socket before we loop back and call poll again
-      while (new_fd != -1)
-      {
-        //Accept each incoming connection. If accept fails with EWOULDBLOCK
-        //then we have accepted all of them. Any other failure on accept
-        //will cause us to end the server
-        std::cout << this->_nfds << " " << i << std::endl;
-        new_fd = accept(this->_socket, NULL, NULL);
-        if (new_fd < 0)
-        {
-          if (errno != EWOULDBLOCK)
-          {
-            std::cerr << "accept() failed" << std::endl;
-            this->_running = false;
-          }
-          break;
-        }
-
-        //Add the new incoming connection to the pollfd structure
-        this->_master[this->_nfds].fd = new_fd;
-        this->_master[this->_nfds].events = POLLIN;
-        this->_nfds++;
-      }  //Loop back up and accept another incoming connection
-    }
-
-    //This is not the listening socket, therefore an existing connection
-    //must be readable
-    else
-    {
-      close_conn = receive_data(i);
-
-      //If the close_conn flag was turned on we need to clean up -> remove this fd
-      if (close_conn == true)
-      {
-        close(this->_master[i].fd);
-        this->_master[i].fd = -1;
-        compress_array = true;
-      }
-    } //End of existing connection is readable
-  } //end of loop through pollable descriptors
-
-  //If the compress_array flag was turned on, we need to squeeze together
-  //the array and decrement the number of fd.
-  if (compress_array)
-    compress_array = compress_fds(this->_nfds);
-}*/
 
 bool Server::receive_data( int i )
 {
+  int rc;
   char  *buffer[80];
   bool  close_conn = false;
 
@@ -291,7 +191,7 @@ bool Server::receive_data( int i )
   {
     //Receive data on this connection until the recv fails with EWOULDBLOCK
     //If any other failure occurs we close the connection
-    int rc = recv(this->_master[i].fd, buffer, sizeof(buffer), 0);
+    rc = recv(this->_master[i].fd, buffer, sizeof(buffer), 0);
     if (rc < 0)
     {
       if (errno != EWOULDBLOCK)
@@ -334,7 +234,6 @@ bool Server::compress_fds()
         this->_master[j].fd = this->_master[j + 1].fd;
         this->_master[j].events = this->_master[j + 1].events;
       }
-
       i--;
       _nfds--;
     }
@@ -360,7 +259,6 @@ void Server::add_client( int new_fd )
   this->_master[this->_nfds].events = POLLIN;
   this->_nfds++;
 }
-
 
 
 /*
