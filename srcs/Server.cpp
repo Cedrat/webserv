@@ -55,6 +55,8 @@ int Server::init()
     }
 
     setAddress();
+    //TODO
+    //bind sur les differents ports = plusieurs structs sockaddr
     if (bind( this->_socket, (sockaddr *)&this->_sockAddr, sizeof(this->_sockAddr)) < 0)
     {
       std::cerr << "Couldn't bind port." << std::endl;
@@ -70,20 +72,15 @@ int Server::init()
     /*
     Set socket to non-blocking
     */
-    int option = 1;
+   /* int option = 1;
     if ((setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option))) < 0)
     {
       std::cerr << "setsockopt() failed" << std::endl;
       close(this->_socket);
       return (-1);
-    }
+    }*/
 
-    if ((ioctl(this->_socket, FIONBIO, (char *)&option)) < 0)
-    {
-      std::cerr << "ioctl() failed" << std::endl;
-      close(this->_socket);
-      return (-1);
-    }
+    fcntl(_socket, F_SETFL, O_NONBLOCK);
 
     return (1);
 }
@@ -184,8 +181,10 @@ int Server::accept_connections()
 bool Server::receive_data( int i )
 {
   int rc;
-  char  *buffer[80];
+  char  buffer[80];
   bool  close_conn = false;
+ 
+//TODO : Correction pb lors de fermeture du client
 
   while (1)
   {
@@ -196,7 +195,7 @@ bool Server::receive_data( int i )
     {
       if (errno != EWOULDBLOCK)
       {
-        std::cerr << "recv() failed" << std::endl;
+        std::cerr << "recv() failed " << std::endl;
         close_conn = true;
       }
       break;
@@ -219,6 +218,12 @@ bool Server::receive_data( int i )
       close_conn = true;
       break;
     }
+  }
+  if (close_conn == true)
+  {
+    close(_master[i].fd);
+    _master[i].fd = -1;
+    compress_fds();
   }
   return close_conn;
 }
@@ -293,3 +298,14 @@ pollfd  Server::getPollFd( int i ) const
 {
   return (this->_master[i]);
 }
+
+/*
+ 1 classe contenant les sockets
+ Constructeur par defaut
+ fonctions : add_socket   -> Socket assimiles a un port (bind)
+ listen a part ?
+
+ 1 seule liste de fds
+
+
+*/
