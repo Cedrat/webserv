@@ -8,6 +8,7 @@
 
 typedef int fd;
 #define ENDOFARRAY -2
+#define BACKLOG 10
 
 class Socket
 {
@@ -15,7 +16,7 @@ class Socket
 		Socket(void);
 		~Socket();
 
-		void	add_sockets_binded(int ports);
+		void	add_sockets_listening(int ports);
 		fd* 	list_sockets();
 
 	private :

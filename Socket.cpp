@@ -22,7 +22,7 @@ void bind_addr(fd fd_to_bind, int port)
 		throw("ERROR BINDING");
 
 }
-void Socket::add_sockets_binded(int port)
+void Socket::add_sockets_listening(int port)
 {
 	fd new_socket;
 
@@ -30,6 +30,8 @@ void Socket::add_sockets_binded(int port)
 	if (new_socket < 0)
 		throw ("ERROR SOCKET CREATION");
 	bind_addr(new_socket, port);
+	if (listen(new_socket, BACKLOG) < 0)
+		throw ("ERROR LISTENING");
 	_list_sockets.push_back(new_socket);
 	_nb_sockets++;
 }
