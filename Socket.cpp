@@ -32,6 +32,9 @@ void Socket::add_sockets_listening(int port)
 	bind_addr(new_socket, port);
 	if (listen(new_socket, BACKLOG) < 0)
 		throw ("ERROR LISTENING");
+	int enable = 1;
+	setsockopt(new_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+	fcntl(new_socket, F_SETFL, O_NONBLOCK);
 	_list_sockets.push_back(new_socket);
 	_nb_sockets++;
 }
