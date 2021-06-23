@@ -12,11 +12,9 @@
 
 #include "Server.hpp"
 
-Server::Server( int port, int host ) : _port(port), _host(host),
-  _socket(-1), _running(true), _nfds(1)
+Server::Server( int port, int host ) : _port(port), _host(host), 
+  _running(true), _nfds(1)
 {
-  this->_running = true;
-
   if (init() == -1)
     return ;
   run();
@@ -30,7 +28,7 @@ Server::Server( Server const & src )
 
 Server & Server::operator=( Server const & rhs )
 {
-  this->_socket = rhs.getSocket();
+  this->_socket = rhs.getSockets();
   this->_port = rhs.getPort();
   this->_host = rhs.getHost();
   this->_running = rhs.getStatus();
@@ -47,59 +45,19 @@ Fonctions membres
 */
 int Server::init()
 {
-    this->_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (this->_socket < 0)
-    {
-      std::cerr << "Couldn't connect socket." << std::endl;
-      return (-1);
-    }
-
-    setAddress();
-    //TODO
-    //bind sur les differents ports = plusieurs structs sockaddr
-    if (bind( this->_socket, (sockaddr *)&this->_sockAddr, sizeof(this->_sockAddr)) < 0)
-    {
-      std::cerr << "Couldn't bind port." << std::endl;
-      return (-1);
-    }
-
-    if (listen(this->_socket, 1000) < 0)
-    {
-      std::cerr << "Couldn't listen." << std::endl;
-      return (-1);
-    }
-
     /*
-    Set socket to non-blocking
+    Ajout des hosts
     */
-   /* int option = 1;
-    if ((setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option))) < 0)
-    {
-      std::cerr << "setsockopt() failed" << std::endl;
-      close(this->_socket);
-      return (-1);
-    }*/
-
-    fcntl(_socket, F_SETFL, O_NONBLOCK);
-
+    Socket s1;
+    s1.add_sockets_listening(7994);
+    s1.add_sockets_listening(7995);
+    _socket = s1.list_sockets();
     return (1);
-}
-
-void Server::setAddress()
-{
-  this->_sockAddr.sin_family = AF_INET;
-  this->_sockAddr.sin_port = htons(this->_port);
-  this->_sockAddr.sin_addr.s_addr = this->_host;
-  bzero(&(this->_sockAddr.sin_zero), 8);
 }
 
 void Server::run()
 {
-  //Init pollfd structure & set up the initial listening socket
-  memset(this->_master, 0, sizeof(this->_master));
-  this->_master[0].fd = this->_socket;
-  this->_master[0].events = POLLIN;
-
+  init_fds();
 
   //Loop waiting for incoming connects or for incoming data
   //on any of the connected sockets
@@ -111,6 +69,19 @@ void Server::run()
       this->_running = false;
   }
   close_fds();
+}
+
+void  Server::init_fds()
+{
+  //Init pollfd structure & set up the initial listening socket
+  memset(this->_master, 0, sizeof(this->_master));
+  for (size_t i = 0; _socket[i] != ENDOFARRAY; i++)
+  {
+    _master[i].fd = _socket[i];
+    _master[i].events = POLLIN;
+  }
+  //this->_master[0].fd = this->_socket[0];
+  //this->_master[0].events = POLLIN;
 }
 
 int Server::ft_poll()
@@ -145,12 +116,12 @@ int Server::accept_connections()
   {
     if (this->_master[i].revents == 0)
       continue;
-    if (_master[i].fd == this->_socket)
+    if (_master[i].fd == this->_socket[i])
     {
       while(this->_nfds != -1)
       {
         if (this->_nfds < 1000)
-          new_fd = accept(this->_socket, NULL, NULL);
+          new_fd = accept(this->_socket[i], NULL, NULL);
         else
         {
           std::cerr << "Max number of clients reached" << std::endl;
@@ -269,7 +240,7 @@ void Server::add_client( int new_fd )
 /*
 Getters
 */
-int Server::getSocket() const
+fd* Server::getSockets() const
 {
   return (this->_socket);
 }
@@ -300,12 +271,6 @@ pollfd  Server::getPollFd( int i ) const
 }
 
 /*
- 1 classe contenant les sockets
- Constructeur par defaut
- fonctions : add_socket   -> Socket assimiles a un port (bind)
- listen a part ?
-
- 1 seule liste de fds
 
 
 */
