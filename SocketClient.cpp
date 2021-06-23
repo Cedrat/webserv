@@ -15,7 +15,6 @@ void SocketClient::addSocketClient(fd sockfd)
 {
 	_array_of_socket.push_back(sockfd);
 	_nb_sockets++;
-	std::cout << _nb_sockets << std::endl;
 }
 
 void SocketClient::closeAndRemoveSocket(size_t idx)
