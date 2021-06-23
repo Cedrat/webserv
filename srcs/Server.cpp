@@ -83,13 +83,8 @@ void Server::run()
     {
       this->_running = false;
       break;
-    }
-      
-    if (!accept_connections()) //Gerer cas d'erreur. Return toujours 1 actuellement
-    {
-      this->_running = false;
-      break;
-    }
+    }   
+    accept_connections(); //Gerer cas d'erreur. Return toujours 1 actuellement
   }
 
   close_fds();
@@ -117,7 +112,7 @@ int Server::ft_poll()
   return (1);
 }
 
-int Server::accept_connections()
+void Server::accept_connections()
 {
   int current_size = _nfds;
   int new_fd = 0;
@@ -150,6 +145,7 @@ int Server::accept_connections()
         if (send(new_fd, "Hello !\n", strlen("Hello !\n"), 0) != strlen("Hello !\n"))
           std::cerr << "Error sending greeting message" << std::endl;
         std::cout << "Greeting message sent successfully !" << std::endl;
+
         add_client(new_fd);
       }
     }
@@ -159,10 +155,9 @@ int Server::accept_connections()
         receive_data(i);
     } 
   }
-  return 1;
 }
 
-bool Server::receive_data( int i )
+void Server::receive_data( int i )
 {
   int rc;
   char  buffer[80];
@@ -193,7 +188,6 @@ bool Server::receive_data( int i )
     //Data was received
     int len = rc;
     std::cout << rc << " bytes received\n" << std::endl;
-
     //Echo the data back to the client
     rc = send(this->_master[i].fd, buffer, len, 0);
     if (rc < 0)
@@ -202,14 +196,16 @@ bool Server::receive_data( int i )
       close_conn = true;
       break;
     }
+
   }
+
   if (close_conn == true)
   {
     close(_master[i].fd);
     _master[i].fd = -1;
     compress_fds();
   }
-  return close_conn;
+
 }
 
 

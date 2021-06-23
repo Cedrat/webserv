@@ -37,16 +37,16 @@ class Server
     ~Server();
 
     int   ft_poll();
-    int   accept_connections();
 
+    void  accept_connections();
     void  init();
     void  run();
     void  init_fds();
     void  close_fds();
     void  add_client( int new_fd );
+    void receive_data( int i );
 
     bool compress_fds();
-    bool receive_data( int i );
 
     //Getters
     fd*         getSockets() const;
