@@ -36,10 +36,10 @@ class Server
     Server & operator=( Server const & rhs );
     ~Server();
 
-    int   init();
     int   ft_poll();
     int   accept_connections();
 
+    void  init();
     void  run();
     void  init_fds();
     void  close_fds();
@@ -53,7 +53,6 @@ class Server
     int         getPort() const;
     int         getHost() const;
     int         getStatus() const;
-    sockaddr_in getSockAddr() const;
     pollfd      getPollFd( int i ) const;
 
   private:
@@ -64,7 +63,6 @@ class Server
     int     _host;
     int     _running;
     int     _nfds;
-    struct  sockaddr_in _sockAddr;
     struct  pollfd      _master[1000];
 
 };
