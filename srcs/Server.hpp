@@ -17,12 +17,15 @@
 # include <sys/types.h>
 # include <sys/socket.h>
 #include <sys/ioctl.h>
+# include <fcntl.h>
 # include <arpa/inet.h>
 # include <netinet/in.h>
 # include <sys/poll.h>
 # include <unistd.h>
 # include <cstring>
 # include <cerrno>
+
+typedef int fd;
 
 class Server
 {
@@ -35,7 +38,6 @@ class Server
     int   init();
     int   ft_poll();
     int   accept_connections();
-    int   actions( int i );
 
     void  run();
     void setAddress();
