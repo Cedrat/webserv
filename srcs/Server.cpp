@@ -13,7 +13,7 @@
 #include "Server.hpp"
 
 Server::Server( int port, int host ) : _port(port), _host(host), 
-  _running(true), _nfds(1)
+  _running(true), _nfds(0)
 {
   if (init() == -1)
     return ;
@@ -79,9 +79,8 @@ void  Server::init_fds()
   {
     _master[i].fd = _socket[i];
     _master[i].events = POLLIN;
+    _nfds++;
   }
-  //this->_master[0].fd = this->_socket[0];
-  //this->_master[0].events = POLLIN;
 }
 
 int Server::ft_poll()
