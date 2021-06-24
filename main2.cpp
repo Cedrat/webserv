@@ -2,6 +2,7 @@
 #include "myPoll.hpp"
 #include "fcntl.h"
 #include "fonction.hpp"
+#include "SocketClient.hpp"
 
 
 int main()
@@ -18,7 +19,8 @@ int main()
     fd * lst_socket;
     lst_socket = list_of_socket.list_sockets();
     MyPoll poll_Fd(20, lst_socket, POLLIN);
-    fd fd_client;
+    SocketClient fd_client;
+    fd temp_fd;
     while (1)
     {
         int     byte_read = -1; 

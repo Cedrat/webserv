@@ -25,8 +25,7 @@ MyPoll::MyPoll(int nb_fd, fd* fd_array, short events_needed)
 int    MyPoll::giveSocketAvailable()
 {
     errno = 0;
-    while (poll(_fds,_nfds,_timeout) <= 0)
-        ;
+    poll(_fds,_nfds,_timeout);
     for (size_t i = 0; i < _nfds; i++)
     {
         if (_fds[i].revents & POLLIN)
