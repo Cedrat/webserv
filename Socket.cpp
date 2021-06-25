@@ -1,5 +1,4 @@
 #include "Socket.hpp"
-#include "fonction.hpp"
 
 Socket::Socket(void) : _nb_sockets(0)
 {
@@ -13,34 +12,42 @@ Socket::~Socket()
 
 
 
-
-void bind_addr(fd fd_to_bind, int port)
+/*****************
+Fonctions membres
+*****************/
+void bind_addr( fd fd_to_bind, int port, int host )
 {
-    sockaddr_in addr;
-    
-    addr.sin_family = AF_INET;
-	//A remplacer par host fourni
-	//Ajouter un int host a add_socket_listening et l'utiliser ici ?
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(port);
+  sockaddr_in addr;
 
-    if (bind(fd_to_bind, (sockaddr *)(&addr), sizeof(addr)) < 0)
-		throw("ERROR BINDING");
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = host;
+  addr.sin_port = htons(port);
+
+  if (bind(fd_to_bind, (sockaddr *)(&addr), sizeof(addr)) < 0)
+	  throw("ERROR BINDING");
 }
 
-void Socket::add_sockets_listening(int port)
+void Socket::add_sockets_listening( int port, int host )
 {
 	fd new_socket;
 
 	new_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (new_socket < 0)
 		throw ("ERROR SOCKET CREATION");
-	bind_addr(new_socket, port);
+    
+	bind_addr(new_socket, port, host);
 	if (listen(new_socket, BACKLOG) < 0)
 		throw ("ERROR LISTENING");
+
+  //Reusable socket
 	int enable = 1;
-	setsockopt(new_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-	fcntl(new_socket, F_SETFL, O_NONBLOCK);
+  if ((setsockopt(new_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))) < 0)
+  {
+    close(new_socket);
+    throw ("setsockopt() failed");
+  }
+
+  fcntl(new_socket, F_SETFL, O_NONBLOCK);
 	_list_sockets.push_back(new_socket);
 	_nb_sockets++;
 }
@@ -56,16 +63,3 @@ fd* Socket::list_sockets()
 	fd_array[_nb_sockets] = ENDOFARRAY;
 	return (fd_array);
 }
-
-
-    /*
-    Permettre au socket de reutiliser l'addresse
-	Mis ici au cas ou on lui trouve une utilité
-    */
-   /* int option = 1;
-    if ((setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option))) < 0)
-    {
-      std::cerr << "setsockopt() failed" << std::endl;
-      close(this->_socket);
-      return (-1);
-    }*/
