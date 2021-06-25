@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+#include <poll.h>
 #include <cerrno>
 #include <unistd.h>
-#include "myPoll.hpp"
 #include "fonction.hpp"
 #include "fcntl.h"
 # define ENDOFARRAY -2

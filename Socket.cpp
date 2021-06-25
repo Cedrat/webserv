@@ -56,7 +56,7 @@ fd* Socket::list_sockets()
 {
 	fd *fd_array;
 	fd_array = new fd[_nb_sockets + 1];
-	for (size_t i = 0; i < _nb_sockets; i++)
+	for (int i = 0; i < _nb_sockets; i++)
 	{
 		fd_array[i] = _list_sockets[i];
 	}

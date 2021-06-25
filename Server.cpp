@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:42 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/18 15:43:43 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/06/25 18:50:01 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server( std::vector<int> ports, int host ) : _port(ports), _host(host),
-  _running(true), _nfds(0)
+Server::Server( std::vector<int> ports, int host ) : _host(host), _running(true) ,
+   _nfds(0), _port(ports)
 {
   init();
   run();
@@ -48,7 +48,7 @@ void Server::init()
     //Ajout des hosts & init du set de fds
     Socket s1;
 
-    for (int i = 0; i < _port.size(); i++)
+    for (size_t i = 0; i < _port.size(); i++)
       s1.add_sockets_listening(_port[i], _host);
     _socket = s1.list_sockets();
     _nfds = getSocketsNb();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:38 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/18 15:43:39 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/06/25 18:37:45 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 
 # include "Socket.hpp"
 # include "PollSocket.hpp"
-# include "../includes/fonction.hpp"
+# include "fonction.hpp"
 
 typedef int fd;
 

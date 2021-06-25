@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   PollSocket.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/25 11:19:56 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 11:19:57 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/06/25 18:44:34 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef POLLSOCKET_HPP
 # define POLLSOCKET_HPP
 
-# include "../includes/VectorUp.hpp"
-# include "../includes/fonction.hpp"
+# include "VectorUp.hpp"
+# include "fonction.hpp"
 
 # define TIMEOUT 3*60*1000
 
