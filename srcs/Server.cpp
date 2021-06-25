@@ -32,7 +32,7 @@ Server & Server::operator=( Server const & rhs )
   this->_host = rhs.getHost();
   this->_running = rhs.getStatus();
   for (int i = 0; i < 1000; i++)
-    this->_master[i] = rhs.getPollFd(i);
+    this->_fds[i] = rhs.getPollFd(i);
   return (*this);
 }
 
@@ -51,35 +51,21 @@ void Server::init()
     s1.add_sockets_listening(7994);
     s1.add_sockets_listening(7995);
     _socket = s1.list_sockets();
-
-    //Initialiser les listening fds
-    init_fds();
+    _nfds = getSocketsNb();
 }
-
-void  Server::init_fds()
-{
-  //Init du set de fds a partir des sockets bind sur les ports
-  memset(this->_master, 0, sizeof(this->_master));
-  for (size_t i = 0; _socket[i] != ENDOFARRAY; i++)
-  {
-    _master[i].fd = _socket[i];
-    _master[i].events = POLLIN; /* TODO : Ajouter POLLOUT */
-    _nfds++;
-  }
-}
-
-
 
 /**********************************
 Fonctions membres - Boucle serveur
 **********************************/
 void Server::run()
 {
+  p1.init(_socket, _nfds, POLLIN);
   //Loop waiting for incoming connects or for incoming data
   //on any of the connected sockets
   while (this->_running == true)
   {
-    if (ft_poll() == -1)
+    _fds = p1.AvailableSockets();
+    if (!_fds)
     {
       this->_running = false;
       break;
@@ -87,29 +73,7 @@ void Server::run()
     accept_connections(); //Gerer cas d'erreur. Return toujours 1 actuellement
   }
 
-  close_fds();
-}
-
-int Server::ft_poll()
-{
-  int timeout = (3 * 60 * 1000); // = 3 mn
-  int socket_count;
-
-  //Call poll and wait 3mn for it to complete
-  std::cout << "Waiting for poll()" << std::endl;
-  socket_count = poll(this->_master, this->_nfds, timeout);
-
-  if (socket_count < 0) //Check to see if any call failed
-  {
-    std::cerr << "Error in poll()" << std::endl;
-    return (-1);
-  }
-  if (socket_count == 0)  //Check to see if the timeout expired
-  {
-    std::cerr << "poll() timeout" << std::endl;
-    return (-1);
-  }
-  return (1);
+  p1.closeAllSockets();
 }
 
 void Server::accept_connections()
@@ -119,9 +83,9 @@ void Server::accept_connections()
 
   for (int i = 0; i < current_size; i++)
   {
-    if (this->_master[i].revents == 0)
+    if (this->_fds[i].revents == 0)
       continue;
-    if (_master[i].fd == this->_socket[i])
+    if (_fds[i].fd == this->_socket[i])
     {
       while(new_fd != -1)
       {
@@ -168,8 +132,8 @@ void Server::receive_data( int i )
   while (1)
   {
     //Receive data until the client close his connection or an error occurs
-    rc = recv(this->_master[i].fd, buffer, sizeof(buffer), 0);
-    if (rc == 0 || _master[i].revents & POLLHUP) //Check to see if connection was closed by the client
+    rc = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+    if (rc == 0 || _fds[i].revents & POLLHUP) //Check to see if connection was closed by the client
     {
       std::cerr << "Connection closed" << std::endl;
       close_conn = true;
@@ -177,7 +141,7 @@ void Server::receive_data( int i )
     }
     if (rc < 0)
     {
-      if (_master[i].revents & POLLERR)
+      if (_fds[i].revents & POLLERR)
       {
         std::cerr << "recv() failed " << std::endl;
         close_conn = true;
@@ -189,7 +153,7 @@ void Server::receive_data( int i )
     int len = rc;
     std::cout << rc << " bytes received\n" << std::endl;
     //Echo the data back to the client
-    rc = send(this->_master[i].fd, buffer, len, 0);
+    rc = send(this->_fds[i].fd, buffer, len, 0);
     if (rc < 0)
     {
       std::cerr << "send() failed" << std::endl;
@@ -200,11 +164,10 @@ void Server::receive_data( int i )
 
   if (close_conn == true)
   {
-    close(_master[i].fd);
-    _master[i].fd = -1;
-    compress_fds();
+    p1.closeOneSocket(_fds[i]);
+    //compress_fds();
   }
-  
+
 }
 
 
@@ -216,12 +179,12 @@ bool Server::compress_fds()
 {
   for (int i = 0; i < _nfds; i++)
   {
-    if (this->_master[i].fd == -1)
+    if (this->_fds[i].fd == -1)
     {
       for (int j = i; j < _nfds; j++)
       {
-        this->_master[j].fd = this->_master[j + 1].fd;
-        this->_master[j].events = this->_master[j + 1].events;
+        this->_fds[j].fd = this->_fds[j + 1].fd;
+        this->_fds[j].events = this->_fds[j + 1].events;
       }
       i--;
       _nfds--;
@@ -230,25 +193,9 @@ bool Server::compress_fds()
   return false;
 }
 
-void Server::close_fds()
-{
-  //Clean up all of the sockets that are open
-  for (int i = 0; i < _nfds; i++)
-  {
-    if (this->_master[i].fd >= 0)
-      close(this->_master[i].fd);
-  }
-}
-
 void Server::add_client( int new_fd )
 {
-  std::cout << "New connection, socket fd is " << new_fd << "\n" << std::endl;
-
-  this->_master[this->_nfds].fd = new_fd;
-  this->_master[this->_nfds].events = POLLIN;
-  /* Pour Linux */
-  fcntl(_master[this->_nfds].fd, F_SETFL, O_NONBLOCK);
-  /* FY Linux  */
+  p1.addClient(new_fd);
   this->_nfds++;
 }
 
@@ -259,6 +206,15 @@ Fonctions membres - Getters
 fd* Server::getSockets() const
 {
   return (this->_socket);
+}
+
+int Server::getSocketsNb() const
+{
+  int i = 0;
+
+  while (_socket[i] != ENDOFARRAY)
+    i++;
+  return (i);
 }
 
 int Server::getPort() const
@@ -278,5 +234,5 @@ int Server::getStatus() const
 
 pollfd  Server::getPollFd( int i ) const
 {
-  return (this->_master[i]);
+  return (this->_fds[i]);
 }
