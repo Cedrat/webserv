@@ -13,27 +13,26 @@ Socket::~Socket()
 
 
 
-void bind_addr(fd fd_to_bind, int port)
+void bind_addr( fd fd_to_bind, int port, int host )
 {
   sockaddr_in addr;
 
   addr.sin_family = AF_INET;
-  //TODO : Remplacer par l'host fourni
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_addr.s_addr = host;
   addr.sin_port = htons(port);
 
   if (bind(fd_to_bind, (sockaddr *)(&addr), sizeof(addr)) < 0)
 	  throw("ERROR BINDING");
 }
 
-void Socket::add_sockets_listening(int port)
+void Socket::add_sockets_listening( int port, int host )
 {
 	fd new_socket;
 
 	new_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (new_socket < 0)
 		throw ("ERROR SOCKET CREATION");
-	bind_addr(new_socket, port);
+	bind_addr(new_socket, port, host);
 	if (listen(new_socket, BACKLOG) < 0)
 		throw ("ERROR LISTENING");
 

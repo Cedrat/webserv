@@ -23,6 +23,7 @@
 # include <unistd.h>
 # include <cstring>
 # include <cerrno>
+# include <vector>
 
 # include "Socket.hpp"
 # include "PollSocket.hpp"
@@ -33,7 +34,7 @@ typedef int fd;
 class Server
 {
   public:
-    Server( int port, int host );
+    Server( std::vector<int> ports, int host );
     Server( Server const & src );
     Server & operator=( Server const & rhs );
     ~Server();
@@ -49,19 +50,19 @@ class Server
     //Getters
     fd*         getSockets() const;
     int         getSocketsNb() const;
-    int         getPort() const;
     int         getHost() const;
     int         getStatus() const;
     pollfd      getPollFd( int i ) const;
+    std::vector<int>  getPorts() const;
 
   private:
     Server();
 
     fd*     _socket;
-    int     _port;
     int     _host;
     int     _running;
     int     _nfds;
+    std::vector<int>    _port;
 
     PollSocket        p1;
     struct  pollfd*   _fds;

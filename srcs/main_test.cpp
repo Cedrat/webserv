@@ -11,12 +11,18 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include <vector>
 
 int main()
 {
   int host;
   inet_pton(AF_INET, "127.0.0.1", &host);
-  Server s1(7995, host);
+
+  std::vector<int> ports;
+  ports.push_back(7994);
+  ports.push_back(7995);
+
+  Server s1(ports, host);
 
   return 0;
 }

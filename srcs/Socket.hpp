@@ -26,7 +26,7 @@ class Socket
 		Socket(void);
 		~Socket();
 
-		void	add_sockets_listening(int ports);
+		void	add_sockets_listening( int port, int host );
 		fd* 	list_sockets();
 
 	private :

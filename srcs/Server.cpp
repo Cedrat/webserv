@@ -12,7 +12,7 @@
 
 #include "Server.hpp"
 
-Server::Server( int port, int host ) : _port(port), _host(host),
+Server::Server( std::vector<int> ports, int host ) : _port(ports), _host(host),
   _running(true), _nfds(0)
 {
   init();
@@ -28,7 +28,7 @@ Server::Server( Server const & src )
 Server & Server::operator=( Server const & rhs )
 {
   this->_socket = rhs.getSockets();
-  this->_port = rhs.getPort();
+  this->_port = rhs.getPorts();
   this->_host = rhs.getHost();
   this->_running = rhs.getStatus();
   for (int i = 0; i < 1000; i++)
@@ -48,8 +48,8 @@ void Server::init()
     //Ajout des hosts & init du set de fds
     Socket s1;
 
-    s1.add_sockets_listening(7994);
-    s1.add_sockets_listening(7995);
+    for (int i = 0; i < _port.size(); i++)
+      s1.add_sockets_listening(_port[i], _host);
     _socket = s1.list_sockets();
     _nfds = getSocketsNb();
 }
@@ -171,7 +171,6 @@ void Server::receive_data( int i )
 }
 
 
-
 /*******************************
 Fonctions membres - Utilitaires
 *******************************/
@@ -217,7 +216,7 @@ int Server::getSocketsNb() const
   return (i);
 }
 
-int Server::getPort() const
+std::vector<int> Server::getPorts() const
 {
   return (this->_port);
 }
