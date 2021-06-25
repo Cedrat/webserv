@@ -3,33 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:38 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/18 15:43:39 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/06/25 19:02:22 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
-# include <sys/types.h>
-# include <sys/socket.h>
-# include <fcntl.h>
-# include <arpa/inet.h>
-# include <netinet/in.h>
-# include <sys/poll.h>
-# include <unistd.h>
-# include <cstring>
-# include <cerrno>
-# include <vector>
-
+# include "../includes/fonction.hpp"
 # include "Socket.hpp"
 # include "PollSocket.hpp"
-# include "../includes/fonction.hpp"
 
-typedef int fd;
+# define NB_CLIENT_MAX 1000
 
 class Server
 {
@@ -39,13 +27,11 @@ class Server
     Server & operator=( Server const & rhs );
     ~Server();
 
-    void  accept_connections();
+    void  acceptConnections();
     void  init();
     void  run();
-    void  add_client( int new_fd );
-    void receive_data( int i );
-
-    bool compress_fds();
+    void  addClient( int new_fd );
+    void  receiveData( int i );
 
     //Getters
     fd*         getSockets() const;
@@ -64,7 +50,7 @@ class Server
     int     _nfds;
     std::vector<int>    _port;
 
-    PollSocket        p1;
+    PollSocket        _p1;
     struct  pollfd*   _fds;
 
 };

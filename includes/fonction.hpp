@@ -1,15 +1,21 @@
 #ifndef FONCTIONS_HPP
 # define FONCTIONS_HPP
 
+# include <iostream>
+# include <cstring>
+# include <cerrno>
+
 # include <sys/types.h>
 # include <sys/socket.h>
-# include <netinet/in.h>
-# include <iostream>
-# include <cerrno>
-# include <unistd.h>
 # include <sys/poll.h>
+# include <fcntl.h>
+# include <netinet/in.h>
+# include <unistd.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
 
-# include "fcntl.h"
+# include <vector>
+
 # define ENDOFARRAY -2
 
 typedef int fd;

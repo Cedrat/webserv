@@ -20,7 +20,7 @@ void SocketClient::addSocketClient(fd sockfd)
 void SocketClient::closeAndRemoveSocket(size_t idx)
 {
 	close(_array_of_socket[idx]);
-
+	
 	std::vector<fd>::iterator it_start;
 	it_start = _array_of_socket.begin();
 	it_start += idx;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PollSocket.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/25 11:19:53 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 11:19:54 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/06/25 18:39:32 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void PollSocket::init( fd* fd_array, int nfds, short events )
   this->_nfds = nfds;
   this->_events = events;
 
-  for (size_t i = 0; i < this->_nfds; i++)
+  for (int i = 0; i < this->_nfds; i++)
   {
     new_fd.fd = fd_array[i]; //TO_DO : error_managembbent
     new_fd.events = this->_events;
@@ -74,7 +74,7 @@ void PollSocket::addClient( fd new_fd )
 
 void PollSocket::closeAllSockets()
 {
-  for (size_t i = 0; i < _nfds; i++)
+  for (int i = 0; i < _nfds; i++)
   {
     if (_fds[i].fd >= 0)
       close(_fds[i].fd);
@@ -83,6 +83,18 @@ void PollSocket::closeAllSockets()
 
 void PollSocket::closeOneSocket( struct pollfd toClose )
 {
-  close(toClose.fd);
-  toClose.fd = -1;
+  VectorUp<pollfd>::iterator it = _fds.begin();
+
+  for (int i = 0; i < _nfds; i++)
+  {
+    if(_fds[i].fd == toClose.fd)
+    {
+      close(_fds[i].fd);
+      _fds.erase(it);
+      close(toClose.fd);
+      _nfds--;
+      break;
+    }
+    it++;
+  }
 }

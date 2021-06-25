@@ -1,24 +1,9 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-#include <string>
-#include <list>
-#include <vector>
-#include <iostream>
+# include "../includes/fonction.hpp"
 
-# include <sys/types.h>
-# include <sys/socket.h>
-# include <fcntl.h>
-# include <arpa/inet.h>
-# include <netinet/in.h>
-# include <sys/poll.h>
-# include <unistd.h>
-# include <cstring>
-# include <cerrno>
-
-typedef int fd;
-#define ENDOFARRAY -2
-#define BACKLOG 10
+# define BACKLOG 10
 
 class Socket
 {
@@ -26,12 +11,12 @@ class Socket
 		Socket(void);
 		~Socket();
 
-		void	add_sockets_listening( int port, int host );
-		fd* 	list_sockets();
+		void	addSocketsListening( int port, int host );
+		fd* 	listSockets();
 
 	private :
 		std::vector<fd> 	_list_sockets;
-		int								_nb_sockets;
+		int					_nb_sockets;
 };
 
 #endif

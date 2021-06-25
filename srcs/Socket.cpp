@@ -1,4 +1,5 @@
 #include "Socket.hpp"
+#include "../includes/fonction.hpp"
 
 Socket::Socket(void) : _nb_sockets(0)
 {
@@ -11,11 +12,10 @@ Socket::~Socket()
 }
 
 
-
 /*****************
 Fonctions membres
 *****************/
-void bind_addr( fd fd_to_bind, int port, int host )
+void bindAddr( fd fd_to_bind, int port, int host )
 {
   sockaddr_in addr;
 
@@ -27,7 +27,7 @@ void bind_addr( fd fd_to_bind, int port, int host )
 	  throw("ERROR BINDING");
 }
 
-void Socket::add_sockets_listening( int port, int host )
+void Socket::addSocketsListening( int port, int host )
 {
 	fd new_socket;
 
@@ -35,7 +35,7 @@ void Socket::add_sockets_listening( int port, int host )
 	if (new_socket < 0)
 		throw ("ERROR SOCKET CREATION");
     
-	bind_addr(new_socket, port, host);
+	bindAddr(new_socket, port, host);
 	if (listen(new_socket, BACKLOG) < 0)
 		throw ("ERROR LISTENING");
 
@@ -52,11 +52,11 @@ void Socket::add_sockets_listening( int port, int host )
 	_nb_sockets++;
 }
 
-fd* Socket::list_sockets()
+fd* Socket::listSockets()
 {
 	fd *fd_array;
 	fd_array = new fd[_nb_sockets + 1];
-	for (size_t i = 0; i < _nb_sockets; i++)
+	for (int i = 0; i < _nb_sockets; i++)
 	{
 		fd_array[i] = _list_sockets[i];
 	}
