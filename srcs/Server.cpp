@@ -12,8 +12,8 @@
 
 #include "Server.hpp"
 
-Server::Server( std::vector<int> ports, int host ) : _host(host), _running(true) ,
-   _nfds(0), _port(ports)
+Server::Server( std::vector<int> ports, int host ) : _port(ports), _host(host),
+   _running(true), _nfds(0)
 {
   init();
   run();

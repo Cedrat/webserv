@@ -23,7 +23,7 @@ void PollSocket::init( fd* fd_array, int nfds, short events )
   this->_nfds = nfds;
   this->_events = events;
 
-  for (int i = 0; i < this->_nfds; i++)
+  for (size_t i = 0; i < this->_nfds; i++)
   {
     new_fd.fd = fd_array[i]; //TO_DO : error_managembbent
     new_fd.events = this->_events;
@@ -74,7 +74,7 @@ void PollSocket::addClient( fd new_fd )
 
 void PollSocket::closeAllSockets()
 {
-  for (int i = 0; i < _nfds; i++)
+  for (size_t i = 0; i < _nfds; i++)
   {
     if (_fds[i].fd >= 0)
       close(_fds[i].fd);
