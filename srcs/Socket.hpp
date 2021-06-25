@@ -22,7 +22,7 @@ typedef int fd;
 
 class Socket
 {
-	public : 
+	public :
 		Socket(void);
 		~Socket();
 

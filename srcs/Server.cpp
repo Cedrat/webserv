@@ -12,7 +12,7 @@
 
 #include "Server.hpp"
 
-Server::Server( int port, int host ) : _port(port), _host(host), 
+Server::Server( int port, int host ) : _port(port), _host(host),
   _running(true), _nfds(0)
 {
   init();
@@ -52,7 +52,7 @@ void Server::init()
     s1.add_sockets_listening(7995);
     _socket = s1.list_sockets();
 
-    //Initialiser les listening fds 
+    //Initialiser les listening fds
     init_fds();
 }
 
@@ -83,7 +83,7 @@ void Server::run()
     {
       this->_running = false;
       break;
-    }   
+    }
     accept_connections(); //Gerer cas d'erreur. Return toujours 1 actuellement
   }
 
@@ -153,7 +153,7 @@ void Server::accept_connections()
     {
       if (this->_running == true)
         receive_data(i);
-    } 
+    }
   }
 }
 
@@ -162,7 +162,7 @@ void Server::receive_data( int i )
   int rc;
   char  buffer[80];
   bool  close_conn = false;
- 
+
 //TODO : Correction pb lors de fermeture du client
 
   while (1)
@@ -184,7 +184,7 @@ void Server::receive_data( int i )
       }
       break;
     }
- 
+
     //Data was received
     int len = rc;
     std::cout << rc << " bytes received\n" << std::endl;
@@ -196,7 +196,6 @@ void Server::receive_data( int i )
       close_conn = true;
       break;
     }
-
   }
 
   if (close_conn == true)
@@ -205,7 +204,7 @@ void Server::receive_data( int i )
     _master[i].fd = -1;
     compress_fds();
   }
-
+  
 }
 
 
@@ -247,6 +246,9 @@ void Server::add_client( int new_fd )
 
   this->_master[this->_nfds].fd = new_fd;
   this->_master[this->_nfds].events = POLLIN;
+  /* Pour Linux */
+  fcntl(_master[this->_nfds].fd, F_SETFL, O_NONBLOCK);
+  /* FY Linux  */
   this->_nfds++;
 }
 

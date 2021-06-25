@@ -13,7 +13,7 @@ Socket::~Socket()
 void bind_addr(fd fd_to_bind, int port)
 {
     sockaddr_in addr;
-    
+
     addr.sin_family = AF_INET;
 	//A remplacer par host fourni
 	//Ajouter un int host a add_socket_listening et l'utiliser ici
