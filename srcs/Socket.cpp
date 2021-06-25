@@ -12,7 +12,9 @@ Socket::~Socket()
 
 
 
-
+/*****************
+Fonctions membres
+*****************/
 void bind_addr( fd fd_to_bind, int port, int host )
 {
   sockaddr_in addr;
@@ -32,6 +34,7 @@ void Socket::add_sockets_listening( int port, int host )
 	new_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (new_socket < 0)
 		throw ("ERROR SOCKET CREATION");
+    
 	bind_addr(new_socket, port, host);
 	if (listen(new_socket, BACKLOG) < 0)
 		throw ("ERROR LISTENING");

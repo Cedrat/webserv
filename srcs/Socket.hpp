@@ -31,7 +31,7 @@ class Socket
 
 	private :
 		std::vector<fd> 	_list_sockets;
-		int				_nb_sockets;
+		int								_nb_sockets;
 };
 
 #endif
