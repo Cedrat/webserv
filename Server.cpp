@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:42 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 18:50:01 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/25 19:05:28 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void Server::run()
   while (this->_running == true)
   {
     _fds = p1.AvailableSockets();
-    if (!_fds)
+    if (_fds == 0)
     {
       this->_running = false;
       break;
@@ -89,7 +89,7 @@ void Server::accept_connections()
     {
       while(new_fd != -1)
       {
-        if (this->_nfds < 1000)
+        if (this->_nfds < NB_CLIENT_MAX)
           new_fd = accept(this->_socket[i], NULL, NULL);
         else
         {
@@ -138,6 +138,7 @@ void Server::receive_data( int i )
       std::cerr << "Connection closed" << std::endl;
       close_conn = true;
       break;
+      
     }
     if (rc < 0)
     {

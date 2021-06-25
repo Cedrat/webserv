@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:38 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 18:37:45 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/25 19:02:22 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # include "Socket.hpp"
 # include "PollSocket.hpp"
 # include "fonction.hpp"
-
+# define NB_CLIENT_MAX 1000
 typedef int fd;
 
 class Server
