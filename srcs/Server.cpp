@@ -12,8 +12,8 @@
 
 #include "Server.hpp"
 
-Server::Server( std::vector<int> ports, int host ) : _host(host), _running(true) ,
-   _nfds(0), _port(ports)
+Server::Server( std::vector<int> ports, int host ) : _port(ports), _host(host),
+   _running(true), _nfds(0)
 {
   init();
   run();
@@ -49,8 +49,8 @@ void Server::init()
     Socket s1;
 
     for (size_t i = 0; i < _port.size(); i++)
-      s1.add_sockets_listening(_port[i], _host);
-    _socket = s1.list_sockets();
+      s1.addSocketsListening(_port[i], _host);
+    _socket = s1.listSockets();
     _nfds = getSocketsNb();
 }
 
@@ -59,24 +59,24 @@ Fonctions membres - Boucle serveur
 **********************************/
 void Server::run()
 {
-  p1.init(_socket, _nfds, POLLIN);
+  _p1.init(_socket, _nfds, POLLIN);
   //Loop waiting for incoming connects or for incoming data
   //on any of the connected sockets
   while (this->_running == true)
   {
-    _fds = p1.AvailableSockets();
+    _fds = _p1.AvailableSockets();
     if (_fds == 0)
     {
       this->_running = false;
       break;
     }
-    accept_connections(); //Gerer cas d'erreur. Return toujours 1 actuellement
+    acceptConnections(); //Gerer cas d'erreur. Return toujours 1 actuellement
   }
 
-  p1.closeAllSockets();
+  _p1.closeAllSockets();
 }
 
-void Server::accept_connections()
+void Server::acceptConnections()
 {
   int current_size = _nfds;
   int new_fd = 0;
@@ -110,18 +110,18 @@ void Server::accept_connections()
           std::cerr << "Error sending greeting message" << std::endl;
         std::cout << "Greeting message sent successfully !" << std::endl;
 
-        add_client(new_fd);
+        addClient(new_fd);
       }
     }
     else
     {
       if (this->_running == true)
-        receive_data(i);
+        receiveData(i);
     }
   }
 }
 
-void Server::receive_data( int i )
+void Server::receiveData( int i )
 {
   int rc;
   char  buffer[80];
@@ -165,8 +165,7 @@ void Server::receive_data( int i )
 
   if (close_conn == true)
   {
-    p1.closeOneSocket(_fds[i]);
-    //compress_fds();
+    _p1.closeOneSocket(_fds[i]);
   }
 
 }
@@ -175,27 +174,10 @@ void Server::receive_data( int i )
 /*******************************
 Fonctions membres - Utilitaires
 *******************************/
-bool Server::compress_fds()
-{
-  for (int i = 0; i < _nfds; i++)
-  {
-    if (this->_fds[i].fd == -1)
-    {
-      for (int j = i; j < _nfds; j++)
-      {
-        this->_fds[j].fd = this->_fds[j + 1].fd;
-        this->_fds[j].events = this->_fds[j + 1].events;
-      }
-      i--;
-      _nfds--;
-    }
-  }
-  return false;
-}
 
-void Server::add_client( int new_fd )
+void Server::addClient( int new_fd )
 {
-  p1.addClient(new_fd);
+  _p1.addClient(new_fd);
   this->_nfds++;
 }
 

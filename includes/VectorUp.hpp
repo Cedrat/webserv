@@ -10,7 +10,7 @@ class VectorUp : public std::vector<T>
         T* data(){
             return (&this->front());
         }
-        
+
         const T* data() const{
             return (&this->front());
         }

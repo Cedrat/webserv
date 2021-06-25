@@ -13,23 +13,11 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
-# include <sys/types.h>
-# include <sys/socket.h>
-# include <fcntl.h>
-# include <arpa/inet.h>
-# include <netinet/in.h>
-# include <sys/poll.h>
-# include <unistd.h>
-# include <cstring>
-# include <cerrno>
-# include <vector>
-
+# include "../includes/fonction.hpp"
 # include "Socket.hpp"
 # include "PollSocket.hpp"
-# include "fonction.hpp"
+
 # define NB_CLIENT_MAX 1000
-typedef int fd;
 
 class Server
 {
@@ -39,13 +27,11 @@ class Server
     Server & operator=( Server const & rhs );
     ~Server();
 
-    void  accept_connections();
+    void  acceptConnections();
     void  init();
     void  run();
-    void  add_client( int new_fd );
-    void receive_data( int i );
-
-    bool compress_fds();
+    void  addClient( int new_fd );
+    void  receiveData( int i );
 
     //Getters
     fd*         getSockets() const;
@@ -64,7 +50,7 @@ class Server
     int     _nfds;
     std::vector<int>    _port;
 
-    PollSocket        p1;
+    PollSocket        _p1;
     struct  pollfd*   _fds;
 
 };

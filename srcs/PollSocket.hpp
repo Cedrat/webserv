@@ -13,8 +13,8 @@
 #ifndef POLLSOCKET_HPP
 # define POLLSOCKET_HPP
 
-# include "VectorUp.hpp"
-# include "fonction.hpp"
+# include "../includes/VectorUp.hpp"
+# include "../includes/fonction.hpp"
 
 # define TIMEOUT 3*60*1000
 

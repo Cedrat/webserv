@@ -1,9 +1,10 @@
 #ifndef SOCKETCLIENT_HPP
 # define SOCKETCLIENT_HPP
 
-#include <string>
-#include "fonction.hpp"
-#include <vector>
+# include <string>
+# include <vector>
+
+# include "../includes/fonction.hpp"
 
 class SocketClient
 {
@@ -18,7 +19,7 @@ class SocketClient
 
 
 	private : 
-		size_t	_nb_sockets;
+		size_t			_nb_sockets;
 		std::vector<fd> _array_of_socket;
 };
 
