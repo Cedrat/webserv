@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:42 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 19:05:28 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/26 17:52:51 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,17 @@ void Server::run()
   //on any of the connected sockets
   while (this->_running == true)
   {
-    _fds = _p1.AvailableSockets();
-    if (_fds == 0)
+    try
     {
-      this->_running = false;
-      break;
+      _fds = _p1.AvailableSockets();
+      acceptConnections();
     }
-    acceptConnections(); //Gerer cas d'erreur. Return toujours 1 actuellement
+    catch (char const * &e) 
+    {
+      std::cout << e << std::endl;
+      this->_running = false;
+    }
   }
-
   _p1.closeAllSockets();
 }
 
@@ -87,8 +89,6 @@ void Server::acceptConnections()
       continue;
     if (_fds[i].fd == this->_socket[i])
     {
-      while(new_fd != -1)
-      {
         if (this->_nfds < NB_CLIENT_MAX)
           new_fd = accept(this->_socket[i], NULL, NULL);
         else
@@ -98,20 +98,15 @@ void Server::acceptConnections()
         }
         if (new_fd < 0)
         {
-          if (errno != EWOULDBLOCK)
-          {
-            std::cerr << "accept() failed" << std::endl;
-            this->_running = false;
-          }
+          std::cerr << "accept() failed" << std::endl;
+          this->_running = false;
           break;
         }
-
         if (send(new_fd, "Hello !\n", strlen("Hello !\n"), 0) != strlen("Hello !\n"))
           std::cerr << "Error sending greeting message" << std::endl;
         std::cout << "Greeting message sent successfully !" << std::endl;
 
         addClient(new_fd);
-      }
     }
     else
     {
@@ -120,48 +115,52 @@ void Server::acceptConnections()
     }
   }
 }
+static bool is_close(int bytes_read)
+{
+  if (bytes_read == 0) //POLLHUP aussi mais doute ? Empeche certaines choses.
+  {
+    std::cerr << "Connection closed" << std::endl;
+    return (true);
+  }
+  return (false);
+}
 
+static void recv_error_management(int bytes_read)
+{
+  if (bytes_read < 0)
+  {
+    std::cerr << "recv() failed" << std::endl;
+  }
+}
 void Server::receiveData( int i )
 {
-  int rc;
+  int bytes_read;
   char  buffer[80];
   bool  close_conn = false;
 
-//TODO : Correction pb lors de fermeture du client
 
-  while (1)
-  {
     //Receive data until the client close his connection or an error occurs
-    rc = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
-    if (rc == 0 || _fds[i].revents & POLLHUP) //Check to see if connection was closed by the client
-    {
-      std::cerr << "Connection closed" << std::endl;
-      close_conn = true;
-      break;
-      
-    }
-    if (rc < 0)
+    bytes_read = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+    close_conn = is_close(bytes_read);
+    if (bytes_read < 0)
     {
       if (_fds[i].revents & POLLERR)
       {
         std::cerr << "recv() failed " << std::endl;
         close_conn = true;
       }
-      break;
     }
-
     //Data was received
-    int len = rc;
-    std::cout << rc << " bytes received\n" << std::endl;
+    int len = bytes_read;
+    std::cout << bytes_read << " bytes received\n" << std::endl;
     //Echo the data back to the client
-    rc = send(this->_fds[i].fd, buffer, len, 0);
-    if (rc < 0)
+    bytes_read = send(this->_fds[i].fd, buffer, len, 0);
+    if (bytes_read < 0)
     {
       std::cerr << "send() failed" << std::endl;
       close_conn = true;
-      break;
     }
-  }
+  
 
   if (close_conn == true)
   {
@@ -169,7 +168,6 @@ void Server::receiveData( int i )
   }
 
 }
-
 
 /*******************************
 Fonctions membres - Utilitaires

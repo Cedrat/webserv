@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:38 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 19:02:22 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/26 18:42:34 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class Server
     std::vector<int>    _port;
 
     PollSocket        _p1;
-    struct  pollfd*   _fds;
+    std::vector<struct pollfd>   _fds;
 
 };
 

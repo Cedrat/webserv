@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/25 11:19:56 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 18:44:34 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/26 15:01:04 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class PollSocket
     PollSocket();
     ~PollSocket();
 
-    pollfd* AvailableSockets();
+    std::vector<struct pollfd> AvailableSockets();
 
     void init( fd* array_fd, int nfds, short events );
 
