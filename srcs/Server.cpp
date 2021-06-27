@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/18 15:43:42 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/26 17:52:51 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/27 17:42:54 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,14 @@ void Server::init()
 {
     //Ajout des hosts & init du set de fds
     Socket s1;
+    FdInformation socket_server;
 
+    socket_server.setTypeOfSocket(SOCKET_SERVER);
     for (size_t i = 0; i < _port.size(); i++)
+    {
       s1.addSocketsListening(_port[i], _host);
+      _fd_info.push_back(socket_server);
+    }
     _socket = s1.listSockets();
     _nfds = getSocketsNb();
 }
@@ -87,8 +92,9 @@ void Server::acceptConnections()
   {
     if (this->_fds[i].revents == 0)
       continue;
-    if (_fds[i].fd == this->_socket[i])
+    if (_fd_info[i].getTypeOfSocket() == SOCKET_SERVER)
     {
+
         if (this->_nfds < NB_CLIENT_MAX)
           new_fd = accept(this->_socket[i], NULL, NULL);
         else
@@ -98,6 +104,7 @@ void Server::acceptConnections()
         }
         if (new_fd < 0)
         {
+          std::cerr << strerror(errno) << std::endl;
           std::cerr << "accept() failed" << std::endl;
           this->_running = false;
           break;
@@ -105,10 +112,11 @@ void Server::acceptConnections()
         if (send(new_fd, "Hello !\n", strlen("Hello !\n"), 0) != strlen("Hello !\n"))
           std::cerr << "Error sending greeting message" << std::endl;
         std::cout << "Greeting message sent successfully !" << std::endl;
-
+        
         addClient(new_fd);
+        break;
     }
-    else
+    else if (this->_fds[i].fd > 0)
     {
       if (this->_running == true)
         receiveData(i);
@@ -135,13 +143,16 @@ static void recv_error_management(int bytes_read)
 void Server::receiveData( int i )
 {
   int bytes_read;
-  char  buffer[80];
+  char  buffer[1000];
   bool  close_conn = false;
 
 
     //Receive data until the client close his connection or an error occurs
-    bytes_read = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+    std::cout << "Receive data from " << this->_fds[i].fd << std::endl; 
+      bytes_read = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+    
     close_conn = is_close(bytes_read);
+    std::cout << bytes_read << " bytes received\n" << std::endl;
     if (bytes_read < 0)
     {
       if (_fds[i].revents & POLLERR)
@@ -151,20 +162,20 @@ void Server::receiveData( int i )
       }
     }
     //Data was received
-    int len = bytes_read;
-    std::cout << bytes_read << " bytes received\n" << std::endl;
-    //Echo the data back to the client
-    bytes_read = send(this->_fds[i].fd, buffer, len, 0);
-    if (bytes_read < 0)
-    {
-      std::cerr << "send() failed" << std::endl;
-      close_conn = true;
-    }
-  
+   //
+      int len = bytes_read;
+      //Echo the data back to the client
+      bytes_read = send(this->_fds[i].fd, buffer, len, 0);
+      if (bytes_read < 0 && _fds[i].revents & POLLHUP)
+      {
+        std::cerr << "send() failed" << std::endl;
+        close_conn = true;
+      }
 
   if (close_conn == true)
   {
     _p1.closeOneSocket(_fds[i]);
+    _fd_info.pop_back();
   }
 
 }
@@ -175,7 +186,11 @@ Fonctions membres - Utilitaires
 
 void Server::addClient( int new_fd )
 {
+  FdInformation socket_client; 
+
+  socket_client.setTypeOfSocket(SOCKET_CLIENT);
   _p1.addClient(new_fd);
+  _fd_info.push_back(socket_client);
   this->_nfds++;
 }
 
