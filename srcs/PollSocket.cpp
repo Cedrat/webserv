@@ -6,7 +6,7 @@
 /*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/25 11:19:53 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/25 18:39:32 by lnoaille         ###   ########.fr       */
+/*   Updated: 2021/06/26 18:42:32 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void PollSocket::init( fd* fd_array, int nfds, short events )
 }
 
 
-struct pollfd* PollSocket::AvailableSockets()
+std::vector<struct pollfd> PollSocket::AvailableSockets()
 {
   int socket_count;
   struct pollfd* fds = _fds.data();
@@ -43,15 +43,13 @@ struct pollfd* PollSocket::AvailableSockets()
 
   if (socket_count < 0) //Check to see if any call failed
   {
-    std::cerr << "Error in poll()" << std::endl;
-    return (NULL);
+    throw ("error in poll()");
   }
   if (socket_count == 0)  //Check to see if the timeout expired
   {
-    std::cerr << "poll() timeout" << std::endl;
-    return (NULL);
+    throw ("poll() timeout");
   }
-  return (fds);
+  return (_fds);
 }
 
 
