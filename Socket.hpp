@@ -9,13 +9,16 @@
 class Socket
 {
     private :
-        std::vector<pollfd> _sockets;
+        std::vector<struct pollfd> _sockets;
         std::vector<Config> _config_socket;
 
     public :
         Socket();
         ~Socket();
         void addSocket(Config config);
+        int         getNbOfSockets() const;
+        pollfd *    getSockets() ;
+        Config      getConfig(int i) const;
 
 };
 

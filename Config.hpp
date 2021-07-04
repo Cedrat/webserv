@@ -3,6 +3,11 @@
 #include <set>
 #include <vector>
 #include "Location.hpp"
+#include <iterator>
+
+# define CLIENT 0
+# define SERVER 1
+
 class Config
 {
     private : 
@@ -12,13 +17,16 @@ class Config
         int                         _host;
         int                         _max_body_size;
         std::vector<std::string>    _server_names;
-        std::set<int, std::string>  _error_pages;
+        std::map<int, std::string>  _error_pages;
         std::vector<Location>       _locations;
 
     public :
         Config();
         ~Config();
-        int getPort() ;
+        int getPort() const;
+        void setPort(int port);
+        void setServerOrClient(bool soc);
+        bool getServerOrClient() const;
 };
 
 #endif

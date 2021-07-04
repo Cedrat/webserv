@@ -11,6 +11,12 @@ Socket::~Socket()
 
 }
 
+pollfd *  Socket::getSockets() 
+{
+    if (_sockets.size() == 0)
+        throw "No Sockets";
+    return (&_sockets[0]);
+}
 static pollfd create_a_listenable_socket(int port)
 {
    struct sockaddr_in   my_addr;
@@ -44,4 +50,14 @@ void Socket::addSocket(Config config)
     new_socket = create_a_listenable_socket(config.getPort());
    _sockets.push_back(new_socket);
    _config_socket.push_back(config);
+}
+
+int Socket::getNbOfSockets() const
+{
+    return (_sockets.size());
+}
+
+Config Socket::getConfig(int i) const
+{
+    return (_config_socket[i]);
 }
