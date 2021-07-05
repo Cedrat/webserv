@@ -41,7 +41,7 @@ class ConfigParser
         void initLocationProperties();
         bool isServerProperty( std::string line );
         bool isLocationProperty( std::string line );
-        bool addServerProperty( std::vector<std::string> line, serverConfig server );
+        bool addServerProperty( std::vector<std::string> line, serverConfig * server );
         bool addLocationProperty( std::vector<std::string> line, serverConfig server );
 
         std::ifstream openConfigFile( std::string const & file );

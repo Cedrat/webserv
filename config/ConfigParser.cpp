@@ -106,6 +106,8 @@ int ConfigParser::treatServerBlock()
                 //On ajoute le serveur complet a la liste
                 closingBrace = true;
                 _serverNb++;
+                if (server.checkServerData() == false)
+                    return (-1);
                 _server.push_back(server);
                 break ;
             }   
@@ -120,7 +122,7 @@ int ConfigParser::treatServerBlock()
         if (isServerProperty(line[0]) == true)
         {
             //Envoyer vers la bonne fonction de serverConfig
-            if (addServerProperty(line, server) == false)
+            if (addServerProperty(line, &server) == false)
                 return (-1);
         }
         //else if (line[0] == "location")
@@ -146,6 +148,7 @@ int ConfigParser::treatServerBlock()
         return (-1);
     }
     //Finaliser la config ici ?
+
     return (1);
 }
 
@@ -290,27 +293,22 @@ bool ConfigParser::isLocationProperty( std::string line )
     return false;
 }
 
-bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfig server )
+bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfig * server )
 {
-    if (line[0] == "listen" && line.size() <=  3)
+    if (line[0] == "listen" && line.size() <=  2)
     {
-        if (server.setHostAndPort(line) == false)
-        {
-            std::cerr << "Error in config file : Invalid listen directive" << std::endl;
-            return false;
-        }
+        server->setHostAndPort(line);
     }  
     else if (line[0] == "server_name")
-        server.setServerNames(line);
-    /*else if (line[0] == "error_page" && line.size() == 3)
-        server.setErrorPages(line);
+        server->setServerNames(line);
+    else if (line[0] == "error_page" && line.size() == 3)
+        server->setErrorPages(line);
     else if (line[0] == "client_max_body_size" && line.size() == 2)
-        server.setMaxBodySize(line);*/
+        server->setMaxClientBodySize(line);
     else
     {
         std::cerr << "Error in config file : Wrong or missing argument in server block" << std::endl;
         return false;
     }
-    //std::cout << server.getServerName() << std::endl;
     return true;
 }

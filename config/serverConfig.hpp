@@ -17,29 +17,45 @@ class serverConfig
         //serverConfig & operator=( serverConfig const & rhs );
         ~serverConfig();
 
-        bool setHostAndPort( std::vector<std::string> line );
+        bool checkServerData();
+
+        void setHostAndPort( std::vector<std::string> line );
+        bool checkHostAndPort();
         bool setOneHostOrPort( std::string line );
+        
+
         bool isIP( std::string line, char c );
         bool isPort( std::string line );
 
         
-        bool setServerNames( std::vector<std::string> line );
-        bool isAcceptableChar( std::string line );
-            //bool setErrorPages( std::vector<std::string> line );
+        void setServerNames( std::vector<std::string> line );
+        bool checkServerNames();
+        bool isAcceptableName( std::string line );
+
+
+        void setErrorPages( std::vector<std::string> line );
+        bool checkErrorPages();
+
             //void setLocations();
-            //bool setMaxBodySize( std::vector<std::string> line );
+        
+        
+        void setMaxClientBodySize( std::vector<std::string> line );
+        bool checkMaxClientBodySize();
+
 
         int getPort() const;
         int getHost() const;
-            /*std::vector<std::string> getServerNames() const;
-            std::map<int, std::string> getErrorPages() const;
+        std::vector<std::string> getServerNames() const;
+        int getMaxClientBodySize() const;
+        /*    std::map<int, std::string> getErrorPages() const;
             std::vector<locationConfig> getLocations() const;
-            int getMaxBodySize() const;
+            
         */
 
 
 
     private:
+        std::string                 _tmpPortOrHost;
         int                         _port;
         int                         _host;
         std::vector<std::string>    _server_names;
