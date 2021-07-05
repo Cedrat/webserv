@@ -10,6 +10,6 @@ int main()
     
     config.setPort(7995);
     config.setServerOrClient(SERVER);  
-    server.addSocket(config);
+    server.addSocketServer(config);
     server.launchingServ();
 }

@@ -13,9 +13,11 @@ class Server
         void    setSockets(Socket sockets);
         void    launchingServ();
         void    acceptConnection();
-        void    addSocket(Config config);
+        void    addSocketServer(Config config);
+        void    addSocketClient(Config config, fd socket_client);
         int     getNbOfFd() const;
         fd      findAvailableServerSocket(pollfd *poll_fd, int nfds);
+        bool    thisFdIsServer(fd fd_to_check); 
 
     private :
         bool _is_running;

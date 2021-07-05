@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <poll.h>
+#include "utils.hpp"
 #include "Config.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,10 +16,14 @@ class Socket
     public :
         Socket();
         ~Socket();
-        void addSocket(Config config);
+        void addSocketServer(Config config);
         int         getNbOfSockets() const;
         pollfd *    getSockets() ;
         Config      getConfig(int i) const;
+        bool        isAFdServer(fd i) const;
+        void        receiveData(fd fd_to_read);
+        void        addSocketClient(Config config, fd socket_client);
+        void        removeSocket(fd fd_to_read);
 
 };
 
