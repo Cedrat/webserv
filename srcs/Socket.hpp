@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <poll.h>
-#include "utils.hpp"
+#include "../includes/utils.hpp"
 #include "Config.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,8 +23,7 @@ class Socket
         bool        isAFdServer(fd i) const;
         void        receiveData(fd fd_to_read);
         void        addSocketClient(Config config, fd socket_client);
-        void        removeSocket(fd fd_to_read);
-
+        void        removeSocket(fd fd_to_remove);
 };
 
 #endif

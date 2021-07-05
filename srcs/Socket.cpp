@@ -1,5 +1,5 @@
 #include "Socket.hpp"
-#include "utils.hpp"
+#include "../includes/utils.hpp"
 
 Socket::Socket()
 {
@@ -54,7 +54,7 @@ void Socket::addSocketServer(Config config)
 
 bool Socket::isAFdServer(fd fd_to_check) const
 {
-    for (int i = 0; i < _sockets.size(); i++)
+    for (size_t i = 0; i < _sockets.size(); i++)
     {
         if (_sockets[i].fd == fd_to_check)
             return (_config_socket[i].getServerOrClient());
@@ -77,16 +77,19 @@ void    Socket::receiveData(fd fd_to_read)
 {
     char buffer[128];
     int bytes_read;
+    std::string request;
 
     bytes_read = recv(fd_to_read, &buffer, 128, 0);
-    if (bytes_read <= 0)
+    std::cout << "Nb of bytes read : " << bytes_read << std::endl;
+    buffer[bytes_read] = 0;
+    request = buffer;
+    if (bytes_read <= 0 || request == "\r\n")
     {
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
     }
-    buffer[bytes_read] = 0;
     write(1, &buffer, bytes_read);
 }
 
@@ -94,7 +97,7 @@ void    Socket::removeSocket(fd fd_to_read)
 {
     std::vector<struct pollfd>::iterator pollfd_itbegin = _sockets.begin();
     std::vector<Config>::iterator config_itbegin = _config_socket.begin();
-    for (int i = 0; i < _sockets.size() ; i++)
+    for (size_t i = 0; i < _sockets.size() ; i++)
     {
         if (_sockets[i].fd == fd_to_read)
         {

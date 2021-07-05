@@ -20,6 +20,8 @@ class Location
     public : 
         Location();
         ~Location();
+
+        void setAutoIndex(bool auto_index);
 };
 
 #endif

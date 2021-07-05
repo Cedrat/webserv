@@ -29,3 +29,18 @@ bool Config::getServerOrClient() const
 {
     return (_server_or_client);
 }
+
+void Config::setPrincipalServer(bool true_or_false)
+{
+    _principal_server = true_or_false;
+}
+
+void Config::setHost(int host)
+{
+    _host = host;
+}
+
+void Config::setMaxBodySize(int max_body_size)
+{
+    _max_body_size = max_body_size;
+}

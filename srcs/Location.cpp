@@ -9,3 +9,8 @@ Location::~Location()
 {
     
 }
+
+void Location::setAutoIndex(bool auto_index)
+{
+    _autoindex = auto_index;
+}

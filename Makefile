@@ -1,7 +1,7 @@
 NAME = webserv
 
 PATH_SRC = ./srcs/
-SRCS = main_test.cpp PollSocket.cpp Server.cpp Socket.cpp SocketClient.cpp
+SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp
 
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
@@ -12,8 +12,8 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 
 RM = rm -f
 
-${PATH_OBJS}%.o :.cpp
-	$(CXX) $(CFLAGS) -c $< 
+%.o :%.cpp
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 all : 		${NAME}
 

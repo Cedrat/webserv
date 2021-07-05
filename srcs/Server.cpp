@@ -1,5 +1,5 @@
 #include "Server.hpp"
-#include "utils.hpp"
+#include "../includes/utils.hpp"
 
 Server::Server(void) : _is_running(false)
 {
@@ -14,6 +14,7 @@ Server::~Server(void)
 void Server::setSockets(Socket sockets)
 {
    //_sockets = sockets;
+   (void)sockets;
 }
 bool Server::isRunning(void)
 {
@@ -73,6 +74,7 @@ void Server::acceptConnection()
 	}
 	else if (fd_to_accept > 0) 
 	{
+		std::cout << "Client " << fd_to_accept << " send a message for you !" << std::endl;
 		_sockets.receiveData(fd_to_accept);
 	}
     

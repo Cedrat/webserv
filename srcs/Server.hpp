@@ -2,7 +2,7 @@
 # define SERVER_HPP
 
 #include "Socket.hpp"
-#include "utils.hpp"
+#include "../includes/utils.hpp"
 
 class Server
 {

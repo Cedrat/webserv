@@ -27,6 +27,10 @@ class Config
         void setPort(int port);
         void setServerOrClient(bool soc);
         bool getServerOrClient() const;
+
+        void setPrincipalServer(bool);
+        void setHost(int host);
+        void setMaxBodySize(int max_body_size);
 };
 
 #endif
