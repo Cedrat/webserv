@@ -50,7 +50,7 @@ fd Server::findAvailableServerSocket(pollfd *poll_fd, int nfds)
     throw "No fd available for this request in poll";
 }
 
-bool Server::thisFdIsServer(int fd_to_check)
+bool Server::isAFdServer(int fd_to_check)
 {
 	return (_sockets.isAFdServer(fd_to_check));
 }
@@ -59,9 +59,10 @@ void Server::acceptConnection()
 {
     fd fd_to_accept;
     fd fd_client;
-    fd_to_accept = findAvailableServerSocket(_sockets.getSockets(), getNbOfFd());
+    
+	fd_to_accept = findAvailableServerSocket(_sockets.getSockets(), getNbOfFd());
 
-	if (thisFdIsServer(fd_to_accept) == SERVER)
+	if (isAFdServer(fd_to_accept) == SERVER)
 	{
     	struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);

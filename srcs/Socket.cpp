@@ -11,7 +11,7 @@ Socket::~Socket()
 
 }
 
-pollfd *  Socket::getSockets() 
+pollfd * Socket::getSockets() 
 {
     if (_sockets.size() == 0)
         throw "No Sockets";
@@ -75,14 +75,22 @@ Config Socket::getConfig(int i) const
 
 void    Socket::receiveData(fd fd_to_read)
 {
-    char buffer[128];
+    char buffer[BUFFER_SIZE + 1];
     int bytes_read;
     std::string request;
 
-    bytes_read = recv(fd_to_read, &buffer, 128, 0);
-    std::cout << "Nb of bytes read : " << bytes_read << std::endl;
+    bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
     buffer[bytes_read] = 0;
     request = buffer;
+    while (bytes_read == BUFFER_SIZE)
+    {
+        bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
+        buffer[bytes_read] = 0;
+        request += buffer;
+
+    }
+    
+    std::cout << "Nb of bytes read : " << request.size() << std::endl;
     if (bytes_read <= 0 || request == "\r\n")
     {
         close(fd_to_read);
@@ -90,7 +98,7 @@ void    Socket::receiveData(fd fd_to_read)
         removeSocket(fd_to_read);
         return ;
     }
-    write(1, &buffer, bytes_read);
+    write(1, request.c_str(), request.size());
 }
 
 void    Socket::removeSocket(fd fd_to_read)

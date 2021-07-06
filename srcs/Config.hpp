@@ -21,16 +21,29 @@ class Config
         std::vector<Location>       _locations;
 
     public :
-        Config();
-        ~Config();
-        int getPort() const;
-        void setPort(int port);
-        void setServerOrClient(bool soc);
-        bool getServerOrClient() const;
+        Config(void);
+        ~Config(void);
+       
+        int                         getPort(void) const;
+        bool                        getServerOrClient(void) const;
+        int                         getHost(void) const;
+        int                         getMaxBodySize(void) const;
+        std::vector<std::string>    getServersNames(void) const;
+        std::map<int, std::string>  getErrorPages(void) const;
+        std::vector<Location>       getLocations(void) const;
 
-        void setPrincipalServer(bool);
-        void setHost(int host);
-        void setMaxBodySize(int max_body_size);
+        bool    IsServerOrClient(void) const;
+        bool    IsPrincipalServer(void) const;
+
+        void    setPort(int port);
+        void    setServerOrClient(bool soc);
+        void    setPrincipalServer(bool);
+        void    setHost(int host);
+        void    setMaxBodySize(int max_body_size);
+
+        void    addServerName(std::string str);
+        void    addErrorPages(int error_nb, std::string path_error);
+        void    addLocation(Location location);
 };
 
 #endif

@@ -21,7 +21,19 @@ class Location
         Location();
         ~Location();
 
-        void setAutoIndex(bool auto_index);
+        void    setLocation(std::string location);
+        void    addMethod(std::string method);
+        void    setAutoIndex(bool _autoindex_on);
+        void    setDefaultFile(std::string default_file);
+        void    setUploadFolder(std::string upload_folder);
+        void    setRoot(std::string root);
+
+        bool                        getAutoIndex(void) const;
+        std::string                 getRoot(void) const;
+        std::string                 getLocation(void) const;
+        std::string                 getDefaultFile(void) const;
+        std::string                 getUploadFolder(void) const;
+        std::vector<std::string>    getMethods(void) const;
 };
 
 #endif
