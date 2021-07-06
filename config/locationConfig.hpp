@@ -13,6 +13,11 @@ class locationConfig
         //locationConfig & operator=( lcoationConfig const & rhs );
         ~locationConfig();
 
+
+        bool checkLocationData();
+
+        void setLocationDirective( std::vector<std::string> line );
+
         /*
         void setLocation();
         void setRoot();
@@ -20,10 +25,10 @@ class locationConfig
         void setAutoindex();
         void setDefaultFile();
         void setUploadFolder();
-        void setCgi();
+        void setCgi();*/
 
         std::string getLocation() const;
-        std::string getRoot() const;
+        /*std::string getRoot() const;
         std::vector<std::string> getMethods() const;
         bool getAutoindex() const;
         std::string getDefaultFile();
@@ -33,13 +38,13 @@ class locationConfig
 
     private:
         std::string                 _location;
-        std::string                 _root;
+        /*std::string                 _root;
         std::vector<std::string>    _methods;
         bool                        _autoindex;
         std::string                 _default_file;
         std::string                 _upload_folder;
 
-        std::map<std::string, std::string>  _cgi;
+        std::map<std::string, std::string>  _cgi;*/
 
 };
 

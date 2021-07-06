@@ -2,11 +2,11 @@
 
 serverConfig::serverConfig() 
 {
-    inet_pton(AF_INET, "0.0.0.1", &_host);
-    this->_port = 80;
-    this->_max_body_size = 1000;
-    this->_server_names.push_back("\"\"");
-    this->_error_pages.insert(std::pair<int, std::string>(404, "./www/errors")); 
+    this->_host = -1;
+    this->_port = -1;
+    this->_max_body_size = -1;
+    this->_server_names.push_back("-1");
+    this->_error_pages.insert(std::pair<int, std::string>(0, "0")); 
 }
 
 serverConfig::~serverConfig() { }
@@ -19,11 +19,16 @@ Parsing - listen
 ***********************************************************/
 void serverConfig::setHostAndPort( std::vector<std::string> line )
 {
-    //Si il n'y a que le listen
-    if (line.size() == 1)
-        return ;
-    
-    _tmpPortOrHost = line[1]; 
+    if (_port == -1 && _host == -1)
+    {
+        inet_pton(AF_INET, "0.0.0.1", &_host);
+        this->_port = 80;
+        if (line.size() == 1)
+            return ;
+        _tmpPortOrHost = line[1];
+    }
+    else
+        throw ("Error : Config file can't contain more than one listen directive"); 
 }
 
 bool serverConfig::checkHostAndPort()
@@ -70,11 +75,19 @@ Parsing - server_name
 **************************************************************/
 void serverConfig::setServerNames( std::vector<std::string> line )
 {
-    if (line.size() == 1)
-        return ;
-    _server_names.clear();
-    for (size_t i = 1; i < line.size(); i++)
-        this->_server_names.push_back(line[i]);
+    if (_server_names[0] == "-1")
+    {
+        _server_names.clear();
+        if (line.size() == 1)
+        {
+            _server_names[0] = "\"\"";
+            return ;
+        }
+        for (size_t i = 1; i < line.size(); i++)
+            this->_server_names.push_back(line[i]);
+    }
+    else
+        throw ("Error : Config file can't contain more than one server_name directive");
 }
 
 bool serverConfig::checkServerNames()
@@ -97,6 +110,11 @@ bool serverConfig::isAcceptableName( std::string line )
 
 //TODO :
 //Tous les checks
+//
+//
+//
+//A ne pas oublier
+//
 
     for (int i = 0; line[i]; i++)
     {
@@ -120,26 +138,35 @@ void serverConfig::setErrorPages( std::vector<std::string> line )
 {
     int error;
     std::string path;
+    std::map<int, std::string>::iterator it = _error_pages.begin();
+
+    if (it->first == 0 && it->second == "0")
+        _error_pages.clear();
 
     error = atoi(line[1].c_str());
     path = line[2];
 
-    this->_error_pages.insert(std::pair<int, std::string>(error, path));
+    _error_pages.insert(std::pair<int, std::string>(error, path));
 }
 
 bool serverConfig::checkErrorPages()
 {
-    //Accéder à int pour check l'erreur
-    //Puis check le path
-
     std::map<int, std::string>::iterator it;
 
     for (it = _error_pages.begin(); it != _error_pages.end(); it++)
     {
-        //int = it->first
-        //string = it->second
-    }
+        if (it->first < 300 || it->first > 599)
+            return false;
 
+        std::ifstream ifs;
+        ifs.open(it->second.c_str(), std::ifstream::in);
+        if (ifs.is_open() == false)
+        {
+            ifs.close();
+            return false;
+        }    
+    }
+    return true;
 }
 
 
@@ -152,9 +179,17 @@ Parsing - max_client_body_size
 ***********************************************************/
 void serverConfig::setMaxClientBodySize( std::vector<std::string> line )
 {
-    if (line.size() == 1)
-        return ;
-    this->_max_body_size = atoi(line[1].c_str());
+    if (_max_body_size == -1)
+    {
+        if (line.size() == 1)
+        {
+            _max_body_size = 1000;
+            return ;
+        }
+        this->_max_body_size = atoi(line[1].c_str());
+    }
+    else
+        throw ("Error : Config file can't contain more than one client_max_body_size directive");
 }
 
 bool serverConfig::checkMaxClientBodySize()
@@ -217,6 +252,15 @@ bool serverConfig::isPort( std::string line )
 }
 
 
+
+
+void serverConfig::setLocationBlock( std::vector<locationConfig> location )
+{
+    _locations = location;
+}
+
+
+
 /***********************************************************
 Getters
 ***********************************************************/
@@ -240,9 +284,22 @@ int serverConfig::getMaxClientBodySize() const
     return this->_max_body_size;
 }
 
+std::map<int, std::string> serverConfig::getErrorPages() const
+{
+    return this->_error_pages;
+}
 
+std::vector<locationConfig> serverConfig::getLocations() const
+{
+    return this->_locations;
+}
 
-
+locationConfig serverConfig::getSpecificLocation( size_t id ) const
+{
+    if (_locations.size() < id)
+        throw ("Error : Out of array location request");
+    return this->_locations[id];
+}
 
 
 
@@ -273,13 +330,15 @@ bool serverConfig::checkServerData()
     }
 
 
-    std::cout << getHost() << " " << getPort() << std::endl;
+    std::cout << "*** Debug ***" << std::endl;
+    std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
     for (size_t i = 0; i < _server_names.size(); i++)
-        std::cout << _server_names[i] << std::endl;
-    std::cout << _max_body_size << std::endl;
+        std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+    std::cout << "max_body_size - " << _max_body_size << std::endl;
     std::map<int, std::string>::iterator it;
     for (it = _error_pages.begin(); it != _error_pages.end(); it++)
-        std::cout << it->first << " " << it->second << std::endl;
+        std::cout << "error_page - " << it->first << " " << it->second << std::endl;
+    std::cout << "*** End ***" << std::endl;
 
     return true;
 }

@@ -35,14 +35,20 @@ class ConfigParser
 
         void parser( std::string const & file );
         void parseServerName();
-        int treatServerBlock();
+        int  treatServerBlock();
+        bool treatLocationBlock( std::vector<std::string> line, locationConfig * location );
+
+        bool closeServerBlock( std::vector<std::string> line, serverConfig * server );
+        bool closeLocationBlock( std::vector<std::string> line, locationConfig * location );
 
         void initServerProperties();
         void initLocationProperties();
+
         bool isServerProperty( std::string line );
         bool isLocationProperty( std::string line );
+
         bool addServerProperty( std::vector<std::string> line, serverConfig * server );
-        bool addLocationProperty( std::vector<std::string> line, serverConfig server );
+        bool addLocationProperty( std::vector<std::string> line, locationConfig * location );
 
         std::ifstream openConfigFile( std::string const & file );
 
@@ -57,6 +63,7 @@ class ConfigParser
         ConfigParser();
 
         int                     _serverNb;
+        int                     _locationNb;
         std::ifstream           _configFile;
 
         std::vector<serverConfig>   _server;
@@ -66,7 +73,5 @@ class ConfigParser
         std::vector<std::string>    _locationProperties;
 
 };
-
-//class Location {}
 
 #endif
