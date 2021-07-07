@@ -7,6 +7,7 @@
 # include <arpa/inet.h>
 # include <iostream>
 # include <fstream>
+# include <sys/stat.h>
 
 # include "locationConfig.hpp"
 
@@ -18,16 +19,18 @@ class serverConfig
         //serverConfig & operator=( serverConfig const & rhs );
         ~serverConfig();
 
-        bool checkServerData();
-
         void setHostAndPort( std::vector<std::string> line );
         void setServerNames( std::vector<std::string> line );
         void setErrorPages( std::vector<std::string> line );
         void setMaxClientBodySize( std::vector<std::string> line );
         void setLocationBlock( std::vector<locationConfig> location );
+        void setRoot( std::vector<std::string> line );
+        void setUncalledDirectives();
 
+        bool checkServerData();
         bool checkHostAndPort();
         bool setOneHostOrPort( std::string line );
+        bool checkRoot();
         bool checkServerNames();
         bool isAcceptableName( std::string line );
         bool checkErrorPages();
@@ -41,6 +44,7 @@ class serverConfig
         int                         getPort() const;
         int                         getHost() const;
         std::vector<std::string>    getServerNames() const;
+        std::string                 getRoot() const;
         int                         getMaxClientBodySize() const;
         std::map<int, std::string>  getErrorPages() const;
         std::vector<locationConfig> getLocations() const;
@@ -53,6 +57,7 @@ class serverConfig
         int                         _port;
         int                         _host;
         int                         _max_body_size;
+        std::string                 _root;
         std::vector<std::string>    _server_names;
         std::map<int, std::string>  _error_pages;
 

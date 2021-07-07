@@ -4,6 +4,10 @@
 # include <vector>
 # include <map>
 # include <string>
+# include <iostream>
+# include <string>
+# include <sys/stat.h>
+# include <fstream>
 
 class locationConfig
 {
@@ -14,37 +18,43 @@ class locationConfig
         ~locationConfig();
 
 
-        bool checkLocationData();
-
         void setLocationDirective( std::vector<std::string> line );
+        void setRoot( std::vector<std::string> line );
+        void setAutoindex( std::vector<std::string> line );
+        void setMethods( std::vector<std::string> line );
+        void setIndex( std::vector<std::string> line );
+        void setUploadFolder( std::vector<std::string> line );
+        void setCgi( std::vector<std::string> line );
 
-        /*
-        void setLocation();
-        void setRoot();
-        void setMethods();
-        void setAutoindex();
-        void setDefaultFile();
-        void setUploadFolder();
-        void setCgi();*/
+        void setUncalledDirectives();
+
+        bool checkLocationData();
+        bool checkLocation();
+        bool checkRoot();
+        bool checkIndex();
+        bool checkMethods();
+        bool checkUploadFolder();
+        bool checkCgi();
+        bool isExtension( std::string ext );
+
 
         std::string getLocation() const;
-        /*std::string getRoot() const;
-        std::vector<std::string> getMethods() const;
+        std::string getRoot() const;
         bool getAutoindex() const;
-        std::string getDefaultFile();
-        std::string getUploadFolder();
+        std::vector<std::string> getMethods() const;
+        std::vector<std::string> getIndex() const;
+        std::string getUploadFolder() const;
         std::map<std::string, std::string> getCgi() const;
-        */
+        
 
     private:
         std::string                 _location;
-        /*std::string                 _root;
-        std::vector<std::string>    _methods;
+        std::string                 _root;
         bool                        _autoindex;
-        std::string                 _default_file;
+        std::vector<std::string>    _methods;
+        std::vector<std::string>    _index;
         std::string                 _upload_folder;
-
-        std::map<std::string, std::string>  _cgi;*/
+        std::map<std::string, std::string>  _cgi;
 
 };
 

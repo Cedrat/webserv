@@ -6,6 +6,7 @@ serverConfig::serverConfig()
     this->_port = -1;
     this->_max_body_size = -1;
     this->_server_names.push_back("-1");
+    this->_root = "-1";
     this->_error_pages.insert(std::pair<int, std::string>(0, "0")); 
 }
 
@@ -201,6 +202,39 @@ bool serverConfig::checkMaxClientBodySize()
 
 
 
+
+/***********************************************************
+Parsing - root
+***********************************************************/
+void serverConfig::setRoot( std::vector<std::string> line )
+{
+    if (_root == "-1")
+    {
+        if (line.size() == 1)
+        {
+            _root = "./";
+            return ;
+        }
+        this->_root = line[1];
+    }
+    else
+        throw ("Error : Server block can't contain more than one root directive");
+}
+
+bool serverConfig::checkRoot()
+{
+    struct stat state;
+
+    stat(_root.c_str(), &state);
+    if (!S_ISDIR(state.st_mode))
+        return false;
+
+    return true;
+}
+
+
+
+
 /*************************************************************
 Utils
 *************************************************************/
@@ -284,6 +318,11 @@ int serverConfig::getMaxClientBodySize() const
     return this->_max_body_size;
 }
 
+std::string serverConfig::getRoot() const
+{
+    return this->_root;
+}
+
 std::map<int, std::string> serverConfig::getErrorPages() const
 {
     return this->_error_pages;
@@ -308,6 +347,7 @@ Config - checking
 *************************************************************/
 bool serverConfig::checkServerData()
 {
+    setUncalledDirectives();
     if (checkHostAndPort() == false)
     {
         std::cerr << "Error in listen directive" << std::endl;
@@ -328,17 +368,46 @@ bool serverConfig::checkServerData()
         std::cerr << "Error in max_client_body_size directive" << std::endl;
         return false;
     }
+    if (checkRoot() == false)
+    {
+        std::cerr << "Error in root directive" << std::endl;
+        return false;
+    }
 
 
-    std::cout << "*** Debug ***" << std::endl;
+    std::cout << "*** Debug server ***" << std::endl;
     std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
     for (size_t i = 0; i < _server_names.size(); i++)
         std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+    std::cout << "Root : " << getRoot() << std::endl;
     std::cout << "max_body_size - " << _max_body_size << std::endl;
     std::map<int, std::string>::iterator it;
     for (it = _error_pages.begin(); it != _error_pages.end(); it++)
         std::cout << "error_page - " << it->first << " " << it->second << std::endl;
-    std::cout << "*** End ***" << std::endl;
+    std::cout << "*** End ***\n" << std::endl;
 
     return true;
+}
+
+void serverConfig::setUncalledDirectives()
+{
+    if (_port == -1)
+        _port = 80;
+    if (_host == -1)
+        inet_pton(AF_INET, "0.0.0.1", &_host);
+    if (_max_body_size == -1)
+        _max_body_size = 1000;
+    if (_root == "-1")
+        _root = "./";
+    if (_server_names[0] == "-1")
+        _server_names[0] = "\"\"";
+    if (_error_pages.size() == 1)
+    {
+        std::map<int, std::string>::iterator it = _error_pages.begin();
+        if (it->first == 0 && it->second == "0")
+        {
+            _error_pages.clear();
+            _error_pages.insert(std::pair<int, std::string>(404, "../www/errors/404.html"));
+        }
+    }
 }

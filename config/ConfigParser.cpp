@@ -42,6 +42,8 @@ void ConfigParser::parser( std::string const & file )
     while (_configFile.good())
     {
         line = FormattingLine(_configFile);
+        if (line.empty())
+            continue;
         if ((line.size() == 1 && line[0] != "server{")
             || (line.size() > 3) || (line.size() == 2 && line[1] != "{"))
         {
@@ -49,7 +51,7 @@ void ConfigParser::parser( std::string const & file )
             std::cerr << "Usage to start a server block is : 'Server {'" << std::endl;
             return ;
         }
-        if (treatServerBlock() == -1)
+        if (treatServerBlock() == false)
             return ;
     }
 }
@@ -78,10 +80,9 @@ std::ifstream ConfigParser::openConfigFile( std::string const & file )
 /**************************************************************
 Fonctions membres - Lecture des blocs
 **************************************************************/
-int ConfigParser::treatServerBlock()
+bool ConfigParser::treatServerBlock()
 {
     serverConfig                server;
-    locationConfig              location;
     std::vector<std::string>    line;
     bool                        closingBrace = false;
 
@@ -93,46 +94,50 @@ int ConfigParser::treatServerBlock()
 
         //Check derniere accolade
         if (line[0] == "}")
+        {
             closingBrace = closeServerBlock(line, &server);
+            break;
+        } 
         else if (isServerProperty(line[0]) == true) //Envoyer vers la bonne fonction de serverConfig
         {
             if (addServerProperty(line, &server) == false)
-                return (-1);
+                return false;
         }
         else if (line[0] == "location") //Envoyer vers la bonne fonction de locationConfig
         {
-            if (treatLocationBlock(line, &location) == false)
-                return -1;
+            if (treatLocationBlock(line) == false)
+                return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
         {
             std::cerr << "Error in config file : Unrecognized or out of line keyword " \
                 << line[0] << std::endl;
-            return (-1);
+            return false;
         }
     }
 
     if (closingBrace == false)
     {
         std::cerr << "Error in config file : No closing bracket" << std::endl;
-        return (-1);
+        return false;
     }
     //Finaliser la config ici ?
 
-    return (1);
+    return true;
 }
 
 
 
-bool ConfigParser::treatLocationBlock( std::vector<std::string> line, locationConfig * location )
+bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 {
+    locationConfig * location = new locationConfig;
     bool closingBrace = false;
 
     if (line.size() > 3 || line.size() < 3 || (line.size() == 3 && line[2] != "{"))
     {
         std::cerr << "Error in location directive : No path or opening bracket" << std::endl;
         return false;
-    } 
+    }
     location->setLocationDirective(line);
     
     while (_configFile.good())
@@ -140,7 +145,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line, locationCo
         line = FormattingLine(_configFile);
         if (line.empty())
             continue ;
-
+        
         //Check derniere accolade
         if (line[0] == "}")
         {
@@ -156,14 +161,14 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line, locationCo
         {
             std::cerr << "Error in config file : Unrecognized or out of line keyword " \
                 << line[0] << std::endl;
-            return (-1);
+            return false;
         }
     }
 
     if (closingBrace == false)
     {
         std::cerr << "Error in config file : No closing bracket in location block" << std::endl;
-        return (-1);
+        return false;
     }
     return true;
 }
@@ -172,7 +177,7 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
 {
     if (line.size() == 1)
     {
-        //On ajoute le serveur complet a la liste
+        //On ajoute le serveur complet a la liste & les blocs lcoation
         if (server->checkServerData() == false)
             return (-1);
         _server.push_back(*server);
@@ -196,6 +201,7 @@ bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationCo
             return false;
         _location.push_back(*location);
         _locationNb++;
+        delete location;
         return true;
     }   
     else
@@ -314,12 +320,12 @@ Fonctions membres - Gestion des keywords
 ****************************************/
 void ConfigParser::initServerProperties()
 {
-    this->_serverProperties = {"listen", "server_name", "error_page", "client_max_body_size"};
+    this->_serverProperties = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
 }
 
 void ConfigParser::initLocationProperties()
 {
-    this->_locationProperties = {"root", "methods", "autoindex", "index", "upload_folder", "cgi"};
+    this->_locationProperties = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
 }
 
 bool ConfigParser::isServerProperty( std::string line )
@@ -352,6 +358,8 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfi
         server->setErrorPages(line);
     else if (line[0] == "client_max_body_size" && line.size() == 2)
         server->setMaxClientBodySize(line);
+    else if (line[0] == "root" && line.size() <=  2)
+        server->setRoot(line);
     else
     {
         std::cerr << "Error in config file : Wrong or missing argument in server block" << std::endl;
@@ -362,20 +370,22 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfi
 
 bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationConfig * location )
 {
-    (void)line;
-    (void)location;
-    /*if (line[0] == "listen" && line.size() <=  2)
-        server->setHostAndPort(line);
-    else if (line[0] == "server_name")
-        server->setServerNames(line);
-    else if (line[0] == "error_page" && line.size() == 3)
-        server->setErrorPages(line);
-    else if (line[0] == "client_max_body_size" && line.size() == 2)
-        server->setMaxClientBodySize(line);
+    if (line[0] == "root" && line.size() < 3)
+        location->setRoot(line);
+    else if (line[0] == "autoindex" && line.size() < 3)
+        location->setAutoindex(line);
+    else if (line[0] == "method")
+        location->setMethods(line);
+    else if (line[0] == "index" && line.size() == 2)
+        location->setIndex(line);
+    else if (line[0] == "upload_folder" && line.size() < 3)
+        location->setUploadFolder(line);
+    else if (line[0] == "cgi" && line.size() == 3)
+        location->setCgi(line);
     else
     {
         std::cerr << "Error in config file : Wrong or missing argument in location block" << std::endl;
         return false;
-    }*/
+    }
     return true;
 }
