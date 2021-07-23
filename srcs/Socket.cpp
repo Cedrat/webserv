@@ -46,10 +46,12 @@ static pollfd create_a_listenable_socket(int port)
 void Socket::addSocketServer(Config config)
 {
     pollfd new_socket;
+    Request new_request;
 
     new_socket = create_a_listenable_socket(config.getPort());
    _sockets.push_back(new_socket);
    _config_socket.push_back(config);
+   _requests.push_back(new_request);
 }
 
 bool Socket::isAFdServer(fd fd_to_check) const
@@ -72,7 +74,17 @@ Config Socket::getConfig(int i) const
 {
     return (_config_socket[i]);
 }
-
+int Socket::getIndexRequest(fd fd_to_request)
+{
+    for (size_t i = 0; i < _requests.size() ; i++)
+    {
+        if (_sockets[i].fd == fd_to_request)
+        {
+            return (i);
+        }
+    }
+    return (-1);
+}
 void    Socket::receiveData(fd fd_to_read)
 {
     char buffer[BUFFER_SIZE + 1];
@@ -87,9 +99,10 @@ void    Socket::receiveData(fd fd_to_read)
         bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
         request += buffer;
-
     }
-    
+    if (_requests[getIndexRequest(fd_to_read)].isAValidMethodLine(request) == OK)
+        std::cout << "Nice !!" << std::endl;
+    std::cout << _requests[getIndexRequest(fd_to_read)].isAValidMethodLine(request) << std::endl;
     std::cout << "Nb of bytes read : " << request.size() << std::endl;
     if (bytes_read <= 0 || request == "\r\n")
     {
@@ -119,10 +132,12 @@ void    Socket::removeSocket(fd fd_to_read)
 void Socket::addSocketClient(Config config, fd socket_client) 
 {
     pollfd new_socket;
+    Request new_request;
 
    new_socket.fd = socket_client;
    new_socket.events = POLLIN;
    new_socket.revents = 0;
    _sockets.push_back(new_socket);
    _config_socket.push_back(config);
+   _requests.push_back(new_request);
 }

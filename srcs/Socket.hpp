@@ -7,11 +7,13 @@
 #include "Config.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "Request.hpp"
 class Socket
 {
     private :
         std::vector<struct pollfd> _sockets;
         std::vector<Config> _config_socket;
+        std::vector<Request> _requests;
 
     public :
                     Socket();
@@ -23,6 +25,7 @@ class Socket
         int         getNbOfSockets() const;
         pollfd *    getSockets() ;
         Config      getConfig(int index_of_socket_needed) const;
+        int         getIndexRequest(fd fd_to_request);
         
         void        removeSocket(fd fd_to_remove);
 

@@ -10,4 +10,6 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+int match_regex(char *request, char * motif);
+
 #endif

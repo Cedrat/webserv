@@ -1,8 +1,7 @@
 NAME = webserv
 
 PATH_SRC = ./srcs/
-SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp
-
+SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp regexp.cpp  Request.cpp
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 
