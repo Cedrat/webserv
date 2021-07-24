@@ -4,6 +4,7 @@
 #include <vector>
 #include "Location.hpp"
 #include <iterator>
+#include "../includes/utils.hpp"
 
 # define CLIENT 0
 # define SERVER 1
@@ -30,6 +31,7 @@ class Config
         int                         getMaxBodySize(void) const;
         std::vector<std::string>    getServersNames(void) const;
         std::map<int, std::string>  getErrorPages(void) const;
+        std::string                 getPathError(int num_error) const;
         std::vector<Location>       getLocations(void) const;
 
         bool    IsServerOrClient(void) const;

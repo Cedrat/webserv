@@ -80,6 +80,13 @@ std::map<int, std::string> Config::getErrorPages(void) const
     return (_error_pages);
 }
 
+std::string Config::getPathError(int num_error) const
+{
+    std::map<int, std::string>::const_iterator  it = _error_pages.find(num_error);
+    std::cout << it->second << std::endl;
+    return (it->second);
+}
+
 std::vector<Location> Config::getLocations() const
 {
     return (_locations);

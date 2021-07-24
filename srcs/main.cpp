@@ -26,7 +26,7 @@ Config default_config()
     config.setServerOrClient(SERVER);
     config.setMaxBodySize(1024);
     config.addServerName("localhost");
-    config.addErrorPages(404, "/error/404.html");
+    config.addErrorPages(400, "/error_files/err400.html");
     location = default_location();
     config.addLocation(location);
     return (config);

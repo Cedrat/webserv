@@ -67,9 +67,10 @@ void Server::acceptConnection()
     	struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
    		fd_client = accept(fd_to_accept, (struct sockaddr *)&their_addr, &their_size);
-		Config config;
+		
+		Config config = _sockets.getConfig(_sockets.getIndexRequest(fd_to_accept));
 		config.setServerOrClient(CLIENT);
-	
+
 		addSocketClient(config, fd_client);
 		std::cout << "New client connected : " << fd_client << std::endl;
 	}

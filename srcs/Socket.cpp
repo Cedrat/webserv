@@ -100,10 +100,25 @@ void    Socket::receiveData(fd fd_to_read)
         buffer[bytes_read] = 0;
         request += buffer;
     }
-    if (_requests[getIndexRequest(fd_to_read)].isAValidMethodLine(request) == OK)
-        std::cout << "Nice !!" << std::endl;
-    std::cout << _requests[getIndexRequest(fd_to_read)].isAValidMethodLine(request) << std::endl;
+    _requests[getIndexRequest(fd_to_read)].addToRequestHeader(request);
     std::cout << "Nb of bytes read : " << request.size() << std::endl;
+    if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
+    {
+        send(fd_to_read, "505 HTTP Version Not Supported\n", 32,0);
+        close(fd_to_read);
+        std::cout << "Client closed" << std::endl;
+        removeSocket(fd_to_read);
+        return ;
+    }
+     if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
+    {
+        //send(fd_to_read, "400 Bad Request\n", 17,0);
+        response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
+        close(fd_to_read);
+        std::cout << "Client closed" << std::endl;
+        removeSocket(fd_to_read);
+        return ;
+    }
     if (bytes_read <= 0 || request == "\r\n")
     {
         close(fd_to_read);
