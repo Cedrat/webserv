@@ -221,6 +221,7 @@ bool locationConfig::checkIndex()
             return false;
         } 
     }
+    
     return true;
 }
 
