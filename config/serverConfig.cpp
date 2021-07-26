@@ -288,7 +288,7 @@ bool serverConfig::isPort( std::string line )
 
 
 
-void serverConfig::setLocationBlock( std::vector<locationConfig> location )
+void serverConfig::setLocation( std::vector<locationConfig> location )
 {
     _locations = location;
 }
@@ -348,32 +348,14 @@ Config - checking
 bool serverConfig::checkServerData()
 {
     setUncalledDirectives();
-    if (checkHostAndPort() == false)
+    for (int i = 0; i < 5; i++)
     {
-        std::cerr << "Error in listen directive" << std::endl;
-        return false;
+        if ((this->*_checks[i])() == false)
+        {
+            std::cerr << "Error in the server block configuration" << std::endl;
+            return false;
+        }
     }
-    if (checkServerNames() == false)
-    {
-        std::cerr << "Error in server_name directive" << std::endl;
-        return false;
-    }
-    if (checkErrorPages() == false)
-    {
-        std::cerr << "Error in error_page directive" << std::endl;
-        return false;
-    }
-    if (checkMaxClientBodySize() == false)
-    {
-        std::cerr << "Error in max_client_body_size directive" << std::endl;
-        return false;
-    }
-    if (checkRoot() == false)
-    {
-        std::cerr << "Error in root directive" << std::endl;
-        return false;
-    }
-
 
     std::cout << "*** Debug server ***" << std::endl;
     std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;

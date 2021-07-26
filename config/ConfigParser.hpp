@@ -23,6 +23,7 @@
 
 # include "serverConfig.hpp"
 # include "locationConfig.hpp"
+# include "../includes/Formatting.hpp"
 
 
 class ConfigParser
@@ -34,8 +35,7 @@ class ConfigParser
         ~ConfigParser();
 
         void parser( std::string const & file );
-        void parseServerName();
-        bool  treatServerBlock();
+        bool treatServerBlock();
         bool treatLocationBlock( std::vector<std::string> line );
 
         bool closeServerBlock( std::vector<std::string> line, serverConfig * server );
@@ -53,10 +53,6 @@ class ConfigParser
         std::ifstream openConfigFile( std::string const & file );
 
         std::vector<std::string> FormattingLine( std::ifstream & file );
-        std::vector<std::string> splitLine( std::string line );
-        std::string trimComment( std::string line );
-        std::string trimStartAndEndWhitespaces( std::string line );
-        std::string trimDotComa( std::string line );
 
 
     private:

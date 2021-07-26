@@ -12,10 +12,8 @@
 
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser( char *filepath )
+ConfigParser::ConfigParser( char *filepath ) : _serverNb(0)
 {
-    _serverNb = 0;
-
     if (strlen(filepath) <= 0)
         throw ("Error : The config file path is empty");
 
@@ -27,6 +25,8 @@ ConfigParser::ConfigParser( char *filepath )
 }
 
 ConfigParser::~ConfigParser() { }
+
+
 
 
 
@@ -56,10 +56,6 @@ void ConfigParser::parser( std::string const & file )
     }
 }
 
-
-/**************************************************************
-Fonctions membres - Check file
-**************************************************************/
 std::ifstream ConfigParser::openConfigFile( std::string const & file )
 {
     std::ifstream ifs;
@@ -121,8 +117,6 @@ bool ConfigParser::treatServerBlock()
         std::cerr << "Error in config file : No closing bracket" << std::endl;
         return false;
     }
-    //Finaliser la config ici ?
-
     return true;
 }
 
@@ -135,7 +129,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 
     if (line.size() > 3 || line.size() < 3 || (line.size() == 3 && line[2] != "{"))
     {
-        std::cerr << "Error in location directive : No path or opening bracket" << std::endl;
+        std::cerr << "Error in location directive : Missing path or opening bracket" << std::endl;
         return false;
     }
     location->setLocationDirective(line);
@@ -177,11 +171,11 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
 {
     if (line.size() == 1)
     {
-        //On ajoute le serveur complet a la liste & les blocs lcoation
+        //On ajoute le serveur complet a la liste & les blocs location
         if (server->checkServerData() == false)
-            return (-1);
+            return false;
         _server.push_back(*server);
-        _server[_serverNb].setLocationBlock(_location);
+        _server[_serverNb].setLocation(_location);
         //std::cout << _server[0].getSpecificLocation(0).getLocation() << std::endl;
         _serverNb++;
         return true;
@@ -221,98 +215,15 @@ std::vector<std::string> ConfigParser::FormattingLine( std::ifstream & file )
     std::vector<std::string>    formattedLine; 
 
     std::getline(file, line);
-    //Enlever commentaires & espaces avant/après
+    //Enlever commentaires & espaces avant/après & point virgule
     line = trimComment(line);
     line = trimStartAndEndWhitespaces(line);
     line = trimDotComa(line);
-    //Decouper : 1 elements = 1 vector -> Server,{,...
+    //Decouper : 1 elements = 1 vector -> Server,{,listen,...
     if (!line.empty())
         formattedLine = splitLine(line);
-    //Ou ajouter line.empty() -> continue; dans boucle principale
     return formattedLine;
 }
-
-std::string ConfigParser::trimComment( std::string line )
-{
-    std::string newLine;
-    size_t      commentPos;
-
-    commentPos = line.find("#");
-    if (commentPos == std::string::npos)
-        return line;
-    else
-        newLine = line.substr(0, commentPos);
-
-    return newLine;
-}
-
-std::string ConfigParser::trimStartAndEndWhitespaces( std::string line )
-{
-    std::string newLine;
-    size_t      whitePos;
-
-    whitePos = line.find_first_not_of(" \n\t\r\f\v");
-    if (whitePos != std::string::npos)
-        newLine = line.substr(whitePos);
-
-    whitePos = newLine.find_last_not_of(" \n\t\r\f\v");
-    if (whitePos != std::string::npos)
-        newLine = newLine.substr(0, whitePos + 1);
-
-    return newLine;
-}
-
-std::string ConfigParser::trimDotComa( std::string line )
-{
-    std::string newLine;
-    size_t      signPos;
-    size_t      accoladePos;
-
-    if ((accoladePos = line.find("{")) != std::string::npos || (accoladePos = line.find("}")) != std::string::npos)
-        return line;
-
-    signPos = line.find(";");
-    if (!line.empty() && signPos == std::string::npos)
-        throw ("Error : Line need to be terminated with a single ';'");
-    else if (line[signPos + 1])
-        throw ("Error : Line need to be terminated with a single ';'");
-    else
-        newLine = trimStartAndEndWhitespaces(line.substr(0, signPos));
-    
-    return newLine;
-}
-
-std::vector<std::string> ConfigParser::splitLine( std::string line )
-{
-    //Renvoie vector<string> avec les éléments découpés selon les espaces
-    std::vector<std::string>    formattedLine; 
-    size_t                      start = 0, end = 0;
-
-    end = line.find_first_of(" \n\t\r\f\v");
-    if (end == std::string::npos)
-    {
-        formattedLine.push_back(line);
-        return formattedLine;
-    }
-    while (end != std::string::npos)
-    {
-        formattedLine.push_back(line.substr(start, (end - start)));
-        if (line[end + 1] == ' ')
-        {
-            start = line.find_first_not_of(" \n\t\r\f\v", end + 1);
-            end = line.find_first_of(" \n\t\r\f\v", start + 1);
-        }
-        else
-        {        
-            start = end + 1;
-            end = line.find_first_of(" \n\t\r\f\v", end + 1);
-        }
-    }
-    formattedLine.push_back(line.substr(start, line.size()));
-
-    return formattedLine;
-}
-
 
 
 /****************************************

@@ -11,6 +11,8 @@
 
 class locationConfig
 {
+    typedef bool(locationConfig::*checks)();
+
     public:
         locationConfig();
         //locationConfig( locationConfig const & src );
@@ -45,16 +47,22 @@ class locationConfig
         std::vector<std::string> getIndex() const;
         std::string getUploadFolder() const;
         std::map<std::string, std::string> getCgi() const;
+
+        void initArrayChecks();
         
 
     private:
-        std::string                 _location;
-        std::string                 _root;
-        bool                        _autoindex;
-        std::vector<std::string>    _methods;
-        std::vector<std::string>    _index;
-        std::string                 _upload_folder;
+        std::string                         _location;
+        std::string                         _root;
+        bool                                _autoindex;
+        std::vector<std::string>            _methods;
+        std::vector<std::string>            _index;
+        std::string                         _upload_folder;
         std::map<std::string, std::string>  _cgi;
+
+        checks _checks[6] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
+            &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
+            &locationConfig::checkCgi};
 
 };
 

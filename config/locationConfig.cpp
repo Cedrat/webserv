@@ -153,39 +153,15 @@ Config - checking
 bool locationConfig::checkLocationData()
 {
     setUncalledDirectives();
-    if (checkLocation() == false)
+    for (int i = 0; i < 6; i++)
     {
-        std::cerr << "Error in location directive" << std::endl;
-        return false;
-    }       
-    if (checkRoot() == false)
-    {
-        std::cerr << "Error in root directive" << std::endl;
-        return false;
+        if ((this->*_checks[i])() == false)
+        {
+            std::cerr << "Error in the location block configuration" << std::endl;
+            return false;
+        }
     }
-    if (checkMethods() == false)
-    {
-        std::cerr << "Error in method directive" << std::endl;
-        return false;
-    }
-    if (checkIndex() == false)
-    {
-        std::cerr << "Error in index directive" << std::endl;
-        return false;
-    }
-    if (checkUploadFolder() == false)
-    {
-        std::cerr << "Error in upload_folder directive" << std::endl;
-        return false;
-    }
-    if (checkCgi() == false)
-    {
-        std::cerr << "Error in cgi directive" << std::endl;
-        return false;
-    }
-
-
-
+   
     std::cout << "*** Debug location ***" << std::endl;
     std::cout << "Location : " << getLocation() << std::endl;
     std::cout << "Root : " << getRoot() << std::endl;

@@ -13,6 +13,8 @@
 
 class serverConfig
 {
+    typedef bool(serverConfig::*checks)();
+
     public:
         serverConfig();
         //serverConfig( serverConfig const & src );
@@ -23,7 +25,7 @@ class serverConfig
         void setServerNames( std::vector<std::string> line );
         void setErrorPages( std::vector<std::string> line );
         void setMaxClientBodySize( std::vector<std::string> line );
-        void setLocationBlock( std::vector<locationConfig> location );
+        void setLocation( std::vector<locationConfig> location );
         void setRoot( std::vector<std::string> line );
         void setUncalledDirectives();
 
@@ -65,6 +67,9 @@ class serverConfig
         //bool                        _server_or_client;
 
         std::vector<locationConfig> _locations;
+        
+        checks _checks[5] = {&serverConfig::checkRoot, &serverConfig::checkHostAndPort, 
+            &serverConfig::checkServerNames, &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
         
 };
 
