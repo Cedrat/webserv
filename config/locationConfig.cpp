@@ -282,19 +282,6 @@ bool locationConfig::checkCgi()
     return true;
 }
 
-bool locationConfig::isExtension( std::string ext )
-{
-    if (ext[0] != '.')
-        return false;
-    for (size_t i = 1; i < ext.size(); i++)
-    {
-        if (!isalpha(ext[i]))
-            return false;
-    }
-    return true;
-}
-
-
 
 
 /*************************************************************

@@ -9,6 +9,8 @@
 # include <sys/stat.h>
 # include <fstream>
 
+# include "../includes/Syntax.hpp"
+
 class locationConfig
 {
     typedef bool(locationConfig::*checks)();
@@ -37,19 +39,15 @@ class locationConfig
         bool checkMethods();
         bool checkUploadFolder();
         bool checkCgi();
-        bool isExtension( std::string ext );
 
-
-        std::string getLocation() const;
-        std::string getRoot() const;
-        bool getAutoindex() const;
-        std::vector<std::string> getMethods() const;
-        std::vector<std::string> getIndex() const;
-        std::string getUploadFolder() const;
+        std::string                getLocation() const;
+        std::string                getRoot() const;
+        std::string                getUploadFolder() const;
+        bool                       getAutoindex() const;
+        std::vector<std::string>   getMethods() const;
+        std::vector<std::string>   getIndex() const;
         std::map<std::string, std::string> getCgi() const;
 
-        void initArrayChecks();
-        
 
     private:
         std::string                         _location;

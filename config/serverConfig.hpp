@@ -10,6 +10,7 @@
 # include <sys/stat.h>
 
 # include "locationConfig.hpp"
+# include "../includes/Syntax.hpp"
 
 class serverConfig
 {
@@ -34,13 +35,8 @@ class serverConfig
         bool setOneHostOrPort( std::string line );
         bool checkRoot();
         bool checkServerNames();
-        bool isAcceptableName( std::string line );
         bool checkErrorPages();
         bool checkMaxClientBodySize();
-
-
-        bool isIP( std::string line, char c );
-        bool isPort( std::string line );
 
         
         int                         getPort() const;
@@ -50,8 +46,9 @@ class serverConfig
         int                         getMaxClientBodySize() const;
         std::map<int, std::string>  getErrorPages() const;
         std::vector<locationConfig> getLocations() const;
-        locationConfig              getSpecificLocation( size_t id ) const;
+        locationConfig              getOneLocation( size_t id ) const;
 
+        void                        debug();
 
 
     private:
@@ -67,7 +64,7 @@ class serverConfig
         //bool                        _server_or_client;
 
         std::vector<locationConfig> _locations;
-        
+
         checks _checks[5] = {&serverConfig::checkRoot, &serverConfig::checkHostAndPort, 
             &serverConfig::checkServerNames, &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
         

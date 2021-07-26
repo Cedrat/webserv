@@ -41,18 +41,24 @@ bool serverConfig::checkHostAndPort()
     size_t separator = _tmpPortOrHost.find(":");
     if (separator == std::string::npos)
         return setOneHostOrPort(_tmpPortOrHost);
-    
+
     //Transformer ce qu'il y a avant ':' en ip
-    if (isIP(_tmpPortOrHost, ':') == true)
+    if (isIP(_tmpPortOrHost, ':', _host) == true)
         inet_pton(AF_INET, _tmpPortOrHost.substr(0, separator).c_str(), &_host);
     else
+    {
+        std::cerr << "Error in listen directive" << std::endl;
         return false;
+    }
 
     //Assigner la valeur après ':' à port
     std::string  str = _tmpPortOrHost;
     str = _tmpPortOrHost.substr(separator + 1, (separator - _tmpPortOrHost.size()));  
     if (str == "" || isPort(static_cast<std::string>(str)) == false)
+    {
+        std::cerr << "Error in listen directive" << std::endl;
         return false;
+    }
     this->_port = atoi(str.c_str());
     return true;
 }
@@ -61,7 +67,7 @@ bool serverConfig::setOneHostOrPort( std::string line )
 {
     if (line == "localhost")
         inet_pton(AF_INET, "127.0.0.1", &_host);
-    else if (isIP(line, '\0') == true)
+    else if (isIP(line, '\0', _host) == true)
         inet_pton(AF_INET, line.c_str(), &_host);
     else if (isPort(line) == true)
         this->_port = atoi(line.c_str());
@@ -93,43 +99,16 @@ void serverConfig::setServerNames( std::vector<std::string> line )
 
 bool serverConfig::checkServerNames()
 {
-    for (size_t i = 1; i < _server_names.size(); i++)
+    for (size_t i = 0; i < _server_names.size(); i++)
     {
         if (isAcceptableName(_server_names[i]) == false)
         {
-            std::cerr << "Error in server_name declaration : "\
-                << "Incorrect character in server name" << std::endl;
+            std::cerr << "Error in server_name directive" << std::endl;
             return false;
         }
     }
     return true;
 }
-
-bool serverConfig::isAcceptableName( std::string line )
-{
-    int dbQuoteCounter = 0;
-
-//TODO :
-//Tous les checks
-//
-//
-//
-//A ne pas oublier
-//
-
-    for (int i = 0; line[i]; i++)
-    {
-        if (!isalnum(line[i]))
-            return false;
-        if (!isalpha(line[i]) && line[i] == '"')
-            dbQuoteCounter++;
-    }
-    if (dbQuoteCounter % 2 != 0)
-        return false;
-    return true;
-}
-
-
 
 
 /********************
@@ -164,6 +143,7 @@ bool serverConfig::checkErrorPages()
         if (ifs.is_open() == false)
         {
             ifs.close();
+            std::cerr << "Error in error_page directive" << std::endl;
             return false;
         }    
     }
@@ -196,7 +176,10 @@ void serverConfig::setMaxClientBodySize( std::vector<std::string> line )
 bool serverConfig::checkMaxClientBodySize()
 {
     if (_max_body_size <= 0 || _max_body_size > 1200)
+    {
+        std::cerr << "Error in max_client_body_size directive" << std::endl;
         return false;
+    }
     return true;
 }
 
@@ -227,72 +210,12 @@ bool serverConfig::checkRoot()
 
     stat(_root.c_str(), &state);
     if (!S_ISDIR(state.st_mode))
+    {
+        std::cerr << "Error in root directive" << std::endl;
         return false;
-
-    return true;
-}
-
-
-
-
-/*************************************************************
-Utils
-*************************************************************/
-bool serverConfig::isIP( std::string line, char c )
-{
-    size_t start = 0;
-    size_t dot_pos;
-    size_t dot_nb = 0;
-
-    if ((dot_pos = line.find("localhost")) != std::string::npos)
-    {
-        if (line.at(dot_pos + 9) != ':')
-            return false;
-        inet_pton(AF_INET, "127.0.0.1", &_host);
-        return true;
-    }
-    for (int i = 0; line[i] != c; i++)
-    {
-        if (!isdigit(line[i]) && line[i] != '.')
-            return false;
-    }
-    dot_pos = line.find(".");
-    if (dot_pos == std::string::npos)
-        return false;
-    while (dot_pos != std::string::npos)
-    {
-        if (dot_pos - start <= 0 || dot_pos - start > 3)
-            return false;
-        dot_nb++;
-        start = dot_pos + 1;
-        dot_pos = line.find(".", start);
-    }
-    if ((line.find(":") != std::string::npos && line.find(":") - start > 3)
-        || (line.find(":") == std::string::npos && line.size() - start > 3))
-        return false;
-    if (dot_nb == 3)
-        return true;
-    return false;
-}
-
-bool serverConfig::isPort( std::string line )
-{
-    for (int i = 0; line[i]; i++)
-    {
-        if (!isdigit(line[i]))
-            return false;
     }
     return true;
 }
-
-
-
-
-void serverConfig::setLocation( std::vector<locationConfig> location )
-{
-    _locations = location;
-}
-
 
 
 /***********************************************************
@@ -333,13 +256,17 @@ std::vector<locationConfig> serverConfig::getLocations() const
     return this->_locations;
 }
 
-locationConfig serverConfig::getSpecificLocation( size_t id ) const
+locationConfig serverConfig::getOneLocation( size_t id ) const
 {
     if (_locations.size() < id)
         throw ("Error : Out of array location request");
     return this->_locations[id];
 }
 
+void serverConfig::setLocation( std::vector<locationConfig> location )
+{
+    _locations = location;
+}
 
 
 /*************************************************************
@@ -351,22 +278,10 @@ bool serverConfig::checkServerData()
     for (int i = 0; i < 5; i++)
     {
         if ((this->*_checks[i])() == false)
-        {
-            std::cerr << "Error in the server block configuration" << std::endl;
             return false;
-        }
     }
 
-    std::cout << "*** Debug server ***" << std::endl;
-    std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
-    for (size_t i = 0; i < _server_names.size(); i++)
-        std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
-    std::cout << "Root : " << getRoot() << std::endl;
-    std::cout << "max_body_size - " << _max_body_size << std::endl;
-    std::map<int, std::string>::iterator it;
-    for (it = _error_pages.begin(); it != _error_pages.end(); it++)
-        std::cout << "error_page - " << it->first << " " << it->second << std::endl;
-    std::cout << "*** End ***\n" << std::endl;
+    debug();
 
     return true;
 }
@@ -392,4 +307,19 @@ void serverConfig::setUncalledDirectives()
             _error_pages.insert(std::pair<int, std::string>(404, "../www/errors/404.html"));
         }
     }
+}
+
+
+void serverConfig::debug()
+{
+    std::cout << "*** Debug server ***" << std::endl;
+    std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
+    for (size_t i = 0; i < _server_names.size(); i++)
+        std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+    std::cout << "Root : " << getRoot() << std::endl;
+    std::cout << "max_body_size - " << _max_body_size << std::endl;
+    std::map<int, std::string>::iterator it;
+    for (it = _error_pages.begin(); it != _error_pages.end(); it++)
+        std::cout << "error_page - " << it->first << " " << it->second << std::endl;
+    std::cout << "*** End ***\n" << std::endl;
 }
