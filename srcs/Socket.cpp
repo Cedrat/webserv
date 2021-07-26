@@ -1,5 +1,12 @@
 #include "Socket.hpp"
 #include "../includes/utils.hpp"
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 Socket::Socket()
 {
@@ -90,7 +97,6 @@ void    Socket::receiveData(fd fd_to_read)
     char buffer[BUFFER_SIZE + 1];
     int bytes_read;
     std::string request;
-
     bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
     buffer[bytes_read] = 0;
     request = buffer;
@@ -99,23 +105,46 @@ void    Socket::receiveData(fd fd_to_read)
         bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
         request += buffer;
+        std::cout << "looooop" << std::endl;
     }
     _requests[getIndexRequest(fd_to_read)].addToRequestHeader(request);
     std::cout << "Nb of bytes read : " << request.size() << std::endl;
+    std::cout << request << std::endl;
     if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
     {
-        send(fd_to_read, "505 HTTP Version Not Supported\n", 32,0);
+        response_error_header(505, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
     }
-     if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
+    else if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
     {
-        //send(fd_to_read, "400 Bad Request\n", 17,0);
         response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
+        removeSocket(fd_to_read);
+        return ;
+    }
+    else
+    {
+        std::fstream fs;
+        struct stat sb;
+        std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
+        if (path == "./www/")
+            path += "/index.html";
+
+        std::cout << path << std::endl;
+        if (stat(path.c_str(), &sb) == -1)
+        {
+            response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
+        }
+        else
+        {
+            response_good_file(_requests[getIndexRequest(fd_to_read)].getPathFileRequest(), fd_to_read);
+        }
+        close(fd_to_read);
+        // // std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
     }

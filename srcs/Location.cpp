@@ -54,3 +54,8 @@ std::string Location::getRoot(void)const
 {
     return (_root);
 }
+
+std::string Location::getDefaultFile(void) const
+{
+    return (_default_file);
+}

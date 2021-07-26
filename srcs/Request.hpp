@@ -26,11 +26,13 @@ class Request
         Request();
         ~Request();
 
-        void    setMethod(std::string method);
-        void    setError(int error);
-        int     getError() const;
-        int     isAValidMethodLine(std::string method_line);
-        void    addToRequestHeader(std::string request_linei);
+        void        setMethod(std::string method);
+        void        setError(int error);
+        void        setPathFileRequest(std::string path_file_request);
+        std::string getPathFileRequest(void) const;
+        int         getError() const;
+        int         isAValidMethodLine(std::string method_line);
+        void        addToRequestHeader(std::string request_linei);
 };
 
 #endif

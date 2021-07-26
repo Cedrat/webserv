@@ -7,6 +7,11 @@ std::string extract_method(std::string method_line)
     return (method_line.substr(0, method_line.find(" ")));
 }
 
+std::string extract_path(std::string method_line)
+{
+    return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
+}
+
 Request::Request() : _error(0), _where_is_request(ZERO_REQUEST)
 {
     (void)_error;
@@ -38,18 +43,35 @@ void Request::setError(int error)
     _error = error;
 }
 
+void Request::setPathFileRequest(std::string path_file)
+{
+    _path_file_request = path_file;
+}
+
 int Request::getError() const
 {
     return (_error);
 }
 
+std::string Request::getPathFileRequest(void) const
+{
+    return (_path_file_request);
+}
+
 void Request::addToRequestHeader(std::string request_line)
 {
+    std::cout << request_line << std::endl;
+    request_line = request_line.substr(0, request_line.find("\n"));
+    request_line += "\n";
+    std::cout << request_line << std::endl;
     if (_where_is_request == ZERO_REQUEST)
     {
         if (isAValidMethodLine(request_line) == OK)
         {
             setMethod(extract_method(request_line));
+            setPathFileRequest(extract_path(request_line)); 
+            setError(OK);
+            std::cout << "Passage ici" << std::endl;
             //requested_file set method
         }
         else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)
