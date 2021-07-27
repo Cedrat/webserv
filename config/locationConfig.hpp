@@ -29,7 +29,6 @@ class locationConfig
         void setIndex( std::vector<std::string> line );
         void setUploadFolder( std::vector<std::string> line );
         void setCgi( std::vector<std::string> line );
-
         void setUncalledDirectives();
 
         bool checkLocationData();
@@ -48,6 +47,7 @@ class locationConfig
         std::vector<std::string>   getIndex() const;
         std::map<std::string, std::string> getCgi() const;
 
+        void                        debug();
 
     private:
         std::string                         _location;

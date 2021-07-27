@@ -126,11 +126,10 @@ void locationConfig::setUncalledDirectives()
         _methods[0] = "GET";
     if (_index[0] == "-1")
     {
-        _index[0] = _root;
-        if (_index[0][_index[0].size()] != '/')
-            _index[0] += "/index.html";
+        if (_root[_root.size() - 1] == '/')
+            _index[0] = "index.html";
         else
-            _index[0] += "index.html";
+            _index[0] = "/index.html";
     }
     if (_upload_folder == "-1")
     {
@@ -141,7 +140,7 @@ void locationConfig::setUncalledDirectives()
         }
         _upload_folder = "../www/post_test";
     }
-    //On ne change pas cgi, comme ça on sait qu'il n'est pas nécessaire ?
+    //On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas nécessaire
 }
 
 
@@ -162,33 +161,25 @@ bool locationConfig::checkLocationData()
         }
     }
    
-    std::cout << "*** Debug location ***" << std::endl;
-    std::cout << "Location : " << getLocation() << std::endl;
-    std::cout << "Root : " << getRoot() << std::endl;
-    std::cout << "autoindex - " << _autoindex << std::endl;
-    for (size_t i = 0; i < _methods.size(); i++)
-        std::cout << "method " << i << " - " <<  _methods[i] << std::endl;
-    std::map<std::string, std::string>::iterator it;
-    for (it = _cgi.begin(); it != _cgi.end(); it++)
-        std::cout << "cgi - " << it->first << " " << it->second << std::endl;
-    for (size_t i = 0; i < _index.size(); i++)
-        std::cout << "index " << i << " - " <<  _index[i] << std::endl;
-    std::cout << "Upload folder : " << getUploadFolder() << std::endl;
-    std::cout << "*** End ***\n" << std::endl;
+   debug();
 
     return true;
 }
 
 bool locationConfig::checkLocation()
 {
-
     // un path '/' match toutes les requêtes
-    
-
-    
-
-
-
+    if (_location.size() == 1 && _location[0] == '/')
+        return true;
+    //On accepte uniquement les char alnum et le '/'
+    for (size_t i = 0; i < _location.size(); i++)
+    {
+        if (!isalnum(_location[i]) && _location[i] != '/')
+        {
+            std::cerr << "Error in location path : Invalid character" << std::endl;
+            return false;
+        }
+    }
     return true;
 }
 
@@ -208,11 +199,12 @@ bool locationConfig::checkIndex()
     std::ifstream ifs;
     std::string path = _root;
 
-    if (path[path.size()] != '/')
-        path += '/';
-
     for (size_t i = 0; i < _index.size(); i++)
     {
+        if (path[path.size() - 1] == '/' && _index[i][0] == '/')
+            path = _root.substr(0, _root.size() - 1);
+        if (path[path.size() - 1] != '/' && _index[i][0] != '/')
+            path += '/';
         path += _index[i];
         ifs.open(path.c_str(), std::ifstream::in);
         if (ifs.is_open() == false)
@@ -221,7 +213,7 @@ bool locationConfig::checkIndex()
             return false;
         } 
     }
-    
+
     return true;
 }
 
@@ -236,14 +228,14 @@ bool locationConfig::checkMethods()
 
     for(size_t i = 0; i < _methods.size(); i++)
     {
-        if (_methods[i] == "GET")
-            get++;
-        if (_methods[i] == "DELETE")
-            del++;
-        if (_methods[i] == "POST")
-            post++;
         if (_methods[i] != "GET" && _methods[i] != "POST" && _methods[i] != "DELETE")
             return false;
+        if (_methods[i] == "GET")
+            get++;
+        else if (_methods[i] == "DELETE")
+            del++;
+        else if (_methods[i] == "POST")
+            post++;
     }
     if (post > 1 || get > 1 || del > 1)
         return false;
@@ -321,4 +313,25 @@ std::string locationConfig::getUploadFolder() const
 std::map<std::string, std::string> locationConfig::getCgi() const
 {
     return this->_cgi;
+}
+
+
+
+
+
+void locationConfig::debug()
+{
+    std::cout << "*** Debug location ***" << std::endl;
+    std::cout << "Location : " << getLocation() << std::endl;
+    std::cout << "Root : " << getRoot() << std::endl;
+    std::cout << "autoindex - " << _autoindex << std::endl;
+    for (size_t i = 0; i < _methods.size(); i++)
+        std::cout << "method " << i << " - " <<  _methods[i] << std::endl;
+    std::map<std::string, std::string>::iterator it;
+    for (it = _cgi.begin(); it != _cgi.end(); it++)
+        std::cout << "cgi - " << it->first << " " << it->second << std::endl;
+    for (size_t i = 0; i < _index.size(); i++)
+        std::cout << "index " << i << " - " <<  _index[i] << std::endl;
+    std::cout << "Upload folder : " << getUploadFolder() << std::endl;
+    std::cout << "*** End ***\n" << std::endl;
 }
