@@ -36,7 +36,7 @@ void locationConfig::setRoot( std::vector<std::string> line )
         _root = line[1];
     }
     else
-        throw ("Error : Server block can't contain more than one root directive");
+        throw std::invalid_argument("Error : Server block can't contain more than one root directive");
 }
 
 void locationConfig::setAutoindex( std::vector<std::string> line )
@@ -47,7 +47,7 @@ void locationConfig::setAutoindex( std::vector<std::string> line )
     else if (line[1] == "on")
         _autoindex = true;
     else
-        throw ("Error : autoindex directive is invalid");
+        throw std::invalid_argument("Error : autoindex directive is invalid");
 }
 
 void locationConfig::setMethods( std::vector<std::string> line )
@@ -64,7 +64,7 @@ void locationConfig::setMethods( std::vector<std::string> line )
             _methods.push_back(line[i]);
     }
     else
-        throw ("Error : location block can't contain more than one method directive");
+        throw std::invalid_argument("Error : location block can't contain more than one method directive");
 }
 
 void locationConfig::setIndex( std::vector<std::string> line )
@@ -81,7 +81,7 @@ void locationConfig::setIndex( std::vector<std::string> line )
             _index.push_back(line[i]);
     }
     else
-        throw ("Error : location block can't contain more than one index directive");
+        throw std::invalid_argument("Error : location block can't contain more than one index directive");
 }
 
 void locationConfig::setUploadFolder( std::vector<std::string> line )
@@ -96,7 +96,7 @@ void locationConfig::setUploadFolder( std::vector<std::string> line )
         _upload_folder = line[1];
     }
     else
-        throw ("Error : location block can't contain more than one upload_folder directive");
+        throw std::invalid_argument("Error : location block can't contain more than one upload_folder directive");
 }
 
 void locationConfig::setCgi( std::vector<std::string> line )
@@ -115,7 +115,7 @@ void locationConfig::setCgi( std::vector<std::string> line )
         _cgi.insert(std::pair<std::string, std::string>(extension, path));
     }
     else
-        throw ("Error : location block can't contain more than one cgi directive");
+        throw std::invalid_argument("Error : location block can't contain more than one cgi directive");
 }
 
 void locationConfig::setUncalledDirectives()
@@ -136,7 +136,7 @@ void locationConfig::setUncalledDirectives()
         for (size_t i = 0; i < _methods.size(); i++)
         {
             if (_methods[i] == "POST")
-                throw ("Error : You must specify an upload directory if you use the POST method");
+                throw std::invalid_argument("Error : You must specify an upload directory if you use the POST method");
         }
         _upload_folder = "../www/post_test";
     }

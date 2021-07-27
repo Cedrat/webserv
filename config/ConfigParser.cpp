@@ -15,7 +15,7 @@
 ConfigParser::ConfigParser( char *filepath ) : _serverNb(0)
 {
     if (strlen(filepath) <= 0)
-        throw ("Error : The config file path is empty");
+        throw std::invalid_argument("Error : The config file path is empty");
 
     initServerProperties();
     initLocationProperties();
@@ -63,18 +63,18 @@ std::ifstream ConfigParser::openConfigFile( std::string const & file )
 
     if (extPos == std::string::npos || (extPos != file.size() - 5)
         || file.size() <= 5)
-        throw ("Error : Invalid configuration file format");
+        throw std::invalid_argument("Error : Invalid configuration file format");
 
     ifs.open(file, std::ifstream::in);
     if (ifs.is_open() == false)
-        throw ("Error : Can't open file");
+        throw std::invalid_argument("Error : Can't open file");
     
     return (ifs);
 }
 
 
 /**************************************************************
-Fonctions membres - Lecture des blocs
+ Lecture des blocs
 **************************************************************/
 bool ConfigParser::treatServerBlock()
 {
@@ -88,8 +88,7 @@ bool ConfigParser::treatServerBlock()
         if (line.empty())
             continue ;
 
-        //Check derniere accolade
-        if (line[0] == "}")
+        if (line[0] == "}") //Check derniere accolade
         {
             closingBrace = closeServerBlock(line, &server);
             break;
@@ -99,27 +98,19 @@ bool ConfigParser::treatServerBlock()
             if (addServerProperty(line, &server) == false)
                 return false;
         }
-        else if (line[0] == "location") //Envoyer vers la bonne fonction de locationConfig
+        else if (isLocation(line) == true) //Envoyer vers la bonne fonction de locationConfig
         {
             if (treatLocationBlock(line) == false)
                 return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
-        {
-            std::cerr << "Error in config file : Unrecognized or out of line keyword " \
-                << line[0] << std::endl;
-            return false;
-        }
+            throw std::invalid_argument("Error in the config file : Unrecognized or out of line keyword '" + line[0] + "'");
     }
 
     if (closingBrace == false)
-    {
         throw std::invalid_argument("Can't create the server : Error in the server block of the config file");
-        return false;
-    }
     return true;
 }
-
 
 
 bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
@@ -127,13 +118,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
     locationConfig * location = new locationConfig;
     bool closingBrace = false;
 
-    if (line.size() > 3 || line.size() < 3 || (line.size() == 3 && line[2] != "{"))
-    {
-        std::cerr << "Error in location directive : Missing path or opening bracket" << std::endl;
-        return false;
-    }
-    location->setLocationDirective(line);
-    
+    location->setLocationDirective(line);    
     while (_configFile.good())
     {
         line = FormattingLine(_configFile);
@@ -152,11 +137,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
                 return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
-        {
-            std::cerr << "Error in config file : Unrecognized or out of line keyword " \
-                << line[0] << std::endl;
-            return false;
-        }
+            throw std::invalid_argument("Error in the config file : Unrecognized or out of line keyword '" + line[0] + "'");
     }
 
     if (closingBrace == false)
@@ -167,6 +148,11 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
     return true;
 }
 
+
+
+/**************************************************************
+Enregistrement des structures de données
+**************************************************************/
 bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig * server )
 {
     if (line.size() == 1)
@@ -176,7 +162,7 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
             return false;
         _server.push_back(*server);
         _server[_serverNb].setLocation(_location);
-        //std::cout << _server[0].getSpecificLocation(0).getLocation() << std::endl;
+        //std::cout << _server[0].getOneLocation(0).getLocation() << std::endl;
         _serverNb++;
         return true;
     }   
@@ -206,9 +192,10 @@ bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationCo
  }
 
 
-/*******************************
-Fonctions membres - Utilitaires
-*******************************/
+
+/**************************************************************
+Utilitaires
+**************************************************************/
 std::vector<std::string> ConfigParser::FormattingLine( std::ifstream & file )
 {
     std::string                 line;
@@ -225,10 +212,22 @@ std::vector<std::string> ConfigParser::FormattingLine( std::ifstream & file )
     return formattedLine;
 }
 
+bool ConfigParser::isLocation( std::vector<std::string> line )
+{
+    if (line[0] != "location")
+        return false;
+    if ((line.size() != 3) || (line.size() == 3 && line[2] != "{"))
+    {
+        std::cerr << "Error in location directive : Missing path or opening bracket" << std::endl;
+        return false;
+    }
+    return true;
+}
 
-/****************************************
-Fonctions membres - Gestion des keywords
-****************************************/
+
+/**************************************************************
+Gestion des keywords
+**************************************************************/
 void ConfigParser::initServerProperties()
 {
     this->_serverProperties = {"listen", "server_name", "error_page", "client_max_body_size", "root"};

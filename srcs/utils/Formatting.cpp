@@ -41,9 +41,9 @@ std::string trimDotComa( std::string line )
 
     signPos = line.find(";");
     if (!line.empty() && signPos == std::string::npos)
-        throw ("Error : Line need to be terminated with a single ';'");
+        throw std::invalid_argument("Error : Line need to be terminated with a single ';'");
     else if (line[signPos + 1])
-        throw ("Error : Line need to be terminated with a single ';'");
+        throw std::invalid_argument("Error : Line need to be terminated with a single ';'");
     else
         newLine = trimStartAndEndWhitespaces(line.substr(0, signPos));
     

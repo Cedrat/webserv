@@ -31,7 +31,7 @@ void serverConfig::setHostAndPort( std::vector<std::string> line )
         _tmpPortOrHost = line[1];
     }
     else
-        throw ("Error : Config file can't contain more than one listen directive"); 
+        throw std::invalid_argument("Error : Config file can't contain more than one listen directive"); 
 }
 
 bool serverConfig::setOneHostOrPort( std::string line )
@@ -61,7 +61,7 @@ void serverConfig::setServerNames( std::vector<std::string> line )
             this->_server_names.push_back(line[i]);
     }
     else
-        throw ("Error : Config file can't contain more than one server_name directive");
+        throw std::invalid_argument("Error : Config file can't contain more than one server_name directive");
 }
 
 void serverConfig::setErrorPages( std::vector<std::string> line )
@@ -91,7 +91,7 @@ void serverConfig::setMaxClientBodySize( std::vector<std::string> line )
         this->_max_body_size = atoi(line[1].c_str());
     }
     else
-        throw ("Error : Config file can't contain more than one client_max_body_size directive");
+        throw std::invalid_argument("Error : Config file can't contain more than one client_max_body_size directive");
 }
 
 void serverConfig::setRoot( std::vector<std::string> line )
@@ -106,7 +106,7 @@ void serverConfig::setRoot( std::vector<std::string> line )
         this->_root = line[1];
     }
     else
-        throw ("Error : Server block can't contain more than one root directive");
+        throw std::invalid_argument("Error : Server block can't contain more than one root directive");
 }
 
 void serverConfig::setUncalledDirectives()
@@ -282,7 +282,7 @@ std::vector<locationConfig> serverConfig::getLocations() const
 locationConfig serverConfig::getOneLocation( size_t id ) const
 {
     if (_locations.size() < id)
-        throw ("Error : Out of array location request");
+        throw std::out_of_range("Error : Out of array location request");
     return this->_locations[id];
 }
 
