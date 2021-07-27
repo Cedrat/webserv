@@ -114,7 +114,7 @@ bool ConfigParser::treatServerBlock()
 
     if (closingBrace == false)
     {
-        std::cerr << "Error in config file : No closing bracket" << std::endl;
+        throw std::invalid_argument("Can't create the server : Error in the server block of the config file");
         return false;
     }
     return true;
@@ -161,8 +161,8 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 
     if (closingBrace == false)
     {
-        std::cerr << "Error in config file : No closing bracket in location block" << std::endl;
-        return false;
+        delete location;
+        throw std::invalid_argument("Can't create the server : Error in the location block of the config file");
     }
     return true;
 }

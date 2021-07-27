@@ -155,14 +155,9 @@ bool locationConfig::checkLocationData()
     for (int i = 0; i < 6; i++)
     {
         if ((this->*_checks[i])() == false)
-        {
-            std::cerr << "Error in the location block configuration" << std::endl;
             return false;
-        }
     }
-   
-   debug();
-
+debug();
     return true;
 }
 
@@ -185,12 +180,14 @@ bool locationConfig::checkLocation()
 
 bool locationConfig::checkRoot()
 {
-    struct stat state;
+    struct stat state{};
 
     stat(_root.c_str(), &state);
     if (!S_ISDIR(state.st_mode))
+    {
+        std::cerr << "Error in root directive" << std::endl;
         return false;
-
+    }
     return true;
 }
 
@@ -210,10 +207,10 @@ bool locationConfig::checkIndex()
         if (ifs.is_open() == false)
         {
             ifs.close();
+            std::cerr << "Error in index directive" << std::endl;
             return false;
         } 
     }
-
     return true;
 }
 
@@ -248,8 +245,10 @@ bool locationConfig::checkUploadFolder()
 
     stat(_upload_folder.c_str(), &state);
     if (!S_ISDIR(state.st_mode))
+    {
+        std::cerr << "Error in upload_folder directive" << std::endl;
         return false;
-
+    }
     return true;
 }
 
@@ -262,13 +261,18 @@ bool locationConfig::checkCgi()
         if (it->first == "0" && it->second == "0")
             return true;
         if (isExtension(it->first) == false)
+        {
+            //throw std::invalid_argument("Error in cgi directive");
+            std::cerr << "Error in cgi directive" << std::endl;
             return false;
+        }   
 
         std::ifstream ifs;
         ifs.open(it->second.c_str(), std::ifstream::in);
         if (ifs.is_open() == false)
         {
             ifs.close();
+            std::cerr << "Error in cgi directive" << std::endl;
             return false;
         }    
     }
