@@ -17,9 +17,6 @@ ConfigParser::ConfigParser( char *filepath ) : _serverNb(0)
     if (strlen(filepath) <= 0)
         throw std::invalid_argument("Error : The config file path is empty");
 
-    initServerProperties();
-    initLocationProperties();
-
     std::string file = filepath;
     parser(file);
 }
@@ -228,21 +225,13 @@ bool ConfigParser::isLocation( std::vector<std::string> line )
 /**************************************************************
 Gestion des keywords
 **************************************************************/
-void ConfigParser::initServerProperties()
-{
-    this->_serverProperties = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
-}
-
-void ConfigParser::initLocationProperties()
-{
-    this->_locationProperties = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
-}
-
 bool ConfigParser::isServerProperty( std::string line )
 {
-    for(unsigned long i = 0; i < _serverProperties.size(); i++)
+    std::vector<std::string> serverProperties = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
+    
+    for(unsigned long i = 0; i < serverProperties.size(); i++)
     {
-        if (line == _serverProperties[i])
+        if (line == serverProperties[i])
             return true;
     }
     return false;
@@ -250,9 +239,11 @@ bool ConfigParser::isServerProperty( std::string line )
 
 bool ConfigParser::isLocationProperty( std::string line )
 {
-    for(unsigned long i = 0; i < _locationProperties.size(); i++)
+    std::vector<std::string> locationProperties = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
+   
+    for(unsigned long i = 0; i < locationProperties.size(); i++)
     {
-        if (line == _locationProperties[i])
+        if (line == locationProperties[i])
             return true;
     }
     return false;

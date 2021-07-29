@@ -41,9 +41,6 @@ class ConfigParser
         bool closeServerBlock( std::vector<std::string> line, serverConfig * server );
         bool closeLocationBlock( std::vector<std::string> line, locationConfig * location );
 
-        void initServerProperties();
-        void initLocationProperties();
-
         bool isServerProperty( std::string line );
         bool isLocationProperty( std::string line );
         bool isLocation( std::vector<std::string> line );
@@ -65,9 +62,6 @@ class ConfigParser
 
         std::vector<serverConfig>   _server;
         std::vector<locationConfig> _location;
-
-        std::vector<std::string>    _serverProperties;
-        std::vector<std::string>    _locationProperties;
 
 };
 
