@@ -11,7 +11,7 @@ Location default_location()
    location.setDefaultFile("index.html");
    location.setUploadFolder("/upload/");
    location.setRoot(".");
-   location.setLocation(".");
+   location.setLocation("/");
    return (location);
 }
 

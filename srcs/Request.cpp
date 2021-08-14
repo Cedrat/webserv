@@ -58,12 +58,21 @@ std::string Request::getPathFileRequest(void) const
     return (_path_file_request);
 }
 
+std::string Request::getMethod() const
+{
+    return (_method);
+}
+
+void Request::verifyMethod(Config config)
+{
+
+}
+
 void Request::addToRequestHeader(std::string request_line)
 {
-    std::cout << request_line << std::endl;
     request_line = request_line.substr(0, request_line.find("\n"));
     request_line += "\n";
-    std::cout << request_line << std::endl;
+    //std::cout << request_line << std::endl;
     if (_where_is_request == ZERO_REQUEST)
     {
         if (isAValidMethodLine(request_line) == OK)
@@ -71,7 +80,7 @@ void Request::addToRequestHeader(std::string request_line)
             setMethod(extract_method(request_line));
             setPathFileRequest(extract_path(request_line)); 
             setError(OK);
-            std::cout << "Passage ici" << std::endl;
+            //std::cout << "Passage ici" << std::endl;
             //requested_file set method
         }
         else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)

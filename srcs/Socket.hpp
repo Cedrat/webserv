@@ -31,7 +31,10 @@ class Socket
 
         bool        isAFdServer(fd i) const;
        
-        void        receiveData(fd fd_to_read); 
+        void        receiveData(fd fd_to_read);
+
+        void        verifyRequest(size_t index_request);
+        
 };
 
 #endif

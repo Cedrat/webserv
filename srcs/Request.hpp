@@ -27,12 +27,15 @@ class Request
         ~Request();
 
         void        setMethod(std::string method);
+        std::string getMethod() const;
         void        setError(int error);
         void        setPathFileRequest(std::string path_file_request);
         std::string getPathFileRequest(void) const;
         int         getError() const;
         int         isAValidMethodLine(std::string method_line);
         void        addToRequestHeader(std::string request_linei);
+        void        verifyMethod(Config config);
+
 };
 
 #endif

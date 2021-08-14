@@ -6,6 +6,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+
 
 
 Socket::Socket()
@@ -29,8 +31,9 @@ static pollfd create_a_listenable_socket(int port)
    struct sockaddr_in   my_addr;
    struct pollfd        mypollfd;
    fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
-   
-   if (new_socket == -1)
+
+    fcntl(new_socket, F_SETFL, O_NONBLOCK);
+    if (new_socket == -1)
         throw "Error when create socket";
 
     my_addr.sin_family = AF_INET;
@@ -43,6 +46,7 @@ static pollfd create_a_listenable_socket(int port)
     if (listen(new_socket, BACKLOG) == -1)
         throw "Error from listening";
     
+    //fcntl(new_socket, F_SETFL, O_NONBLOCK);
     mypollfd.fd = new_socket;
     mypollfd.events = POLLIN;
     mypollfd.revents = 0;
@@ -109,7 +113,8 @@ void    Socket::receiveData(fd fd_to_read)
     }
     _requests[getIndexRequest(fd_to_read)].addToRequestHeader(request);
     std::cout << "Nb of bytes read : " << request.size() << std::endl;
-    std::cout << request << std::endl;
+    //std::cout << "ligne 115" <<  request << std::endl;
+    verifyRequest(getIndexRequest(fd_to_read));
     if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
     {
         response_error_header(505, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
@@ -133,20 +138,19 @@ void    Socket::receiveData(fd fd_to_read)
         std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
         if (path == "./www/")
             path += "/index.html";
-
-        std::cout << path << std::endl;
+            
         if (stat(path.c_str(), &sb) == -1)
         {
             response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         }
         else
         {
-            response_good_file(_requests[getIndexRequest(fd_to_read)].getPathFileRequest(), fd_to_read);
+            response_good_file(path, fd_to_read);
         }
-        close(fd_to_read);
-        // // std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
+        //close(fd_to_read);
+        // std::cout << "Client closed" << std::endl;
+        // removeSocket(fd_to_read);
+         return ;
     }
     if (bytes_read <= 0 || request == "\r\n")
     {
@@ -155,7 +159,7 @@ void    Socket::receiveData(fd fd_to_read)
         removeSocket(fd_to_read);
         return ;
     }
-    write(1, request.c_str(), request.size());
+    //write(1, request.c_str(), request.size());
 }
 
 void    Socket::removeSocket(fd fd_to_read)
@@ -178,10 +182,16 @@ void Socket::addSocketClient(Config config, fd socket_client)
     pollfd new_socket;
     Request new_request;
 
+    //fcntl(socket_client, F_SETFL, O_NONBLOCK);
    new_socket.fd = socket_client;
    new_socket.events = POLLIN;
    new_socket.revents = 0;
    _sockets.push_back(new_socket);
    _config_socket.push_back(config);
    _requests.push_back(new_request);
+}
+
+void Socket::verifyRequest(size_t index_request)
+{
+   _requests[index_request].verifyMethod(_config_socket[index_request]);
 }
