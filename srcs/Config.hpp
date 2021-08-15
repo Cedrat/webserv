@@ -9,6 +9,8 @@
 # define CLIENT 0
 # define SERVER 1
 
+class Location;
+
 class Config
 {
     private : 

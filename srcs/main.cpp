@@ -15,6 +15,21 @@ Location default_location()
    return (location);
 }
 
+Location default_location_2()
+{
+   Location location;
+
+   location.setAutoIndex(TRUE);
+   location.addMethod("GET");
+   location.addMethod("POST");
+   location.addMethod("DELETE");
+   location.setDefaultFile("test_index.html");
+   location.setUploadFolder("/upload/");
+   location.setRoot(".");
+   location.setLocation("/test/");
+   return (location);
+}
+
 Config default_config()
 {
    Config config;
@@ -29,8 +44,10 @@ Config default_config()
     config.addErrorPages(400, "/error_files/err400.html");
     location = default_location();
     config.addErrorPages(404, "/error_files/err404.html");
+    config.addErrorPages(405, "/error_files/err405.html");
     config.addErrorPages(505, "/error_files/err505.html");
     config.addLocation(location);
+    config.addLocation(default_location_2());
     return (config);
 }
 

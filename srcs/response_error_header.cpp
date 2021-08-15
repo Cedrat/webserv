@@ -23,7 +23,7 @@ void response_error_header(int num_code,  Config config, fd fd_to_answer)
     std::string path;
     path = config.getPathError(num_code);
 
-
+    //std::cout << "response_error_header" <<  path << std::endl;
     std::string line;
     std::ifstream file;
     std:: string page;
@@ -45,14 +45,14 @@ void response_good_file(std::string path, fd fd_to_answer)
     std:: string page;
 
     file.open(path);
-    std::cout << path << std::endl;
+    //std::cout << path << std::endl;
     
     while (std::getline(file, line))
     {
         page += line + "\n";
     }
-    std::cout << page.size() << std::endl;
+    //std::cout << page.size() << std::endl;
     page = "HTTP/1.1 " + get_string_error(200) +"\nContent-Length: " + int_to_string(page.size()) + "\n\n" + page;
-    std::cout << page << std::endl;
+    //std::cout << page << std::endl;
     send(fd_to_answer, page.c_str(), page.size(), 0); 
 }

@@ -109,13 +109,17 @@ void    Socket::receiveData(fd fd_to_read)
         bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
         request += buffer;
-        std::cout << "looooop" << std::endl;
+       // std::cout << "looooop" << std::endl;
     }
     _requests[getIndexRequest(fd_to_read)].addToRequestHeader(request);
     std::cout << "Nb of bytes read : " << request.size() << std::endl;
     //std::cout << "ligne 115" <<  request << std::endl;
-    verifyRequest(getIndexRequest(fd_to_read));
-    if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
+    std::cout << "The request is as follows :\n" << request << std::endl;
+    if (_requests[getIndexRequest(fd_to_read)].getError() == OK)
+        verifyRequest(getIndexRequest(fd_to_read));
+    if (request.size() == 0)
+        std::cout << "request size 0" << std::endl; 
+    else if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
     {
         response_error_header(505, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         close(fd_to_read);
@@ -125,7 +129,16 @@ void    Socket::receiveData(fd fd_to_read)
     }
     else if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
     {
+        std::cout << "ERROR" << std::endl;
         response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
+        close(fd_to_read);
+        std::cout << "Client closed" << std::endl;
+        removeSocket(fd_to_read);
+        return ;
+    }
+    else if (_requests[getIndexRequest(fd_to_read)].getError() == METHOD_NOT_ALLOWED)
+    {
+        response_error_header(405, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
@@ -136,10 +149,10 @@ void    Socket::receiveData(fd fd_to_read)
         std::fstream fs;
         struct stat sb;
         std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
-        if (path == "./www/")
-            path += "/index.html";
-            
-        if (stat(path.c_str(), &sb) == -1)
+        if (path == "./www" + _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getLocation())
+            path += _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getDefaultFile();
+        //std::cout << path << std::endl;
+        if (stat(path.c_str(), &sb) == -1 || S_ISREG(sb.st_mode) == 0)
         {
             response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         }

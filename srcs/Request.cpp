@@ -65,7 +65,32 @@ std::string Request::getMethod() const
 
 void Request::verifyMethod(Config config)
 {
+    Location location = findBestLocation(config);
 
+    if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
+        setError(405); 
+}
+
+Location Request::findBestLocation(Config config)
+{
+   std::vector<Location>    locations;
+   Location                 best_location;
+   size_t                   nb_of_precision = 0;
+
+   locations = config.getLocations();
+
+   std::vector<Location>::iterator  it_begin = locations.begin();
+   std::vector<Location>::iterator  it_end = locations.end();
+
+   for (int i = 0; it_begin != it_end; i++, it_begin++)
+   {
+       if ((getPathFileRequest().find(locations[i].getLocation()) != std::string::npos) && nb_of_char_in_str('/', locations[i].getLocation()) > nb_of_precision)
+       {
+            best_location = locations[i];
+            nb_of_precision = nb_of_char_in_str('/', locations[i].getLocation());
+       }
+   }
+   return (best_location);
 }
 
 void Request::addToRequestHeader(std::string request_line)
@@ -87,5 +112,6 @@ void Request::addToRequestHeader(std::string request_line)
             setError(NOT_SUPPORTED);
         else if (isAValidMethodLine(request_line) == BAD_REQUEST)
             setError(BAD_REQUEST);
+        
     }
 }

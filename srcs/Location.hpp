@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include "../includes/utils.hpp"
 
 class Location
 {
@@ -34,6 +35,8 @@ class Location
         std::string                 getDefaultFile(void) const;
         std::string                 getUploadFolder(void) const;
         std::vector<std::string>    getMethods(void) const;
+
+        bool                        checkIfMethodIsPresent(std::string method) const;
 };
 
 #endif
