@@ -93,13 +93,14 @@ Location Request::findBestLocation(Config config)
    return (best_location);
 }
 
-void Request::addToRequestHeader(std::string request_line)
+void Request::addToRequestHeader(std::string request)
 {
-    request_line = request_line.substr(0, request_line.find("\n"));
-    request_line += "\n";
+    std::string request_line;
     //std::cout << request_line << std::endl;
     if (_where_is_request == ZERO_REQUEST)
     {
+        request_line = request.substr(0, request.find("\n"));
+        request_line += "\n";
         if (isAValidMethodLine(request_line) == OK)
         {
             setMethod(extract_method(request_line));
@@ -112,6 +113,34 @@ void Request::addToRequestHeader(std::string request_line)
             setError(NOT_SUPPORTED);
         else if (isAValidMethodLine(request_line) == BAD_REQUEST)
             setError(BAD_REQUEST);
-        
+        _where_is_request = HOST_LINE;
     }
+    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
+    if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
+    {
+        _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
+        std::cout << "L'Host name retenu est" << _host_name << std::endl;
+        _where_is_request = REQUEST_FINISHED;
+    }
+}
+
+void Request::setWhereIsRequest(int where_is_request)
+{
+   _where_is_request = where_is_request; 
+}
+
+std::string Request::getHostName() const
+{
+    return (_host_name);
+}
+
+void    Request::verifyHostName(Config config) 
+{
+    if (config.checkIfHostNameIsPresent(getHostName()) == FALSE) // a finir aprés pause.
+        setError(666); 
+}
+
+int Request::getWhereIsRequest() const
+{
+    return(_where_is_request);
 }

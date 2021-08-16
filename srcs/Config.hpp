@@ -48,6 +48,9 @@ class Config
         void    addServerName(std::string str);
         void    addErrorPages(int error_nb, std::string path_error);
         void    addLocation(Location location);
+
+        bool    checkIfHostNameIsPresent(std::string host_name) const;
+
 };
 
 #endif

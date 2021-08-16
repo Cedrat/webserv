@@ -8,16 +8,6 @@
 #include <cstdlib>
 #include <sstream>
 
-std::string int_to_string(int nb)
-{
-    std::string str;
-    std::ostringstream temp;
-
-    temp << nb;
-    str = temp.str();
-    return (str);
-
-}
 void response_error_header(int num_code,  Config config, fd fd_to_answer)
 {
     std::string path;
@@ -45,7 +35,6 @@ void response_good_file(std::string path, fd fd_to_answer)
     std:: string page;
 
     file.open(path);
-    //std::cout << path << std::endl;
     
     while (std::getline(file, line))
     {

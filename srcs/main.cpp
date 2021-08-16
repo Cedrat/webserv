@@ -60,7 +60,7 @@ int main()
     
     config2.setPort(7996);
     config2.setServerOrClient(SERVER);
-    server.addSocketServer(config2);
+    server.addSocketServer(config2); //Segfault ici mais rare ?
     config = default_config();
     server.addSocketServer(config);
     server.launchingServ();

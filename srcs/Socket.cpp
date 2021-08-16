@@ -1,5 +1,5 @@
-#include "Socket.hpp"
 #include "../includes/utils.hpp"
+#include "Socket.hpp"
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -100,50 +100,43 @@ void    Socket::receiveData(fd fd_to_read)
 {
     char buffer[BUFFER_SIZE + 1];
     int bytes_read;
-    std::string request;
+    std::string str_request;
     bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
     buffer[bytes_read] = 0;
-    request = buffer;
+    str_request = buffer;
     while (bytes_read == BUFFER_SIZE)
     {
         bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
-        request += buffer;
+        str_request += buffer;
        // std::cout << "looooop" << std::endl;
     }
-    _requests[getIndexRequest(fd_to_read)].addToRequestHeader(request);
-    std::cout << "Nb of bytes read : " << request.size() << std::endl;
-    //std::cout << "ligne 115" <<  request << std::endl;
-    std::cout << "The request is as follows :\n" << request << std::endl;
+	if (str_request.size() != 2)
+    	_requests[getIndexRequest(fd_to_read)].addToRequestHeader(str_request);
+    std::cout << "Nb of bytes read : " << str_request.size() << std::endl;
+    //std::cout << "ligne 115" <<  str_request << std::endl;
+    std::cout << "The str_request is as follows :\n" << str_request << std::endl;
     if (_requests[getIndexRequest(fd_to_read)].getError() == OK)
         verifyRequest(getIndexRequest(fd_to_read));
-    if (request.size() == 0)
-        std::cout << "request size 0" << std::endl; 
-    else if (_requests[getIndexRequest(fd_to_read)].getError() == NOT_SUPPORTED)
+    if (((str_request.size() == 0 || (str_request.find("\r\n"))) == 0 && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == ZERO_REQUEST))
+        std::cout << "str_request size 0" << std::endl; 
+    else if (_requests[getIndexRequest(fd_to_read)].getError() != OK)
     {
-        response_error_header(505, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
+        std::cout << "error" << _requests[getIndexRequest(fd_to_read)].getError() << std::endl;
+        response_error_header(_requests[getIndexRequest(fd_to_read)].getError(), getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
     }
-    else if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
-    {
-        std::cout << "ERROR" << std::endl;
-        response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
+	else if (check_if_request_is_in_progress(getRequestStatus(fd_to_read)) && str_request.find("\r\n") == 0)
+	{
+		response_error_header(BAD_REQUEST, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
-    }
-    else if (_requests[getIndexRequest(fd_to_read)].getError() == METHOD_NOT_ALLOWED)
-    {
-        response_error_header(405, getConfig(getIndexRequest(fd_to_read)), fd_to_read); 
-        close(fd_to_read);
-        std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
-    }
+	}
     else
     {
         std::fstream fs;
@@ -151,40 +144,44 @@ void    Socket::receiveData(fd fd_to_read)
         std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
         if (path == "./www" + _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getLocation())
             path += _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getDefaultFile();
-        //std::cout << path << std::endl;
-        if (stat(path.c_str(), &sb) == -1 || S_ISREG(sb.st_mode) == 0)
-        {
-            response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
-        }
-        else
-        {
-            response_good_file(path, fd_to_read);
-        }
-        //close(fd_to_read);
-        // std::cout << "Client closed" << std::endl;
-        // removeSocket(fd_to_read);
-         return ;
-    }
-    if (bytes_read <= 0 || request == "\r\n")
+        std::cout << "path = "<< path << std::endl;
+		std::cout << "\\r\\n find ? " << str_request.find("\r\n\r\n") << std::endl;
+		if ((str_request.find("\r\n\r\n") != std::string::npos || str_request.find("\r\n") == 0) && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == REQUEST_FINISHED)
+		{
+			if (stat(path.c_str(), &sb) == -1 || S_ISREG(sb.st_mode) == 0)
+			{
+				response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
+			}
+			else
+			{
+				response_good_file(path, fd_to_read);
+			}
+			_requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
+			return ;
+		}
+	}
+    if (bytes_read <= 0)
     {
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
         return ;
     }
-    //write(1, request.c_str(), request.size());
+    //write(1, str_request.c_str(), str_request.size());
 }
 
 void    Socket::removeSocket(fd fd_to_read)
 {
     std::vector<struct pollfd>::iterator pollfd_itbegin = _sockets.begin();
     std::vector<Config>::iterator config_itbegin = _config_socket.begin();
+	std::vector<Request>::iterator requests_itbegin = _requests.begin();
     for (size_t i = 0; i < _sockets.size() ; i++)
     {
         if (_sockets[i].fd == fd_to_read)
         {
             _sockets.erase(pollfd_itbegin + i);
             _config_socket.erase(config_itbegin + i);
+			_requests.erase(requests_itbegin + i);
             return ;
         }
     }
@@ -206,5 +203,12 @@ void Socket::addSocketClient(Config config, fd socket_client)
 
 void Socket::verifyRequest(size_t index_request)
 {
-   _requests[index_request].verifyMethod(_config_socket[index_request]);
+    _requests[index_request].verifyMethod(_config_socket[index_request]);
+	if (_requests[index_request].getWhereIsRequest() == REQUEST_FINISHED)
+    	_requests[index_request].verifyHostName(_config_socket[index_request]);
+}
+
+int Socket::getRequestStatus(fd current_fd)
+{
+	return (_requests[getIndexRequest(current_fd)].getWhereIsRequest());
 }

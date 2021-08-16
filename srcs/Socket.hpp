@@ -26,6 +26,7 @@ class Socket
         pollfd *    getSockets() ;
         Config      getConfig(int index_of_socket_needed) const;
         int         getIndexRequest(fd fd_to_request);
+        int         getRequestStatus(fd current_fd);
         
         void        removeSocket(fd fd_to_remove);
 

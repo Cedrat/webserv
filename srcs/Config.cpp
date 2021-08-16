@@ -101,3 +101,24 @@ bool    Config::IsPrincipalServer() const
     return (_principal_server);
 }
 
+bool    Config::checkIfHostNameIsPresent(std::string host_name) const
+{
+   std::vector<std::string> host_names;
+     
+     host_names = getServersNames();
+
+    std::vector<std::string>::iterator it_begin = host_names.begin();
+    std::vector<std::string>::iterator it_end = host_names.end();
+
+
+    for (int i = 0; it_begin != it_end; i++, it_begin++)
+    {
+        if (host_names[i] == host_name)
+            return (TRUE);
+    }
+    if (host_name == ("127.0.0.1:" + int_to_string(getPort())) || host_name == ("localhost:" + int_to_string(getPort())))
+        return (TRUE);
+    return (FALSE); 
+}
+
+
