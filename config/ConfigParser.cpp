@@ -151,13 +151,21 @@ Enregistrement des structures de données
 **************************************************************/
 bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig * server )
 {
+    //if (_serverNb < 100) ?
+
     if (line.size() == 1)
     {
         //On ajoute le serveur complet a la liste & les blocs location
         if (server->checkServerData() == false)
             return false;
+        for (int i = 0; i < _serverNb; i++)
+        {
+            if (server->isEqual(_server[i]))
+                throw std::invalid_argument("Server bloc duplicata");
+        }
         _server.push_back(*server);
         _server[_serverNb].setLocation(_location);
+        _location.clear();
         //std::cout << _server[0].getOneLocation(0).getLocation() << std::endl;
         _serverNb++;
         return true;
@@ -175,6 +183,11 @@ bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationCo
     {
         if (location->checkLocationData() == false)
             return false;
+        for (int i = 0; i < _locationNb; i++)
+        {
+            if (location->isEqual(_location[i]))
+                throw std::invalid_argument("Location bloc duplicata");
+        }
         _location.push_back(*location);
         _locationNb++;
         return true;

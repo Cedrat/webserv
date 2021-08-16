@@ -38,6 +38,10 @@ class serverConfig
         bool checkErrorPages();
         bool checkMaxClientBodySize();
 
+        bool isEqual(const serverConfig & rhs) const;
+        bool compareServerNames(const serverConfig & rhs) const;
+        bool compareErrorPages(const serverConfig & rhs) const;
+
         
         int                         getPort() const;
         int                         getHost() const;

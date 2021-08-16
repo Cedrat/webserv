@@ -238,6 +238,46 @@ bool serverConfig::checkRoot()
 
 
 
+/*************************************************************
+Config - checking doublons
+*************************************************************/
+bool serverConfig::isEqual(const serverConfig & rhs) const
+{
+    return 
+        _port == rhs.getPort()
+        && _host == rhs.getHost()
+        && _max_body_size == rhs.getMaxClientBodySize()
+        && _root == rhs.getRoot()
+        && compareServerNames(rhs)
+        && compareErrorPages(rhs)
+        ;
+}
+
+bool serverConfig::compareServerNames(const serverConfig & rhs) const
+{
+    std::vector<std::string> names = rhs.getServerNames();
+
+    if (names.size() != _server_names.size())
+        return false;
+    for (size_t i = 0; i < names.size(); i++)
+    {
+        if (names[i] != _server_names[i])
+            return false;
+    }
+    return true;
+}
+
+bool serverConfig::compareErrorPages(const serverConfig & rhs) const
+{
+    std::map<int, std::string> errors = rhs.getErrorPages();
+
+    /*return
+        errors.size() == _error_pages.size()
+        && std::equal(_error_pages.begin(), _error_pages.end(), errors.begin());*/
+        
+}
+
+
 
 
 

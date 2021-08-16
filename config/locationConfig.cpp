@@ -261,11 +261,7 @@ bool locationConfig::checkCgi()
         if (it->first == "0" && it->second == "0")
             return true;
         if (isExtension(it->first) == false)
-        {
-            //throw std::invalid_argument("Error in cgi directive");
-            std::cerr << "Error in cgi directive" << std::endl;
-            return false;
-        }   
+            throw std::invalid_argument("Error in cgi directive"); 
 
         std::ifstream ifs;
         ifs.open(it->second.c_str(), std::ifstream::in);
@@ -278,6 +274,62 @@ bool locationConfig::checkCgi()
     }
     return true;
 }
+
+
+
+/*************************************************************
+Config - checking doublons
+*************************************************************/
+bool locationConfig::isEqual(const locationConfig & rhs) const
+{
+    return 
+        _location == rhs.getLocation()
+        && _root == rhs.getRoot()
+        && _autoindex == rhs.getAutoindex()
+        && _upload_folder == rhs.getUploadFolder()
+        && compareMethods(rhs)
+        && compareIndex(rhs)
+        && compareCgi(rhs)
+        ;
+}
+
+bool locationConfig::compareMethods(const locationConfig & rhs) const
+{
+    std::vector<std::string> methods = rhs.getMethods();
+
+    if (methods.size() != _methods.size())
+        return false;
+    for (size_t i = 0; i < methods.size(); i++)
+    {
+        if (methods[i] != _methods[i])
+            return false;
+    }
+    return true;
+}
+
+bool locationConfig::compareIndex(const locationConfig & rhs) const
+{
+    std::vector<std::string> indexs = rhs.getIndex();
+
+    if (indexs.size() != _index.size())
+        return false;
+    for (size_t i = 0; i < indexs.size(); i++)
+    {
+        if (indexs[i] != _index[i])
+            return false;
+    }
+    return true;
+}
+
+bool locationConfig::compareCgi(const locationConfig & rhs) const
+{
+    std::map<std::string, std::string> cgi = rhs.getCgi();
+
+    /*return
+        cgi.size() == _cgi.size()
+        && std::equal(_cgi.begin(), _cgi.end(), cgi.begin());*/
+}
+
 
 
 

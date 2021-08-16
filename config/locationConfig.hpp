@@ -39,6 +39,11 @@ class locationConfig
         bool checkUploadFolder();
         bool checkCgi();
 
+        bool isEqual(const locationConfig & rhs) const;
+        bool compareMethods(const locationConfig & rhs) const;
+        bool compareIndex(const locationConfig & rhs) const;
+        bool compareCgi(const locationConfig & rhs) const;
+
         std::string                getLocation() const;
         std::string                getRoot() const;
         std::string                getUploadFolder() const;
