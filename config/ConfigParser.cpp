@@ -112,10 +112,10 @@ bool ConfigParser::treatServerBlock()
 
 bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 {
-    locationConfig * location = new locationConfig;
+    locationConfig location;
     bool closingBrace = false;
 
-    location->setLocationDirective(line);    
+    location.setLocationDirective(line);    
     while (_configFile.good())
     {
         line = FormattingLine(_configFile);
@@ -125,12 +125,12 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
         //Check derniere accolade
         if (line[0] == "}")
         {
-            closingBrace = closeLocationBlock(line, location);
+            closingBrace = closeLocationBlock(line, &location);
             break ;
         }
         else if (isLocationProperty(line[0]) == true)
         {
-            if (addLocationProperty(line, location) == false)
+            if (addLocationProperty(line, &location) == false)
                 return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
@@ -139,7 +139,6 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 
     if (closingBrace == false)
     {
-        delete location;
         throw std::invalid_argument("Can't create the server : Error in the location block of the config file");
     }
     return true;
@@ -178,7 +177,6 @@ bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationCo
             return false;
         _location.push_back(*location);
         _locationNb++;
-        delete location;
         return true;
     }   
     else
