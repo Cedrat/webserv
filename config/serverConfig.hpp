@@ -22,13 +22,13 @@ class serverConfig
         ~serverConfig();
 
         void setHostAndPort( std::vector<std::string> line );
+        void setOneHostOrPort( std::string line );
         void setServerNames( std::vector<std::string> line );
         void setErrorPages( std::vector<std::string> line );
         void setMaxClientBodySize( std::vector<std::string> line );
         void setLocation( std::vector<locationConfig> location );
         void setRoot( std::vector<std::string> line );
         void setUncalledDirectives();
-        void setOneHostOrPort( std::string line );
         void setDefaultServer( bool value );
 
         bool checkServerData();
@@ -38,8 +38,6 @@ class serverConfig
         bool checkMaxClientBodySize();
 
         bool isEqual(const serverConfig & rhs) const;
-        bool compareServerNames(const serverConfig & rhs) const;
-        bool compareErrorPages(const serverConfig & rhs) const;
 
         
         int                         getPort() const;
@@ -57,7 +55,7 @@ class serverConfig
 
     private:
         std::vector<locationConfig> _locations;
-        
+
         int                         _port;
         int                         _host;
         int                         _max_body_size;

@@ -152,18 +152,17 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
 
     if (line.size() == 1)
     {
-        //On defini serveur par defaut
-        //On check les donnees et absence de doublon
+        //On defini serveur par defaut, on check les donnees et absence de doublon
         //On ajoute le serveur complet a la liste & les blocs location
         if (_serverNb == 0)
             server->setDefaultServer(true);
-        if (server->checkServerData() == false)
-            return false;
         for (int i = 0; i < _serverNb; i++)
         {
             if (server->isEqual(_server[i]))
                 throw std::invalid_argument("Server bloc duplicata");
         }
+        if (server->checkServerData() == false)
+            return false;
         _server.push_back(*server);
         _server[_serverNb].setLocation(_location);
         _location.clear();

@@ -240,47 +240,7 @@ bool serverConfig::isEqual(const serverConfig & rhs) const
 {
     if (_port == rhs.getPort())
         return true;
-    return 
-        _port == rhs.getPort()
-        && _host == rhs.getHost()
-        && _max_body_size == rhs.getMaxClientBodySize()
-        && _root == rhs.getRoot()
-        && compareServerNames(rhs)
-        && compareErrorPages(rhs)
-        ;
-}
-
-bool serverConfig::compareServerNames(const serverConfig & rhs) const
-{
-    std::vector<std::string> names = rhs.getServerNames();
-
-    if (names.size() != _server_names.size())
-        return false;
-    for (size_t i = 0; i < names.size(); i++)
-    {
-        if (names[i] != _server_names[i])
-            return false;
-    }
-    return true;
-}
-
-bool serverConfig::compareErrorPages(const serverConfig & rhs) const
-{
-    std::map<int, std::string> errors = rhs.getErrorPages();
-
-    if (errors.size() != _error_pages.size())
-        return false;
-
-    std::map<int, std::string>::const_iterator it_src;
-    std::map<int, std::string>::iterator it_rhs = errors.begin();
-    
-    for (it_src = _error_pages.begin(); it_src != _error_pages.end(); it_src++)
-    {
-        if (it_src->first != it_rhs->first || it_src->second != it_rhs->second)
-            return false; 
-    }
-
-    return true;
+    return false;
 }
 
 
