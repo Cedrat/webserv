@@ -18,14 +18,14 @@ bool isIP( std::string line, char c, int host )
     size_t dot_pos;
     size_t dot_nb = 0;
 
-    if ((dot_pos = line.find("localhost")) != std::string::npos)
+    if ((dot_pos = line.find("localhost")) != std::string::npos)  //Gestion host = localhost
     {
         if (line.at(dot_pos + 9) != ':')
             return false;
         inet_pton(AF_INET, "127.0.0.1", &host);
         return true;
     }
-    for (int i = 0; line[i] != c; i++)
+    for (int i = 0; line[i] != c; i++)  //Verification que chiffres only OU . de separation
     {
         if (!isdigit(line[i]) && line[i] != '.')
             return false;
@@ -35,10 +35,12 @@ bool isIP( std::string line, char c, int host )
         return false;
     while (dot_pos != std::string::npos)
     {
-        if (dot_pos - start <= 0 || dot_pos - start > 3)
+        if (dot_pos - start <= 0 || dot_pos - start > 3 || dot_nb > 3)
             return false;
         dot_nb++;
         start = dot_pos + 1;
+        if (!isdigit(line[start]))
+            return false;
         dot_pos = line.find(".", start);
     }
     if ((line.find(":") != std::string::npos && line.find(":") - start > 3)
