@@ -34,8 +34,8 @@ Gestion centrale du parsing
 void ConfigParser::parser( std::string const & file )
 {
     std::vector<std::string> line;
-    this->_configFile = openConfigFile(file);
-    
+    openConfigFile(file);
+
     while (_configFile.good())
     {
         line = FormattingLine(_configFile);
@@ -53,20 +53,17 @@ void ConfigParser::parser( std::string const & file )
     }
 }
 
-std::ifstream ConfigParser::openConfigFile( std::string const & file )
+void ConfigParser::openConfigFile( std::string const & file )
 {
-    std::ifstream ifs;
     size_t extPos = file.find(".conf", 0);
 
     if (extPos == std::string::npos || (extPos != file.size() - 5)
         || file.size() <= 5)
         throw std::invalid_argument("Error : Invalid configuration file format");
 
-    ifs.open(file, std::ifstream::in);
-    if (ifs.is_open() == false)
+    this->_configFile.open(file, std::ifstream::in);
+    if (this->_configFile.is_open() == false)
         throw std::invalid_argument("Error : Can't open file");
-    
-    return (ifs);
 }
 
 
@@ -155,7 +152,11 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
 
     if (line.size() == 1)
     {
+        //On defini serveur par defaut
+        //On check les donnees et absence de doublon
         //On ajoute le serveur complet a la liste & les blocs location
+        if (_serverNb == 0)
+            server->setDefaultServer(true);
         if (server->checkServerData() == false)
             return false;
         for (int i = 0; i < _serverNb; i++)
@@ -238,9 +239,9 @@ Gestion des keywords
 **************************************************************/
 bool ConfigParser::isServerProperty( std::string line )
 {
-    std::vector<std::string> serverProperties = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
+    std::string serverProperties[5] = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
     
-    for(unsigned long i = 0; i < serverProperties.size(); i++)
+    for(unsigned long i = 0; i < 5; i++)
     {
         if (line == serverProperties[i])
             return true;
@@ -250,9 +251,9 @@ bool ConfigParser::isServerProperty( std::string line )
 
 bool ConfigParser::isLocationProperty( std::string line )
 {
-    std::vector<std::string> locationProperties = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
+    std::string locationProperties[6] = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
    
-    for(unsigned long i = 0; i < locationProperties.size(); i++)
+    for(unsigned long i = 0; i < 6; i++)
     {
         if (line == locationProperties[i])
             return true;
@@ -300,4 +301,14 @@ bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationC
         return false;
     }
     return true;
+}
+
+
+
+/**************************************************************
+Getters
+**************************************************************/
+std::vector<serverConfig> ConfigParser::getServer()
+{
+    return this->_server;
 }

@@ -152,6 +152,10 @@ Config - checking
 bool locationConfig::checkLocationData()
 {
     setUncalledDirectives();
+
+    checks _checks[6] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
+            &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
+            &locationConfig::checkCgi};
     for (int i = 0; i < 6; i++)
     {
         if ((this->*_checks[i])() == false)
@@ -180,7 +184,7 @@ bool locationConfig::checkLocation()
 
 bool locationConfig::checkRoot()
 {
-    struct stat state{};
+    struct stat state;
 
     stat(_root.c_str(), &state);
     if (!S_ISDIR(state.st_mode))
@@ -325,9 +329,19 @@ bool locationConfig::compareCgi(const locationConfig & rhs) const
 {
     std::map<std::string, std::string> cgi = rhs.getCgi();
 
-    /*return
-        cgi.size() == _cgi.size()
-        && std::equal(_cgi.begin(), _cgi.end(), cgi.begin());*/
+    if (cgi.size() != _cgi.size())
+        return false;
+
+    std::map<std::string, std::string>::const_iterator it_src;
+    std::map<std::string, std::string>::iterator it_rhs = cgi.begin();
+    
+    for (it_src = _cgi.begin(); it_src != _cgi.end(); it_src++)
+    {
+        if (it_src->first != it_rhs->first || it_src->second != it_rhs->second)
+            return false; 
+    }
+
+    return true;
 }
 
 

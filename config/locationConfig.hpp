@@ -63,10 +63,6 @@ class locationConfig
         std::string                         _upload_folder;
         std::map<std::string, std::string>  _cgi;
 
-        checks _checks[6] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
-            &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
-            &locationConfig::checkCgi};
-
 };
 
 #endif

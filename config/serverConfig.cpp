@@ -7,7 +7,8 @@ serverConfig::serverConfig()
     this->_max_body_size = -1;
     this->_server_names.push_back("-1");
     this->_root = "-1";
-    this->_error_pages.insert(std::pair<int, std::string>(0, "0")); 
+    this->_error_pages.insert(std::pair<int, std::string>(0, "0"));
+    this->_default_server = false;
 }
 
 serverConfig::~serverConfig() { }
@@ -24,8 +25,6 @@ void serverConfig::setHostAndPort( std::vector<std::string> line )
 {
     if (_port == -1 && _host == -1)
     {
-        inet_pton(AF_INET, "0.0.0.1", &_host);
-        this->_port = 80;
         if (line.size() == 1)
             return ;
         _tmpPortOrHost = line[1];
@@ -36,6 +35,9 @@ void serverConfig::setHostAndPort( std::vector<std::string> line )
 
 bool serverConfig::setOneHostOrPort( std::string line )
 {
+    if (_tmpPortOrHost.empty())
+        return true;
+
     if (line == "localhost")
         inet_pton(AF_INET, "127.0.0.1", &_host);
     else if (isIP(line, '\0', _host) == true)
@@ -132,6 +134,11 @@ void serverConfig::setUncalledDirectives()
     }
 }
 
+void serverConfig::setDefaultServer( bool value )
+{
+    this->_default_server = value;
+}
+
 
 /*************************************************************
 Config - checking
@@ -139,6 +146,9 @@ Config - checking
 bool serverConfig::checkServerData()
 {
     setUncalledDirectives();
+
+    checks _checks[5] = {&serverConfig::checkRoot, &serverConfig::checkHostAndPort, 
+            &serverConfig::checkServerNames, &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
     for (int i = 0; i < 5; i++)
     {
         if ((this->*_checks[i])() == false)
@@ -150,9 +160,6 @@ bool serverConfig::checkServerData()
 
 bool serverConfig::checkHostAndPort()
 {
-    if (_tmpPortOrHost.empty())
-        return true;
-
     //Chercher ':' && gestion si absent
     size_t separator = _tmpPortOrHost.find(":");
     if (separator == std::string::npos)
@@ -243,6 +250,8 @@ Config - checking doublons
 *************************************************************/
 bool serverConfig::isEqual(const serverConfig & rhs) const
 {
+    if (_port == rhs.getPort())
+        return true;
     return 
         _port == rhs.getPort()
         && _host == rhs.getHost()
@@ -271,10 +280,19 @@ bool serverConfig::compareErrorPages(const serverConfig & rhs) const
 {
     std::map<int, std::string> errors = rhs.getErrorPages();
 
-    /*return
-        errors.size() == _error_pages.size()
-        && std::equal(_error_pages.begin(), _error_pages.end(), errors.begin());*/
-        
+    if (errors.size() != _error_pages.size())
+        return false;
+
+    std::map<int, std::string>::const_iterator it_src;
+    std::map<int, std::string>::iterator it_rhs = errors.begin();
+    
+    for (it_src = _error_pages.begin(); it_src != _error_pages.end(); it_src++)
+    {
+        if (it_src->first != it_rhs->first || it_src->second != it_rhs->second)
+            return false; 
+    }
+
+    return true;
 }
 
 
@@ -331,6 +349,11 @@ void serverConfig::setLocation( std::vector<locationConfig> location )
     _locations = location;
 }
 
+bool serverConfig::getDefaultServer() const
+{
+    return this->_default_server;
+}
+
 
 
 
@@ -338,6 +361,7 @@ void serverConfig::setLocation( std::vector<locationConfig> location )
 void serverConfig::debug()
 {
     std::cout << "*** Debug server ***" << std::endl;
+    std::cout << "Is default server ? " << getDefaultServer() << std::endl;
     std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
     for (size_t i = 0; i < _server_names.size(); i++)
         std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;

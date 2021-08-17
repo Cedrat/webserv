@@ -48,7 +48,9 @@ class ConfigParser
         bool addServerProperty( std::vector<std::string> line, serverConfig * server );
         bool addLocationProperty( std::vector<std::string> line, locationConfig * location );
 
-        std::ifstream openConfigFile( std::string const & file );
+        std::vector<serverConfig> getServer();
+
+        void openConfigFile( std::string const & file );
 
         std::vector<std::string> FormattingLine( std::ifstream & file );
 
