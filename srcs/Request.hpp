@@ -8,6 +8,7 @@
 # define BAD_REQUEST 400
 # define NOT_SUPPORTED 505
 # define METHOD_NOT_ALLOWED 405
+# define BAD_HOST 666
 
 # define ZERO_REQUEST 0
 # define METHOD_LINE 1
@@ -52,7 +53,10 @@ class Request
         
         Location    findBestLocation(Config config);
 
-
+        void        checkDuplicate(std::string request);
+        void        checkSyntaxRequest(std::string request);
+        void        checkAndAddMethod(std::string request);
+        void        checkAndAddHostName(std::string request);
 };
 
 bool check_if_request_is_in_progress(int request_status);

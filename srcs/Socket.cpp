@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-
-
 Socket::Socket()
 {
 
@@ -109,15 +107,20 @@ void    Socket::receiveData(fd fd_to_read)
         bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
         str_request += buffer;
-       // std::cout << "looooop" << std::endl;
     }
 	if (str_request.size() != 2)
     	_requests[getIndexRequest(fd_to_read)].addToRequestHeader(str_request);
     std::cout << "Nb of bytes read : " << str_request.size() << std::endl;
-    //std::cout << "ligne 115" <<  str_request << std::endl;
     std::cout << "The str_request is as follows :\n" << str_request << std::endl;
-    if (_requests[getIndexRequest(fd_to_read)].getError() == OK)
+    if (getRequestStatus(fd_to_read) == REQUEST_FINISHED)
         verifyRequest(getIndexRequest(fd_to_read));
+    if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_HOST)
+    {
+        close(fd_to_read);
+        std::cout << "Client closed" << std::endl;
+        removeSocket(fd_to_read);
+        return ;
+    }
     if (((str_request.size() == 0 || (str_request.find("\r\n"))) == 0 && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == ZERO_REQUEST))
         std::cout << "str_request size 0" << std::endl; 
     else if (_requests[getIndexRequest(fd_to_read)].getError() != OK)
@@ -131,7 +134,7 @@ void    Socket::receiveData(fd fd_to_read)
     }
 	else if (check_if_request_is_in_progress(getRequestStatus(fd_to_read)) && str_request.find("\r\n") == 0)
 	{
-		response_error_header(BAD_REQUEST, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
+		response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
         close(fd_to_read);
         std::cout << "Client closed" << std::endl;
         removeSocket(fd_to_read);
@@ -144,8 +147,6 @@ void    Socket::receiveData(fd fd_to_read)
         std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
         if (path == "./www" + _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getLocation())
             path += _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getDefaultFile();
-        std::cout << "path = "<< path << std::endl;
-		std::cout << "\\r\\n find ? " << str_request.find("\r\n\r\n") << std::endl;
 		if ((str_request.find("\r\n\r\n") != std::string::npos || str_request.find("\r\n") == 0) && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == REQUEST_FINISHED)
 		{
 			if (stat(path.c_str(), &sb) == -1 || S_ISREG(sb.st_mode) == 0)
@@ -154,7 +155,10 @@ void    Socket::receiveData(fd fd_to_read)
 			}
 			else
 			{
-				response_good_file(path, fd_to_read);
+                if (_requests[getIndexRequest(fd_to_read)].getMethod() == "GET")
+				    response_good_file(path, fd_to_read);
+                else if (_requests[getIndexRequest(fd_to_read)].getMethod() == "DELETE")
+                    delete_and_give_response(path, fd_to_read);
 			}
 			_requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
 			return ;
@@ -167,7 +171,6 @@ void    Socket::receiveData(fd fd_to_read)
         removeSocket(fd_to_read);
         return ;
     }
-    //write(1, str_request.c_str(), str_request.size());
 }
 
 void    Socket::removeSocket(fd fd_to_read)
@@ -192,7 +195,6 @@ void Socket::addSocketClient(Config config, fd socket_client)
     pollfd new_socket;
     Request new_request;
 
-    //fcntl(socket_client, F_SETFL, O_NONBLOCK);
    new_socket.fd = socket_client;
    new_socket.events = POLLIN;
    new_socket.revents = 0;
@@ -204,8 +206,7 @@ void Socket::addSocketClient(Config config, fd socket_client)
 void Socket::verifyRequest(size_t index_request)
 {
     _requests[index_request].verifyMethod(_config_socket[index_request]);
-	if (_requests[index_request].getWhereIsRequest() == REQUEST_FINISHED)
-    	_requests[index_request].verifyHostName(_config_socket[index_request]);
+    _requests[index_request].verifyHostName(_config_socket[index_request]);
 }
 
 int Socket::getRequestStatus(fd current_fd)

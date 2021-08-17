@@ -1,8 +1,9 @@
 #include "./includes/utils.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
-    std::cout << check_valid_path("/../../deux/../../trois/") << std::endl;
-    std::cout << check_valid_path("/deux/../trois/") << std::endl;
-    std::cout << check_valid_path("/../trois/") << std::endl;
+    if (check_valid_path(argv[1]))
+        std::cout << factorised_path(argv[1]) << std::endl;
+    else
+        std::cout << "Security breach detected" << std::endl;
 }

@@ -17,3 +17,28 @@ bool    check_valid_path(std::string path)
     }
     return (TRUE);
 }
+
+std::string factorised_path(std::string path)
+{
+    std::vector<std::string> tokens;
+    std::string new_path;
+    size_t jump_next_path(0);
+
+    tokens = split_string(path, "/");
+
+    for (int i = tokens.size() - 1; i >= 0; i--)
+    {
+        if (tokens[i] == "..")
+            jump_next_path++;
+        else
+        {
+            if (jump_next_path == 0)
+                new_path = "/" + tokens[i] + new_path;
+            else
+                jump_next_path--;
+        }
+    }
+    if (path[path.size() - 1] == '/')
+        new_path += "/";
+    return (new_path);
+}

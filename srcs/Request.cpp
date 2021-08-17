@@ -12,7 +12,7 @@ std::string extract_path(std::string method_line)
     return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
 }
 
-Request::Request() : _error(0), _where_is_request(ZERO_REQUEST)
+Request::Request() : _error(OK), _where_is_request(ZERO_REQUEST)
 {
     (void)_error;
 }
@@ -68,7 +68,7 @@ void Request::verifyMethod(Config config)
     Location location = findBestLocation(config);
 
     if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
-        setError(405); 
+        setError(METHOD_NOT_ALLOWED); 
 }
 
 Location Request::findBestLocation(Config config)
@@ -95,33 +95,18 @@ Location Request::findBestLocation(Config config)
 
 void Request::addToRequestHeader(std::string request)
 {
-    std::string request_line;
-    //std::cout << request_line << std::endl;
+
+    checkDuplicate(request);
     if (_where_is_request == ZERO_REQUEST)
     {
-        request_line = request.substr(0, request.find("\n"));
-        request_line += "\n";
-        if (isAValidMethodLine(request_line) == OK)
-        {
-            setMethod(extract_method(request_line));
-            setPathFileRequest(extract_path(request_line)); 
-            setError(OK);
-            //std::cout << "Passage ici" << std::endl;
-            //requested_file set method
-        }
-        else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)
-            setError(NOT_SUPPORTED);
-        else if (isAValidMethodLine(request_line) == BAD_REQUEST)
-            setError(BAD_REQUEST);
-        _where_is_request = HOST_LINE;
+        checkAndAddMethod(request);
     }
-    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
-    if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
+    if (_where_is_request == HOST_LINE)
     {
-        _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
-        std::cout << "L'Host name retenu est" << _host_name << std::endl;
-        _where_is_request = REQUEST_FINISHED;
+        checkAndAddHostName(request);
     }
+    if (getError() == OK)
+        checkSyntaxRequest(request);
 }
 
 void Request::setWhereIsRequest(int where_is_request)
@@ -136,11 +121,88 @@ std::string Request::getHostName() const
 
 void    Request::verifyHostName(Config config) 
 {
-    if (config.checkIfHostNameIsPresent(getHostName()) == FALSE) // a finir aprés pause.
-        setError(666); 
+    if (config.checkIfHostNameIsPresent(getHostName()) == FALSE)
+        setError(BAD_HOST); 
 }
 
 int Request::getWhereIsRequest() const
 {
     return(_where_is_request);
+}
+
+void    Request::checkDuplicate(std::string request)
+{
+    std::string request_line;
+    
+    request_line = request.substr(0, request.find("\n"));
+    request_line += "\n";
+    if (isAValidMethodLine(request_line) == OK && _where_is_request != ZERO_REQUEST)
+        setError(BAD_REQUEST);
+    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
+    if (_where_is_request == REQUEST_FINISHED && match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
+    {
+        setError(BAD_REQUEST);
+    }
+}
+
+void    Request::checkSyntaxRequest(std::string request)
+{
+    std::vector<std::string> all_lines;
+    
+    char motif2[] = "[a-zA-z0-9]+: .*\r\n";
+    all_lines = split_string(request, "\n");
+    for (size_t i = 0; i < all_lines.size(); i++)
+    {
+        if (isAValidMethodLine(all_lines[i] + "\n") == OK)
+        {
+
+        }
+        else if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
+        {
+            //
+        }
+        else if (all_lines[i].find(" ") != std::string::npos)
+        {
+            setError(BAD_REQUEST);
+        }
+    }
+}
+
+void Request::checkAndAddMethod(std::string request)
+{
+    std::string request_line;
+    request_line = request.substr(0, request.find("\n"));
+    request_line += "\n";
+
+    if (isAValidMethodLine(request_line) == OK)
+    {
+        setMethod(extract_method(request_line));
+        if (check_valid_path(extract_path(request_line)))
+        {
+            setPathFileRequest(factorised_path(extract_path(request_line)));
+        }
+        else
+        {
+            setError(BAD_REQUEST);
+        }
+    }
+    else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)
+    {
+        std::cout << "EEEEEEEEEEEEEE" << std::endl;
+        setError(NOT_SUPPORTED);
+    }
+    else if (isAValidMethodLine(request_line) == BAD_REQUEST)
+        setError(BAD_REQUEST);
+    _where_is_request = HOST_LINE;
+}
+
+void Request::checkAndAddHostName(std::string request)
+{
+    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
+    if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1 && getError() == OK)
+    {
+        _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
+        std::cout << "L'Host name retenu est " << _host_name << std::endl;
+        _where_is_request = REQUEST_FINISHED;
+    } 
 }

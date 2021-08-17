@@ -9,6 +9,8 @@
 # include "../srcs/Location.hpp"
 # include "../srcs/Request.hpp"
 # include <sstream>
+# include <sys/types.h>
+# include <sys/socket.h>
 
 class Config;
 class Location;
@@ -29,5 +31,7 @@ size_t nb_of_char_in_str(char character, std::string str);
 std::string int_to_string(int nb);
 std::vector<std::string> split_string(std::string str, std::string splitter);
 bool    check_valid_path(std::string path);
+std::string factorised_path(std::string path);
+void delete_and_give_response(std::string path, fd current_fd);
 
 #endif

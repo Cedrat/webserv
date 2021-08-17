@@ -24,7 +24,6 @@ std::string int_to_string(int nb)
 std::vector<std::string> split_string(std::string str, std::string splitter)
 {
     std::vector<std::string> split_str;
-    size_t i(0);
     int p(0);
 
     while (str.find(splitter) == 0)
