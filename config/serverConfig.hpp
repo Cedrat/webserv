@@ -28,11 +28,10 @@ class serverConfig
         void setLocation( std::vector<locationConfig> location );
         void setRoot( std::vector<std::string> line );
         void setUncalledDirectives();
-        bool setOneHostOrPort( std::string line );
+        void setOneHostOrPort( std::string line );
         void setDefaultServer( bool value );
 
         bool checkServerData();
-        bool checkHostAndPort();
         bool checkRoot();
         bool checkServerNames();
         bool checkErrorPages();
@@ -57,7 +56,8 @@ class serverConfig
 
 
     private:
-        std::string                 _tmpPortOrHost;
+        std::vector<locationConfig> _locations;
+        
         int                         _port;
         int                         _host;
         int                         _max_body_size;
@@ -67,11 +67,7 @@ class serverConfig
 
         bool                        _default_server;
         //bool                        _server_or_client;
-
-        std::vector<locationConfig> _locations;
-
-        
-        
+  
 };
 
 #endif

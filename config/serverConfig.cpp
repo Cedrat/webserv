@@ -27,17 +27,32 @@ void serverConfig::setHostAndPort( std::vector<std::string> line )
     {
         if (line.size() == 1)
             return ;
-        _tmpPortOrHost = line[1];
+
+        //Chercher ':' && gestion si absent
+        size_t separator = line[1].find(":");
+        if (separator == std::string::npos)
+            setOneHostOrPort(static_cast<std::string>(line[1]));
+        else
+        {
+            //Assigner la valeur avant ':' à host
+            if (isIP(line[1], ':', _host) == true)
+                inet_pton(AF_INET, line[1].substr(0, separator).c_str(), &_host);
+            else
+                throw std::invalid_argument("Error : Config - Invalid host"); 
+            
+            //Assigner la valeur après ':' à port
+            std::string  str = line[1].substr(separator + 1, (separator - line[1].size())); 
+            if (str == "" || isPort(static_cast<std::string>(str)) == false)
+                throw std::invalid_argument("Error : Config - Invalid port"); 
+            this->_port = atoi(str.c_str());
+        }
     }
     else
         throw std::invalid_argument("Error : Config file can't contain more than one listen directive"); 
 }
 
-bool serverConfig::setOneHostOrPort( std::string line )
+void serverConfig::setOneHostOrPort( std::string line )
 {
-    if (_tmpPortOrHost.empty())
-        return true;
-
     if (line == "localhost")
         inet_pton(AF_INET, "127.0.0.1", &_host);
     else if (isIP(line, '\0', _host) == true)
@@ -45,8 +60,7 @@ bool serverConfig::setOneHostOrPort( std::string line )
     else if (isPort(line) == true)
         this->_port = atoi(line.c_str());
     else
-        return false;
-    return true;
+        throw std::invalid_argument("Error : Imvalid host or port");
 }
 
 void serverConfig::setServerNames( std::vector<std::string> line )
@@ -140,6 +154,8 @@ void serverConfig::setDefaultServer( bool value )
 }
 
 
+
+
 /*************************************************************
 Config - checking
 *************************************************************/
@@ -147,42 +163,14 @@ bool serverConfig::checkServerData()
 {
     setUncalledDirectives();
 
-    checks _checks[5] = {&serverConfig::checkRoot, &serverConfig::checkHostAndPort, 
-            &serverConfig::checkServerNames, &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
-    for (int i = 0; i < 5; i++)
+    checks _checks[4] = {&serverConfig::checkRoot, &serverConfig::checkServerNames, 
+                    &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
+    for (int i = 0; i < 4; i++)
     {
         if ((this->*_checks[i])() == false)
             return false;
     }
     debug();
-    return true;
-}
-
-bool serverConfig::checkHostAndPort()
-{
-    //Chercher ':' && gestion si absent
-    size_t separator = _tmpPortOrHost.find(":");
-    if (separator == std::string::npos)
-        return setOneHostOrPort(_tmpPortOrHost);
-
-    //Transformer ce qu'il y a avant ':' en ip
-    if (isIP(_tmpPortOrHost, ':', _host) == true)
-        inet_pton(AF_INET, _tmpPortOrHost.substr(0, separator).c_str(), &_host);
-    else
-    {
-        std::cerr << "Error in listen directive" << std::endl;
-        return false;
-    }
-
-    //Assigner la valeur après ':' à port
-    std::string  str = _tmpPortOrHost;
-    str = _tmpPortOrHost.substr(separator + 1, (separator - _tmpPortOrHost.size()));  
-    if (str == "" || isPort(static_cast<std::string>(str)) == false)
-    {
-        std::cerr << "Error in listen directive" << std::endl;
-        return false;
-    }
-    this->_port = atoi(str.c_str());
     return true;
 }
 
