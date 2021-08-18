@@ -32,6 +32,9 @@ std::string int_to_string(int nb);
 std::vector<std::string> split_string(std::string str, std::string splitter);
 bool    check_valid_path(std::string path);
 std::string factorised_path(std::string path);
-void delete_and_give_response(std::string path, fd current_fd);
 
+void delete_and_give_response(std::string path, fd current_fd);
+void delete_f(const char *path);
+
+std::string    decoding_http_string(std::string str);
 #endif

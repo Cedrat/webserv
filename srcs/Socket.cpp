@@ -147,9 +147,10 @@ void    Socket::receiveData(fd fd_to_read)
         std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
         if (path == "./www" + _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getLocation())
             path += _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getDefaultFile();
+        std::cout << "the path needed is" <<path << std::endl;
 		if ((str_request.find("\r\n\r\n") != std::string::npos || str_request.find("\r\n") == 0) && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == REQUEST_FINISHED)
 		{
-			if (stat(path.c_str(), &sb) == -1 || S_ISREG(sb.st_mode) == 0)
+			if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
 			{
 				response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
 			}

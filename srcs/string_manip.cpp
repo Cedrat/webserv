@@ -24,12 +24,13 @@ std::string int_to_string(int nb)
 std::vector<std::string> split_string(std::string str, std::string splitter)
 {
     std::vector<std::string> split_str;
-    int p(0);
 
     while (str.find(splitter) == 0)
         str.erase(0, splitter.size());
+    std::cout << str << std::endl;
     while (str.size() > 0)
     {
+        std::cout << str << std::endl;
         if (str.find(splitter) != std::string::npos)
         {
             split_str.push_back(str.substr(0, str.find(splitter)));
@@ -41,8 +42,16 @@ std::vector<std::string> split_string(std::string str, std::string splitter)
             str.erase(0, str.size());
         }
         while (str.find(splitter) == 0)
-            str.erase(0, splitter.size());
-        p++;
+            str.erase(0, splitter.size());        
     }
     return (split_str);
+}
+
+std::string    decoding_http_string(std::string str)
+{
+    while (str.find("%20") != std::string::npos)
+    {
+        str.replace(str.find("%20"), 3, " ", 1);
+    }
+    return(str);
 }

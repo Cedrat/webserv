@@ -43,7 +43,7 @@ Config default_config()
     config.addServerName("localhost");
     config.addErrorPages(400, "/error_files/err400.html");
     location = default_location();
-    config.addErrorPages(404, "/error_files/err404.html");
+    //config.addErrorPages(404, "/error_files/err404.html");
     config.addErrorPages(405, "/error_files/err405.html");
     config.addErrorPages(505, "/error_files/err505.html");
     config.addLocation(location);

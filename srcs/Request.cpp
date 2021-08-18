@@ -121,8 +121,9 @@ std::string Request::getHostName() const
 
 void    Request::verifyHostName(Config config) 
 {
-    if (config.checkIfHostNameIsPresent(getHostName()) == FALSE)
-        setError(BAD_HOST); 
+    (void)config;
+    // if (config.checkIfHostNameIsPresent(getHostName()) == FALSE)
+    //     setError(BAD_HOST); 
 }
 
 int Request::getWhereIsRequest() const
@@ -179,7 +180,7 @@ void Request::checkAndAddMethod(std::string request)
         setMethod(extract_method(request_line));
         if (check_valid_path(extract_path(request_line)))
         {
-            setPathFileRequest(factorised_path(extract_path(request_line)));
+            setPathFileRequest(decoding_http_string(factorised_path(extract_path(request_line))));
         }
         else
         {
