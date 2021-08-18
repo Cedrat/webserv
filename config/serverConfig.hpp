@@ -36,7 +36,6 @@ class serverConfig
         bool checkServerNames();
         bool checkErrorPages();
         bool checkMaxClientBodySize();
-
         bool isEqual(const serverConfig & rhs) const;
 
         

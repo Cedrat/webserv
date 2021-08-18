@@ -279,69 +279,9 @@ bool locationConfig::checkCgi()
     return true;
 }
 
-
-
-/*************************************************************
-Config - checking doublons
-*************************************************************/
 bool locationConfig::isEqual(const locationConfig & rhs) const
 {
-    return 
-        _location == rhs.getLocation()
-        && _root == rhs.getRoot()
-        && _autoindex == rhs.getAutoindex()
-        && _upload_folder == rhs.getUploadFolder()
-        && compareMethods(rhs)
-        && compareIndex(rhs)
-        && compareCgi(rhs)
-        ;
-}
-
-bool locationConfig::compareMethods(const locationConfig & rhs) const
-{
-    std::vector<std::string> methods = rhs.getMethods();
-
-    if (methods.size() != _methods.size())
-        return false;
-    for (size_t i = 0; i < methods.size(); i++)
-    {
-        if (methods[i] != _methods[i])
-            return false;
-    }
-    return true;
-}
-
-bool locationConfig::compareIndex(const locationConfig & rhs) const
-{
-    std::vector<std::string> indexs = rhs.getIndex();
-
-    if (indexs.size() != _index.size())
-        return false;
-    for (size_t i = 0; i < indexs.size(); i++)
-    {
-        if (indexs[i] != _index[i])
-            return false;
-    }
-    return true;
-}
-
-bool locationConfig::compareCgi(const locationConfig & rhs) const
-{
-    std::map<std::string, std::string> cgi = rhs.getCgi();
-
-    if (cgi.size() != _cgi.size())
-        return false;
-
-    std::map<std::string, std::string>::const_iterator it_src;
-    std::map<std::string, std::string>::iterator it_rhs = cgi.begin();
-    
-    for (it_src = _cgi.begin(); it_src != _cgi.end(); it_src++)
-    {
-        if (it_src->first != it_rhs->first || it_src->second != it_rhs->second)
-            return false; 
-    }
-
-    return true;
+    return _location == rhs.getLocation();
 }
 
 

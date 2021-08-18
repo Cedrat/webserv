@@ -231,18 +231,12 @@ bool serverConfig::checkRoot()
     return true;
 }
 
-
-
-/*************************************************************
-Config - checking doublons
-*************************************************************/
 bool serverConfig::isEqual(const serverConfig & rhs) const
 {
     if (_port == rhs.getPort())
         return true;
     return false;
 }
-
 
 
 
