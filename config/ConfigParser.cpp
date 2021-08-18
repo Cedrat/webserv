@@ -12,7 +12,7 @@
 
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser( char *filepath ) : _serverNb(0)
+ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
 {
     if (strlen(filepath) <= 0)
         throw std::invalid_argument("Error : The config file path is empty");
@@ -282,15 +282,15 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfi
 
 bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationConfig * location )
 {
-    if (line[0] == "root" && line.size() < 3)
+    if (line[0] == "root" && line.size() == 2)
         location->setRoot(line);
-    else if (line[0] == "autoindex" && line.size() < 3)
+    else if (line[0] == "autoindex" && line.size() == 2)
         location->setAutoindex(line);
     else if (line[0] == "method")
         location->setMethods(line);
     else if (line[0] == "index" && line.size() == 2)
         location->setIndex(line);
-    else if (line[0] == "upload_folder" && line.size() < 3)
+    else if (line[0] == "upload_folder" && line.size() == 2)
         location->setUploadFolder(line);
     else if (line[0] == "cgi" && line.size() == 3)
         location->setCgi(line);
