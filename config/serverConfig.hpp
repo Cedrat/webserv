@@ -63,7 +63,6 @@ class serverConfig
         std::map<int, std::string>  _error_pages;
 
         bool                        _default_server;
-        //bool                        _server_or_client;
   
 };
 

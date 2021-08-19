@@ -29,9 +29,9 @@ class locationConfig
         void setIndex( std::vector<std::string> line );
         void setUploadFolder( std::vector<std::string> line );
         void setCgi( std::vector<std::string> line );
-        void setUncalledDirectives();
+        void setUncalledDirectives( std::string defaultRoot );
 
-        bool checkLocationData();
+        bool checkLocationData( std::string defaultRoot );
         bool checkLocation();
         bool checkRoot();
         bool checkIndex();
@@ -58,6 +58,7 @@ class locationConfig
         std::vector<std::string>            _index;
         std::string                         _upload_folder;
         std::map<std::string, std::string>  _cgi;
+        bool                                _isFile;
 
 };
 

@@ -94,7 +94,7 @@ bool ConfigParser::treatServerBlock()
         }
         else if (isLocation(line) == true) //Envoyer vers la bonne fonction de locationConfig
         {
-            if (treatLocationBlock(line) == false)
+            if (treatLocationBlock(line, server.getRoot()) == false)
                 return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
@@ -107,7 +107,7 @@ bool ConfigParser::treatServerBlock()
 }
 
 
-bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
+bool ConfigParser::treatLocationBlock( std::vector<std::string> line, std::string defaultRoot )
 {
     locationConfig location;
     bool closingBrace = false;
@@ -122,7 +122,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
         //Check derniere accolade
         if (line[0] == "}")
         {
-            closingBrace = closeLocationBlock(line, &location);
+            closingBrace = closeLocationBlock(line, &location, defaultRoot);
             break ;
         }
         else if (isLocationProperty(line[0]) == true)
@@ -177,11 +177,11 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
     }    
 }
 
-bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationConfig * location )
+bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationConfig * location, std::string defaultRoot )
 {
     if (line.size() == 1)
     {
-        if (location->checkLocationData() == false)
+        if (location->checkLocationData(defaultRoot) == false)
             return false;
         for (int i = 0; i < _locationNb; i++)
         {
@@ -288,7 +288,7 @@ bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationC
         location->setAutoindex(line);
     else if (line[0] == "method")
         location->setMethods(line);
-    else if (line[0] == "index" && line.size() == 2)
+    else if (line[0] == "index" && line.size() >= 1)
         location->setIndex(line);
     else if (line[0] == "upload_folder" && line.size() == 2)
         location->setUploadFolder(line);

@@ -3,11 +3,12 @@
 locationConfig::locationConfig()
 {
     this->_root = "-1";
-    this->_autoindex = false;
+    //this->_autoindex = false;
     this->_methods.push_back("-1");
     this->_index.push_back("-1");
     this->_upload_folder = "-1";
     this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
+    this->_isFile = false;
 }
 
 locationConfig::~locationConfig() { }
@@ -22,6 +23,10 @@ Config - setting
 void locationConfig::setLocationDirective( std::vector<std::string> line )
 {
     this->_location = line[1];
+
+    size_t dotPos = _location.find(".", 0);
+    if (dotPos != std::string::npos && _location[dotPos + 1])
+        this->_isFile = true; 
 }
 
 void locationConfig::setRoot( std::vector<std::string> line )
@@ -41,13 +46,17 @@ void locationConfig::setRoot( std::vector<std::string> line )
 
 void locationConfig::setAutoindex( std::vector<std::string> line )
 {
-    //Ajouter système pour check qu'autoindex n'est pas call plusieurs fois
-    if (line[1] == "off")
-        _autoindex = false;
-    else if (line[1] == "on")
-        _autoindex = true;
+    if (!_autoindex)
+    {
+        if (line[1] == "off")
+            _autoindex = false;
+        else if (line[1] == "on")
+            _autoindex = true;
+        else
+            throw std::invalid_argument("Error : autoindex directive is invalid");
+    }
     else
-        throw std::invalid_argument("Error : autoindex directive is invalid");
+        throw std::invalid_argument("Error : Server block can't contain more than one autoindex directive");
 }
 
 void locationConfig::setMethods( std::vector<std::string> line )
@@ -73,7 +82,7 @@ void locationConfig::setIndex( std::vector<std::string> line )
     {
         if (line.size() == 1)
         {
-            _index[0] = "../www/tester/index.html";
+            _index[0] = "index.html";
             return ;
         }
         _index.clear();
@@ -118,13 +127,18 @@ void locationConfig::setCgi( std::vector<std::string> line )
         throw std::invalid_argument("Error : location block can't contain more than one cgi directive");
 }
 
-void locationConfig::setUncalledDirectives()
+void locationConfig::setUncalledDirectives( std::string defaultRoot )
 {
-    if (_root == "-1")
-        _root = "./";
+    if (_root == "-1") //Recuperer root du serveur si pas de root dans location
+    {
+        if (defaultRoot == "-1")
+            throw std::invalid_argument("Error : A root must be specified in the server bloc, before the location, if none is provided");
+        else
+            _root = defaultRoot;
+    }
     if (_methods[0] == "-1")
         _methods[0] = "GET";
-    if (_index[0] == "-1")
+    if (_index[0] == "-1" && _isFile == false)
     {
         if (_root[_root.size() - 1] == '/')
             _index[0] = "index.html";
@@ -140,7 +154,7 @@ void locationConfig::setUncalledDirectives()
         }
         _upload_folder = "../www/post_test";
     }
-    //On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas nécessaire
+    //On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas demandé
 }
 
 
@@ -149,9 +163,9 @@ void locationConfig::setUncalledDirectives()
 /*************************************************************
 Config - checking
 *************************************************************/
-bool locationConfig::checkLocationData()
+bool locationConfig::checkLocationData( std::string defaultRoot )
 {
-    setUncalledDirectives();
+    setUncalledDirectives(defaultRoot);
 
     checks _checks[6] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
             &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
@@ -173,7 +187,7 @@ bool locationConfig::checkLocation()
     //On accepte uniquement les char alnum et le '/'
     for (size_t i = 0; i < _location.size(); i++)
     {
-        if (!isalnum(_location[i]) && _location[i] != '/')
+        if (!isalnum(_location[i]) && _location[i] != '/' && _location[i] != '.')
         {
             std::cerr << "Error in location path : Invalid character" << std::endl;
             return false;
@@ -197,6 +211,8 @@ bool locationConfig::checkRoot()
 
 bool locationConfig::checkIndex()
 {
+    if (_index.size() == 1 && _index[0] == "-1")  //Si path = fichier, pas besoin d'index
+        return true;
     std::ifstream ifs;
     std::string path = _root;
 

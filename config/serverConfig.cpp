@@ -137,15 +137,6 @@ void serverConfig::setUncalledDirectives()
         _root = "./";
     if (_server_names[0] == "-1")
         _server_names[0] = "\"\"";
-    if (_error_pages.size() == 1)
-    {
-        std::map<int, std::string>::iterator it = _error_pages.begin();
-        if (it->first == 0 && it->second == "0")
-        {
-            _error_pages.clear();
-            _error_pages.insert(std::pair<int, std::string>(404, "../www/errors/404.html"));
-        }
-    }
 }
 
 void serverConfig::setDefaultServer( bool value )
@@ -189,9 +180,12 @@ bool serverConfig::checkServerNames()
 
 bool serverConfig::checkErrorPages()
 {
-    std::map<int, std::string>::iterator it;
+    std::map<int, std::string>::iterator it = _error_pages.begin();
 
-    for (it = _error_pages.begin(); it != _error_pages.end(); it++)
+    if (it->first == 0 && it->second == "0")
+        return true;
+
+    for ( ; it != _error_pages.end(); it++)
     {
         if (it->first < 300 || it->first > 599)
             return false;

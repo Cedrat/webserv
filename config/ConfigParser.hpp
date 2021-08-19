@@ -36,10 +36,10 @@ class ConfigParser
 
         void parser( std::string const & file );
         bool treatServerBlock();
-        bool treatLocationBlock( std::vector<std::string> line );
+        bool treatLocationBlock( std::vector<std::string> line, std::string defaultRoot );
 
         bool closeServerBlock( std::vector<std::string> line, serverConfig * server );
-        bool closeLocationBlock( std::vector<std::string> line, locationConfig * location );
+        bool closeLocationBlock( std::vector<std::string> line, locationConfig * location, std::string defaultRoot );
 
         bool isServerProperty( std::string line );
         bool isLocationProperty( std::string line );
