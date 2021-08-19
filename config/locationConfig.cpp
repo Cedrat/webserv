@@ -256,6 +256,8 @@ bool locationConfig::checkMethods()
     }
     if (post > 1 || get > 1 || del > 1)
         return false;
+    if (get == 0)
+        _methods.push_back("GET");
     return true;
 }
 
