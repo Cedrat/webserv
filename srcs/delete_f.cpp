@@ -15,7 +15,7 @@ int remove_f(const char * path, const struct stat *sb, int tflag, struct FTW* ft
     {
         rmdir(path);
     }
-    return (1);
+    return (0);
 }
 
 void delete_f(const char *path)

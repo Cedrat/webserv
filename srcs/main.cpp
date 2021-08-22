@@ -6,11 +6,12 @@ Location default_location()
 {
    Location location;
 
-   location.setAutoIndex(FALSE);
-   location.addMethod("GET");
+   location.setAutoIndex(TRUE);
    location.setDefaultFile("index.html");
+   location.addMethod("GET");
+   location.addMethod("POST");
    location.setUploadFolder("/upload/");
-   location.setRoot(".");
+   location.setRoot("./www");
    location.setLocation("/");
    return (location);
 }
@@ -25,7 +26,7 @@ Location default_location_2()
    location.addMethod("DELETE");
    location.setDefaultFile("test_index.html");
    location.setUploadFolder("/upload/");
-   location.setRoot(".");
+   location.setRoot("./www");
    location.setLocation("/test/");
    return (location);
 }

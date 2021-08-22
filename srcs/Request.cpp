@@ -119,6 +119,15 @@ std::string Request::getHostName() const
     return (_host_name);
 }
 
+std::string Request::getRequest() const
+{
+    return (_request);
+}
+
+void        Request::addToRequest(std::string request)
+{
+    _request += request;
+}
 void    Request::verifyHostName(Config config) 
 {
     (void)config;
@@ -169,6 +178,46 @@ void    Request::checkSyntaxRequest(std::string request)
     }
 }
 
+void Request::resetRequest()
+{
+    _request = "";
+    _method_line = "";
+    _method = "";
+    _path_file_request = "";
+    _host_name = "";
+    _error = OK;
+    _where_is_request = ZERO_REQUEST;
+
+}
+
+
+
+
+void    Request::checkSyntaxRequest()
+{
+    std::vector<std::string> all_lines;
+    
+    char motif2[] = "[a-zA-z0-9]+: .*\r\n";
+    all_lines = split_string(_request, "\n");
+    for (size_t i = 0; i < all_lines.size(); i++)
+    {
+        if (i == all_lines.size() -1)
+            std::cout <<  "last_line" << std::endl;
+        else if (isAValidMethodLine(all_lines[i] + "\n") == OK)
+        {
+
+        }
+        else if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
+        {
+            //
+        }
+        else if (all_lines[i].find(" ") != std::string::npos)
+        {
+            setError(BAD_REQUEST);
+        }
+    }
+}
+
 void Request::checkAndAddMethod(std::string request)
 {
     std::string request_line;
@@ -189,7 +238,6 @@ void Request::checkAndAddMethod(std::string request)
     }
     else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)
     {
-        std::cout << "EEEEEEEEEEEEEE" << std::endl;
         setError(NOT_SUPPORTED);
     }
     else if (isAValidMethodLine(request_line) == BAD_REQUEST)

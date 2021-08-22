@@ -5,11 +5,11 @@ size_t count_words(std::string str)
     size_t count_word(0); 
     for (size_t i = 0; i <= str.size() ; i++)
     {
-        while (str[i] != ' ' && i <= str.size())
+        while (i <= str.size() && str[i] != ' ')
         {
            i++;
         }
-        while (str[i] == ' ' && i <= str.size())
+        while (i <= str.size() && str[i] == ' ')
             i++;
         count_word++;
     }

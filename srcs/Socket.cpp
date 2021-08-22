@@ -79,6 +79,11 @@ int Socket::getNbOfSockets() const
     return (_sockets.size());
 }
 
+Config Socket::getConfigByFd(fd current_fd)
+{
+    return (_config_socket[getIndexRequest(current_fd)]);
+}
+
 Config Socket::getConfig(int i) const
 {
     return (_config_socket[i]);
@@ -94,83 +99,42 @@ int Socket::getIndexRequest(fd fd_to_request)
     }
     return (-1);
 }
+
+void    Socket::resetRequest(fd request_fd)
+{
+    _requests[getIndexRequest(request_fd)].resetRequest();
+}
+
 void    Socket::receiveData(fd fd_to_read)
 {
     char buffer[BUFFER_SIZE + 1];
     int bytes_read;
     std::string str_request;
     bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
-    buffer[bytes_read] = 0;
-    str_request = buffer;
-    while (bytes_read == BUFFER_SIZE)
+    if (bytes_read < 0)
+    {   std::cout << "we return here" << std::endl;
+        _requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
+        _requests[getIndexRequest(fd_to_read)].setError(200);
+        return ; 
+    }
+    if (bytes_read > 0)
     {
-        bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
         buffer[bytes_read] = 0;
-        str_request += buffer;
-    }
-	if (str_request.size() != 2)
-    	_requests[getIndexRequest(fd_to_read)].addToRequestHeader(str_request);
-    std::cout << "Nb of bytes read : " << str_request.size() << std::endl;
-    std::cout << "The str_request is as follows :\n" << str_request << std::endl;
-    if (getRequestStatus(fd_to_read) == REQUEST_FINISHED)
-        verifyRequest(getIndexRequest(fd_to_read));
-    if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_HOST)
-    {
-        close(fd_to_read);
-        std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
-    }
-    if (((str_request.size() == 0 || (str_request.find("\r\n"))) == 0 && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == ZERO_REQUEST))
-        std::cout << "str_request size 0" << std::endl; 
-    else if (_requests[getIndexRequest(fd_to_read)].getError() != OK)
-    {
-        std::cout << "error" << _requests[getIndexRequest(fd_to_read)].getError() << std::endl;
-        response_error_header(_requests[getIndexRequest(fd_to_read)].getError(), getConfig(getIndexRequest(fd_to_read)), fd_to_read);
-        close(fd_to_read);
-        std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
-    }
-	else if (check_if_request_is_in_progress(getRequestStatus(fd_to_read)) && str_request.find("\r\n") == 0)
-	{
-		response_error_header(400, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
-        close(fd_to_read);
-        std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
-	}
-    else
-    {
-        std::fstream fs;
-        struct stat sb;
-        std::string path = "./www" + _requests[getIndexRequest(fd_to_read)].getPathFileRequest();
-        if (path == "./www" + _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getLocation())
-            path += _requests[(getIndexRequest(fd_to_read))].findBestLocation(getConfig(getIndexRequest(fd_to_read))).getDefaultFile();
-        std::cout << "the path needed is" <<path << std::endl;
-		if ((str_request.find("\r\n\r\n") != std::string::npos || str_request.find("\r\n") == 0) && _requests[getIndexRequest(fd_to_read)].getWhereIsRequest() == REQUEST_FINISHED)
-		{
-			if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
-			{
-				response_error_header(404, getConfig(getIndexRequest(fd_to_read)), fd_to_read);
-			}
-			else
-			{
-                if (_requests[getIndexRequest(fd_to_read)].getMethod() == "GET")
-				    response_good_file(path, fd_to_read);
-                else if (_requests[getIndexRequest(fd_to_read)].getMethod() == "DELETE")
-                    delete_and_give_response(path, fd_to_read);
-			}
-			_requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
-			return ;
-		}
-	}
-    if (bytes_read <= 0)
-    {
-        close(fd_to_read);
-        std::cout << "Client closed" << std::endl;
-        removeSocket(fd_to_read);
-        return ;
+        str_request = buffer;
+        _requests[getIndexRequest(fd_to_read)].addToRequest(str_request);
+        //std::cout << _requests[getIndexRequest(fd_to_read)].getRequest() << std::endl;
+        if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\n") != std::string::npos)
+           _requests[getIndexRequest(fd_to_read)].checkSyntaxRequest();
+        if (_requests[getIndexRequest(fd_to_read)].getError() != 200)
+        {
+            _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+        }
+        std::cout << "op" << std::endl;
+        if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\r\n\r\n") != std::string::npos)
+        {
+            _requests[getIndexRequest(fd_to_read)].addToRequestHeader(_requests[getIndexRequest(fd_to_read)].getRequest());
+            _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+        }
     }
 }
 
@@ -186,9 +150,16 @@ void    Socket::removeSocket(fd fd_to_read)
             _sockets.erase(pollfd_itbegin + i);
             _config_socket.erase(config_itbegin + i);
 			_requests.erase(requests_itbegin + i);
+            std::cout << _sockets.size() << std::endl;
             return ;
         }
     }
+}
+
+
+Request    Socket::getRequest(fd fd_request)
+{
+    return (_requests[getIndexRequest(fd_request)]);
 }
 
 void Socket::addSocketClient(Config config, fd socket_client) 

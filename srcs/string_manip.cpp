@@ -27,10 +27,8 @@ std::vector<std::string> split_string(std::string str, std::string splitter)
 
     while (str.find(splitter) == 0)
         str.erase(0, splitter.size());
-    std::cout << str << std::endl;
     while (str.size() > 0)
     {
-        std::cout << str << std::endl;
         if (str.find(splitter) != std::string::npos)
         {
             split_str.push_back(str.substr(0, str.find(splitter)));

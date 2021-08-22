@@ -2,23 +2,29 @@
 #include <ftw.h>
  #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <unistd.h> //opendir et readdir
+#include <sys/types.h>
+
+#include <dirent.h>
 
 
-int write_f(const char * path, const struct stat *sb, int tflag, struct FTW* ftw_struct)
+std::string create_ai_page(const char * path)
 {
-    (void)ftw_struct;
-    (void)tflag;
-    std::cout << path << std::endl;
-    return (0);
-}
-void auto_index_html_page(const char * path)
-{
-    std::cout << nftw(path, write_f, 1024, FTW_DEPTH) <<std::endl;
- 
+    DIR * dir;
+    dir = opendir(path);
+    std::string ai_page;
+    std::string name_file;
+
+    
+    ai_page += "<!DOCTYPE html>\n<html>\n";
+    struct dirent * info;
+    while ((info = readdir(dir)))
+    {
+        name_file = info->d_name;
+        ai_page += "<p><a href=\"" + name_file + "\">" + " " + name_file + "</a></p>\n";
+    }
+    ai_page += "</html>";
+
+    return (ai_page);
 }
 
-int main()
-{
-    auto_index_html_page("..");
-}

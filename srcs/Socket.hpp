@@ -22,11 +22,16 @@ class Socket
         void        addSocketServer(Config config);
         void        addSocketClient(Config config, fd socket_client);
         
-        int         getNbOfSockets() const;
-        pollfd *    getSockets() ;
-        Config      getConfig(int index_of_socket_needed) const;
-        int         getIndexRequest(fd fd_to_request);
-        int         getRequestStatus(fd current_fd);
+        int                     getNbOfSockets() const;
+        pollfd *                getSockets() ;
+        Config                  getConfig(int index_of_socket_needed) const;
+        int                     getIndexRequest(fd fd_to_request);
+        int                     getRequestStatus(fd current_fd);
+        std::vector<Request>    getRequests();
+        Request                 getRequest(fd fd_required);
+        Config                  getConfigByFd(int current_fd);
+        void                    resetRequest(fd request_fd);
+
         
         void        removeSocket(fd fd_to_remove);
 

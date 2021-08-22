@@ -28,20 +28,26 @@ void response_error_header(int num_code,  Config config, fd fd_to_answer)
     send(fd_to_answer, page.c_str(), page.size(), 0);
 }
 
-void response_good_file(std::string path, fd fd_to_answer)
+void response_good_file(std::string path, fd fd_to_answer, bool ai)
 {
     std::string line;
     std::ifstream file;
     std:: string page;
+    struct stat sb;
 
-    file.open(path);
-    
-    while (std::getline(file, line))
+    stat(path.c_str(), &sb);
+    if (ai == FALSE || S_ISREG(sb.st_mode))
     {
-        page += line + "\n";
+        file.open(path);
+        while (std::getline(file, line))
+        {
+            page += line + "\n";
+        }
     }
-    //std::cout << page.size() << std::endl;
+    else
+    {
+        page = create_ai_page(path.c_str());
+    }
     page = "HTTP/1.1 " + get_string_error(200) +"\nContent-Length: " + int_to_string(page.size()) + "\n\n" + page;
-    //std::cout << page << std::endl;
     send(fd_to_answer, page.c_str(), page.size(), 0); 
 }

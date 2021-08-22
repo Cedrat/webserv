@@ -19,7 +19,8 @@ class Config;
 class Location;
 class Request
 {
-    private : 
+    private :
+        std::string _request; 
         std::string _method_line;
         std::string _method;
         std::string _path_file_request;
@@ -42,11 +43,14 @@ class Request
         int         getError() const;
         std::string getHostName() const;
         int         getWhereIsRequest() const;
+        std::string getRequest() const;
 
         
         int         isAValidMethodLine(std::string method_line);
         
         void        addToRequestHeader(std::string request_linei);
+        void        addToRequest(std::string request);
+        void        resetRequest();
         
         void        verifyMethod(Config config);
         void        verifyHostName(Config config);
@@ -55,6 +59,7 @@ class Request
 
         void        checkDuplicate(std::string request);
         void        checkSyntaxRequest(std::string request);
+        void        checkSyntaxRequest();
         void        checkAndAddMethod(std::string request);
         void        checkAndAddHostName(std::string request);
 };
