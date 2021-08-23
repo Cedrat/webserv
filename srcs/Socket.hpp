@@ -29,6 +29,7 @@ class Socket
         int                     getRequestStatus(fd current_fd);
         std::vector<Request>    getRequests();
         Request                 getRequest(fd fd_required);
+        Request &               getRefRequest(fd fd_required);
         Config                  getConfigByFd(int current_fd);
         void                    resetRequest(fd request_fd);
 
@@ -39,8 +40,7 @@ class Socket
        
         void        receiveData(fd fd_to_read);
 
-        void        verifyRequest(size_t index_request);
-        
+        void        verifyRequest(size_t index_request); 
 };
 
 #endif

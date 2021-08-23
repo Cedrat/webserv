@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "../includes/utils.hpp"
+#include "ResponseHTTP.hpp"
 
 Server::Server(void) : _is_running(false)
 {
@@ -50,7 +51,7 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
 			close(poll_fd[i].fd);
 			_sockets.removeSocket(poll_fd[i].fd);
 			nfds--;
-			std::cout << "WEWEWE" << std::endl;
+			std::cout << "Client closed" << std::endl;
 		}
 		else if (poll_fd[i].revents & POLLIN && isAFdServer(poll_fd[i].fd) == CLIENT)
 		{
@@ -61,10 +62,23 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
 		{ 
 			std::cout << "send Data" << std::endl;
 			sendData(poll_fd[i].fd);
-			_sockets.resetRequest(poll_fd[i].fd);
-			std::cout << "oooooooooooooo\n" << _sockets.getRequest(poll_fd[i].fd).getPathFileRequest() << "\nooooooooooooo" << std::endl;
-			poll_fd[i].events = POLLIN;
-			poll_fd[i].revents = 0;
+			std::cout << _sockets.getRequest(poll_fd[i].fd).getSendingData() << std::endl;
+			if (_sockets.getRequest(poll_fd[i].fd).getError() == 400)
+			{
+					close(poll_fd[i].fd);
+				_sockets.removeSocket(poll_fd[i].fd);
+				nfds--;
+				std::cout << "Client closed" << std::endl;
+			}
+			else if (_sockets.getRequest(poll_fd[i].fd).getSendingData() == TRUE)
+				std::cout << "transfer in progress" << std::endl;
+			else
+			{
+				_sockets.resetRequest(poll_fd[i].fd);
+				std::cout << "oooooooooooooo\n" << _sockets.getRequest(poll_fd[i].fd).getPathFileRequest() << "\nooooooooooooo" << std::endl;
+				poll_fd[i].events = POLLIN;
+				poll_fd[i].revents = 0;
+			}
 		}
     }
 }
@@ -76,18 +90,40 @@ void	Server::receiveData(fd fd_client)
 
 void	Server::sendData(fd fd_client)
 {
-	Request request = _sockets.getRequest(fd_client);
+	Request&  request = _sockets.getRefRequest(fd_client);
 	Config	config = _sockets.getConfigByFd(fd_client);
 
-
+	struct stat sb;
 	std::string path = create_path(request, config);
 	std::cout << "_________________\n" << request.getRequest() << "\n____________________" << std::endl;
 	std::cout << request.getPathFileRequest() << std::endl;
-	std::cout << "path required " << path << std::endl; 
-	if (request.getError() == OK)
-		response_good_file(path, fd_client, 0);
+	std::cout << "path required " << path << std::endl;
+	if (request.getSendingData() == FALSE)
+	{
+		if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
+		{
+			response_error_header(404, config, fd_client);
+		}
+		else if (request.getError() == OK && request.getMethod() == "GET")
+		{	
+			request.setResponseHTTP(response_good_file(path, fd_client, 0));
+			request.setSendingData(TRUE);
+			std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
+		}
+		else if (request.getError() == OK && request.getMethod() == "DELETE")
+		{
+			delete_and_give_response(path.c_str(), fd_client);
+			std::cout << "DELETE COMPLETED" << std::endl;
+		}
+		else 
+			response_error_header(request.getError(), config, fd_client);
+	}
 	else 
-		response_error_header(request.getError(), config, fd_client);
+	{
+		std::cout << "blop" << std::endl;
+		std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
+		request.send();
+	}
 }
 
 bool Server::isAFdServer(int fd_to_check)

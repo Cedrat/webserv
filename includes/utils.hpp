@@ -6,6 +6,7 @@
 # include <iostream>
 # include <string>
 # include "../srcs/Config.hpp"
+# include "../srcs/ResponseHTTP.hpp"
 # include "../srcs/Location.hpp"
 # include "../srcs/Request.hpp"
 # include <sstream>
@@ -14,14 +15,16 @@
 # include <ftw.h>
 # include <sys/types.h>
 # include <sys/stat.h>
+# include <fstream>
 
 
 class Config;
 class Location;
 class Request;
+class ResponseHTTP;
 
 typedef int fd;
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1
@@ -30,7 +33,7 @@ void response_post(int num_code,  Config config, fd fd_to_answer);
 int match_regex(char *request, char * motif);
 size_t count_words(std::string str);
 void response_error_header(int error,  Config config, fd fd_to_answer);
-void response_good_file(std::string path, fd fd_to_answer, bool ai);
+ResponseHTTP  response_good_file(std::string path, fd fd_to_answer, bool ai);
 std::string get_string_error(int num_error);
 size_t nb_of_char_in_str(char character, std::string str);
 std::string int_to_string(int nb);

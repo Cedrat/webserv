@@ -20,5 +20,11 @@ int remove_f(const char * path, const struct stat *sb, int tflag, struct FTW* ft
 
 void delete_f(const char *path)
 {
-    nftw(path, remove_f, 1024, FTW_DEPTH); 
+    struct stat sb;
+
+    stat(path, &sb);
+    if (S_ISDIR(sb.st_mode) != 1)
+        unlink(path);
+    else
+        nftw(path, remove_f, 1024, FTW_DEPTH); 
 }

@@ -1,7 +1,6 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-#include "../includes/utils.hpp"
 #include <string>
 
 # define OK 200
@@ -17,6 +16,7 @@
 
 class Config;
 class Location;
+class ResponseHTTP;
 class Request
 {
     private :
@@ -27,6 +27,8 @@ class Request
         std::string _host_name;
         int _error; 
         int _where_is_request;
+        bool _sending_data;
+        ResponseHTTP _data_to_send;
         
 
     public :
@@ -37,15 +39,18 @@ class Request
         void        setError(int error);
         void        setPathFileRequest(std::string path_file_request);
         void        setWhereIsRequest(int where_is_request);
+        void        setResponseHTTP(ResponseHTTP  rep);
+        void        setSendingData(bool);
 
-        std::string getMethod() const;
-        std::string getPathFileRequest(void) const;
-        int         getError() const;
-        std::string getHostName() const;
-        int         getWhereIsRequest() const;
-        std::string getRequest() const;
+        int             getError() const;
+        std::string     getMethod() const;
+        std::string     getRequest() const;
+        std::string     getHostName() const;
+        bool            getSendingData() const;
+        ResponseHTTP    getResponseHTTP() const;
+        int             getWhereIsRequest() const;
+        std::string     getPathFileRequest(void) const;
 
-        
         int         isAValidMethodLine(std::string method_line);
         
         void        addToRequestHeader(std::string request_linei);
@@ -58,10 +63,15 @@ class Request
         Location    findBestLocation(Config config);
 
         void        checkDuplicate(std::string request);
+        void        checkDuplicate(std::vector<std::string> all_lines);
         void        checkSyntaxRequest(std::string request);
         void        checkSyntaxRequest();
         void        checkAndAddMethod(std::string request);
         void        checkAndAddHostName(std::string request);
+
+        void        send();
+        
+        void        checkPath();
 };
 
 bool check_if_request_is_in_progress(int request_status);

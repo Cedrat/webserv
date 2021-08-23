@@ -1,6 +1,10 @@
+#include "ResponseHTTP.hpp"
 #include "Request.hpp"
+#include "Config.hpp"
 #include <string>
 #include <iostream>
+#include <unistd.h>
+#include <stddef.h>
 
 std::string extract_method(std::string method_line)
 {
@@ -12,7 +16,7 @@ std::string extract_path(std::string method_line)
     return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
 }
 
-Request::Request() : _error(OK), _where_is_request(ZERO_REQUEST)
+Request::Request() : _error(OK), _where_is_request(ZERO_REQUEST), _sending_data(FALSE)
 {
     (void)_error;
 }
@@ -22,6 +26,25 @@ Request::~Request()
 
 }
 
+void    Request::setResponseHTTP(ResponseHTTP  rep)
+{
+    _data_to_send = rep;
+}
+
+bool    Request::getSendingData() const
+{
+    return (_sending_data);
+}
+
+ResponseHTTP    Request::getResponseHTTP() const
+{
+    return _data_to_send;
+}
+
+void Request::setSendingData(bool boolean)
+{
+    _sending_data = boolean;
+}
 int Request::isAValidMethodLine(std::string method_line)
 {
     char motif[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
@@ -36,6 +59,11 @@ int Request::isAValidMethodLine(std::string method_line)
 void Request::setMethod(std::string method)
 {
         _method = method;
+}
+
+void Request::send()
+{
+   _data_to_send.send(); 
 }
 
 void Request::setError(int error)
@@ -96,7 +124,7 @@ Location Request::findBestLocation(Config config)
 void Request::addToRequestHeader(std::string request)
 {
 
-    checkDuplicate(request);
+    //checkDuplicate(request);
     if (_where_is_request == ZERO_REQUEST)
     {
         checkAndAddMethod(request);
@@ -127,12 +155,15 @@ std::string Request::getRequest() const
 void        Request::addToRequest(std::string request)
 {
     _request += request;
+
+    std::cout << "Request in progress\n" << _request << "end of request" << std::endl;
 }
 void    Request::verifyHostName(Config config) 
 {
-    (void)config;
-    // if (config.checkIfHostNameIsPresent(getHostName()) == FALSE)
-    //     setError(BAD_HOST); 
+    (void) config;
+    checkAndAddHostName(_request);
+    if (getHostName() == "")
+         setError(400); 
 }
 
 int Request::getWhereIsRequest() const
@@ -151,10 +182,29 @@ void    Request::checkDuplicate(std::string request)
     char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
     if (_where_is_request == REQUEST_FINISHED && match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
     {
-        setError(BAD_REQUEST);
+        //setError(BAD_REQUEST);
     }
 }
 
+void Request::checkDuplicate(std::vector<std::string> all_lines)
+{
+
+    int nb_host(0);
+    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
+    for (size_t i = 1; i < all_lines.size(); i++)
+    {
+        if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif) >= 1)
+        {
+            nb_host++;
+            checkAndAddHostName(all_lines[i]);
+            if (nb_host > 1)
+            {
+                setError(BAD_REQUEST);
+                return ;
+            }
+        }
+    }
+}
 void    Request::checkSyntaxRequest(std::string request)
 {
     std::vector<std::string> all_lines;
@@ -191,7 +241,11 @@ void Request::resetRequest()
 }
 
 
-
+void Request::checkPath()
+{
+    if (check_valid_path(_path_file_request) == FALSE)
+        setError(BAD_REQUEST);
+}
 
 void    Request::checkSyntaxRequest()
 {
@@ -199,20 +253,20 @@ void    Request::checkSyntaxRequest()
     
     char motif2[] = "[a-zA-z0-9]+: .*\r\n";
     all_lines = split_string(_request, "\n");
-    for (size_t i = 0; i < all_lines.size(); i++)
-    {
-        if (i == all_lines.size() -1)
-            std::cout <<  "last_line" << std::endl;
-        else if (isAValidMethodLine(all_lines[i] + "\n") == OK)
-        {
+    std::cout << "request __ " << _request << std::endl;
+    checkDuplicate(all_lines);
 
-        }
-        else if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
+    if (isAValidMethodLine(all_lines[0] + "\n") != OK)
+        setError(BAD_REQUEST);
+    for (size_t i = 1; i < all_lines.size(); i++)
+    {
+        if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
         {
             //
         }
         else if (all_lines[i].find(" ") != std::string::npos)
         {
+            std::cout << "heho" << std::endl;
             setError(BAD_REQUEST);
         }
     }

@@ -30,7 +30,7 @@ static pollfd create_a_listenable_socket(int port)
    struct pollfd        mypollfd;
    fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-    fcntl(new_socket, F_SETFL, O_NONBLOCK);
+    fcntl(new_socket, F_SETFL, O_NONBLOCK, SO_REUSEADDR);
     if (new_socket == -1)
         throw "Error when create socket";
 
@@ -111,6 +111,7 @@ void    Socket::receiveData(fd fd_to_read)
     int bytes_read;
     std::string str_request;
     bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
+    std::cout << "bytes_read = " << bytes_read << std::endl;
     if (bytes_read < 0)
     {   std::cout << "we return here" << std::endl;
         _requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
@@ -121,19 +122,34 @@ void    Socket::receiveData(fd fd_to_read)
     {
         buffer[bytes_read] = 0;
         str_request = buffer;
+
+
+       
+        if (_requests[getIndexRequest(fd_to_read)].getRequest() == "" && str_request == "\r\n")
+        {
+            return ;
+        }
+         if (_requests[getIndexRequest(fd_to_read)].getRequest() == "")
+        {
+            _requests[getIndexRequest(fd_to_read)].checkAndAddMethod(str_request);
+        }
         _requests[getIndexRequest(fd_to_read)].addToRequest(str_request);
-        //std::cout << _requests[getIndexRequest(fd_to_read)].getRequest() << std::endl;
         if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\n") != std::string::npos)
-           _requests[getIndexRequest(fd_to_read)].checkSyntaxRequest();
+        {
+            _requests[getIndexRequest(fd_to_read)].checkSyntaxRequest();
+
+        }
         if (_requests[getIndexRequest(fd_to_read)].getError() != 200)
         {
             _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
         }
-        std::cout << "op" << std::endl;
+        std::cout << _requests[getIndexRequest(fd_to_read)].getRequest() << std::endl;
         if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\r\n\r\n") != std::string::npos)
         {
-            _requests[getIndexRequest(fd_to_read)].addToRequestHeader(_requests[getIndexRequest(fd_to_read)].getRequest());
+            //_requests[getIndexRequest(fd_to_read)].addToRequestHeader(_requests[getIndexRequest(fd_to_read)].getRequest());
+            verifyRequest(getIndexRequest(fd_to_read));
             _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+            std::cout << "Request completed" << std::endl;
         }
     }
 }
@@ -162,6 +178,10 @@ Request    Socket::getRequest(fd fd_request)
     return (_requests[getIndexRequest(fd_request)]);
 }
 
+Request & Socket::getRefRequest(fd fd_request)
+{
+    return (_requests[getIndexRequest(fd_request)]);
+}
 void Socket::addSocketClient(Config config, fd socket_client) 
 {
     pollfd new_socket;
@@ -179,6 +199,7 @@ void Socket::verifyRequest(size_t index_request)
 {
     _requests[index_request].verifyMethod(_config_socket[index_request]);
     _requests[index_request].verifyHostName(_config_socket[index_request]);
+    
 }
 
 int Socket::getRequestStatus(fd current_fd)

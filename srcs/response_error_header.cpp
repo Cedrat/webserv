@@ -28,7 +28,7 @@ void response_error_header(int num_code,  Config config, fd fd_to_answer)
     send(fd_to_answer, page.c_str(), page.size(), 0);
 }
 
-void response_good_file(std::string path, fd fd_to_answer, bool ai)
+ResponseHTTP response_good_file(std::string path, fd fd_to_answer, bool ai)
 {
     std::string line;
     std::ifstream file;
@@ -48,6 +48,8 @@ void response_good_file(std::string path, fd fd_to_answer, bool ai)
     {
         page = create_ai_page(path.c_str());
     }
-    page = "HTTP/1.1 " + get_string_error(200) +"\nContent-Length: " + int_to_string(page.size()) + "\n\n" + page;
-    send(fd_to_answer, page.c_str(), page.size(), 0); 
+    page = "HTTP/1.1 " + get_string_error(200) +"\nContent-Length: " + int_to_string(page.size()) + "\n\n";
+    send(fd_to_answer, page.c_str(), page.size(), 0);
+    ResponseHTTP answer(path.c_str(), fd_to_answer);
+    return (answer);
 }
