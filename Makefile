@@ -6,7 +6,7 @@ SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp regexp.cpp  Reques
 		create_path.cpp ResponseHTTP.cpp
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
-DEBUG = -g3 -fsanitize=address
+DEBUG = -g3 #-fsanitize=address
 
 CXX= clang++
 

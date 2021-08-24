@@ -21,8 +21,8 @@ class Server
         bool    isRunning(void);
 
         void    addClient(fd new_fd_client); 
-        void    addSocketServer(Config config);
-        void    addSocketClient(Config config, fd socket_client);
+        void    addSocketServer(Config& config);
+        void    addSocketClient(Config &config, fd socket_client);
         
         void    launchingServ();
         void    acceptConnection();

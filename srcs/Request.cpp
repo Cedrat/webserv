@@ -26,9 +26,29 @@ Request::~Request()
 
 }
 
+void Request::setFinished(bool boolean)
+{
+    _data_to_send.setFinished(boolean);
+}
+
+void Request::setFdAnswer(fd fd_client)
+{
+    _data_to_send.setFdToAnswer(fd_client);
+}
+
+void Request::resetByteSend()
+{
+    _data_to_send.resetByteSend();
+}
+
 void    Request::setResponseHTTP(ResponseHTTP  rep)
 {
     _data_to_send = rep;
+}
+
+void Request::setPathFileAnswer(const char *path)
+{
+    _data_to_send.setPathFile(path);
 }
 
 bool    Request::getSendingData() const

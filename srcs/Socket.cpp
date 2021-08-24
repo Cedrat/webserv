@@ -52,11 +52,10 @@ static pollfd create_a_listenable_socket(int port)
     return (mypollfd);
 }
 
-void Socket::addSocketServer(Config config)
+void Socket::addSocketServer(Config & config)
 {
     pollfd new_socket;
     Request new_request;
-
     new_socket = create_a_listenable_socket(config.getPort());
    _sockets.push_back(new_socket);
    _config_socket.push_back(config);
@@ -182,7 +181,7 @@ Request & Socket::getRefRequest(fd fd_request)
 {
     return (_requests[getIndexRequest(fd_request)]);
 }
-void Socket::addSocketClient(Config config, fd socket_client) 
+void Socket::addSocketClient(Config & config, fd socket_client) 
 {
     pollfd new_socket;
     Request new_request;

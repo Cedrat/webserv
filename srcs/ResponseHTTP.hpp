@@ -18,7 +18,11 @@ class ResponseHTTP
 
         void    send();
         
+        void    resetByteSend();
         bool    getFinished();
+        void    setPathFile(const char* path);
+        void    setFdToAnswer(int);
+        void    setFinished(bool);
         const char * getPath();
         ResponseHTTP& operator=(const ResponseHTTP& other);
 };

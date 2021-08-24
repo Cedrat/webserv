@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-ResponseHTTP::ResponseHTTP()
+ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE)
 {}
 
 ResponseHTTP::ResponseHTTP(const char * path, int client_fd) : _path_file(path), 
@@ -16,31 +16,52 @@ _byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd)
 ResponseHTTP::~ResponseHTTP()
 {}
 
+void    ResponseHTTP::setPathFile(const char *path)
+{
+    _path_file = path;
+}
 
+void ResponseHTTP::setFdToAnswer(int fd_client)
+{
+    _fd_to_answer= fd_client;
+}
 void ResponseHTTP::send()
 {
     std::fstream fs;
-    int ret(0);
     char buffer[BUFFER_SIZE];
 
     fs.open(_path_file, std::fstream::binary | std::fstream::in);
     fs.seekg(_byte_send);
 
     fs.read(buffer, BUFFER_SIZE);
-    std::cout << "bisounours" << _path_file << std::endl;
-    std::cout << buffer << std::endl;
+    std::cout << "bisounours" << _byte_send << std::endl;
+    //std::cout << buffer << std::endl;
     if (fs)
         ::send(_fd_to_answer, buffer, BUFFER_SIZE, 0);
     else
+    {
         ::send(_fd_to_answer, buffer, fs.gcount(), 0);
+        std::cout << "Finished boy" << std::endl;
+        _finished = TRUE;
+    }
     _byte_send += fs.gcount();
-    std::cout << "ret is" << ret << std::endl;
+    std::cout << "Is Finished ?" << _finished << std::endl;
     fs.close();
 }
 
 bool ResponseHTTP::getFinished()
 {
     return (_finished);
+}
+
+void ResponseHTTP::setFinished(bool boolean)
+{
+    _finished = boolean;
+}
+
+void ResponseHTTP::resetByteSend()
+{
+    _byte_send = 0;
 }
 
 const char * ResponseHTTP::getPath()

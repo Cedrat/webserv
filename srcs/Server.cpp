@@ -44,6 +44,8 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
     poll(poll_fd, nfds, -1);
     for (int i = 0; i < nfds;i++)
     {
+		std::cout << "what integer ? " << i << std::endl;
+		std::cout << poll_fd[i].revents << std::endl;
         if (poll_fd[i].revents != 0 && isAFdServer(poll_fd[i].fd) == SERVER)
             addClient(poll_fd[i].fd);
 		else if (poll_fd[i].revents & POLLHUP && isAFdServer(poll_fd[i].fd) == CLIENT)
@@ -51,18 +53,13 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
 			close(poll_fd[i].fd);
 			_sockets.removeSocket(poll_fd[i].fd);
 			nfds--;
-			std::cout << "Client closed" << std::endl;
-		}
-		else if (poll_fd[i].revents & POLLIN && isAFdServer(poll_fd[i].fd) == CLIENT)
-		{
-			receiveData(poll_fd[i].fd);
-			std::cout << "re" << std::endl;
+			std::cout << "Client closed HERE HERE BOY BOY" << std::endl;
 		}
 		else if (poll_fd[i].revents & POLLOUT && isAFdServer(poll_fd[i].fd) == CLIENT)
 		{ 
 			std::cout << "send Data" << std::endl;
 			sendData(poll_fd[i].fd);
-			std::cout << _sockets.getRequest(poll_fd[i].fd).getSendingData() << std::endl;
+		
 			if (_sockets.getRequest(poll_fd[i].fd).getError() == 400)
 			{
 					close(poll_fd[i].fd);
@@ -79,6 +76,11 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
 				poll_fd[i].events = POLLIN;
 				poll_fd[i].revents = 0;
 			}
+		}
+		else if (poll_fd[i].revents & POLLIN && isAFdServer(poll_fd[i].fd) == CLIENT)
+		{
+			receiveData(poll_fd[i].fd);
+			std::cout << "re" << std::endl;
 		}
     }
 }
@@ -106,8 +108,11 @@ void	Server::sendData(fd fd_client)
 		}
 		else if (request.getError() == OK && request.getMethod() == "GET")
 		{	
-			request.setResponseHTTP(response_good_file(path, fd_client, 0));
+			response_good_file(path, fd_client, 0);
+			request.setPathFileAnswer(path.c_str());
 			request.setSendingData(TRUE);
+			request.setFinished(FALSE);
+			request.setFdAnswer(fd_client);
 			std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
 		}
 		else if (request.getError() == OK && request.getMethod() == "DELETE")
@@ -123,6 +128,11 @@ void	Server::sendData(fd fd_client)
 		std::cout << "blop" << std::endl;
 		std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
 		request.send();
+		if (request.getResponseHTTP().getFinished() == TRUE)
+		{
+			request.setSendingData(FALSE);
+			request.resetByteSend();
+		}
 	}
 }
 
@@ -158,12 +168,12 @@ bool Server::isAFdServer(int fd_to_check)
     
 // }
 
-void Server::addSocketServer(Config config)
+void Server::addSocketServer(Config & config)
 {
     _sockets.addSocketServer(config);
 }
 
-void Server::addSocketClient(Config config,fd fd_client)
+void Server::addSocketClient(Config & config,fd fd_client)
 {
     _sockets.addSocketClient(config, fd_client);
 }
@@ -181,9 +191,10 @@ void Server::addClient(fd new_fd_client)
    		socklen_t their_size = sizeof(struct sockaddr_in);
    		fd_client = accept(new_fd_client, (struct sockaddr *)&their_addr, &their_size);
 		
-		Config config = _sockets.getConfig(_sockets.getIndexRequest(new_fd_client));
-		config.setServerOrClient(CLIENT);
+		Config * config = new Config;
+		*config = _sockets.getConfig(_sockets.getIndexRequest(new_fd_client));
+		config->setServerOrClient(CLIENT);
 
-		addSocketClient(config, fd_client);
+		addSocketClient(*config, fd_client);
 		std::cout << "New client connected : " << fd_client << std::endl;
 }

@@ -19,8 +19,8 @@ class Socket
                     Socket();
                     ~Socket();
 
-        void        addSocketServer(Config config);
-        void        addSocketClient(Config config, fd socket_client);
+        void        addSocketServer(Config & config);
+        void        addSocketClient(Config & config, fd socket_client);
         
         int                     getNbOfSockets() const;
         pollfd *                getSockets() ;

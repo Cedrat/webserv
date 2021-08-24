@@ -33,7 +33,7 @@ void response_post(int num_code,  Config config, fd fd_to_answer);
 int match_regex(char *request, char * motif);
 size_t count_words(std::string str);
 void response_error_header(int error,  Config config, fd fd_to_answer);
-ResponseHTTP  response_good_file(std::string path, fd fd_to_answer, bool ai);
+void   response_good_file(std::string path, fd fd_to_answer, bool ai);
 std::string get_string_error(int num_error);
 size_t nb_of_char_in_str(char character, std::string str);
 std::string int_to_string(int nb);

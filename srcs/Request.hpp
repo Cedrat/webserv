@@ -41,6 +41,7 @@ class Request
         void        setWhereIsRequest(int where_is_request);
         void        setResponseHTTP(ResponseHTTP  rep);
         void        setSendingData(bool);
+        void        setPathFileAnswer(const char* path);
 
         int             getError() const;
         std::string     getMethod() const;
@@ -56,6 +57,7 @@ class Request
         void        addToRequestHeader(std::string request_linei);
         void        addToRequest(std::string request);
         void        resetRequest();
+
         
         void        verifyMethod(Config config);
         void        verifyHostName(Config config);
@@ -69,9 +71,14 @@ class Request
         void        checkAndAddMethod(std::string request);
         void        checkAndAddHostName(std::string request);
 
+        void        setFdAnswer(int);
+
         void        send();
         
         void        checkPath();
+
+        void        resetByteSend();
+        void        setFinished(bool);
 };
 
 bool check_if_request_is_in_progress(int request_status);

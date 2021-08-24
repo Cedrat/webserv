@@ -31,38 +31,34 @@ Location default_location_2()
    return (location);
 }
 
-Config default_config()
+Config & default_config()
 {
-   Config config;
+   Config  * config = new Config;
    Location location;
 
-    config.setPrincipalServer(TRUE);
-    config.setHost(0);
-    config.setPort(7995);
-    config.setServerOrClient(SERVER);
-    config.setMaxBodySize(1024);
-    config.addServerName("localhost");
-    config.addErrorPages(400, "/error_files/err400.html");
+    config->setPrincipalServer(TRUE);
+    config->setHost(0);
+    config->setPort(7995);
+    config->setServerOrClient(SERVER);
+    config->setMaxBodySize(1024);
+    config->addServerName("localhost");
+    config->addErrorPages(400, "/error_files/err400.html");
     location = default_location();
-    //config.addErrorPages(404, "/error_files/err404.html");
-    config.addErrorPages(405, "/error_files/err405.html");
-    config.addErrorPages(505, "/error_files/err505.html");
-    config.addLocation(location);
-    config.addLocation(default_location_2());
-    return (config);
+    //config->addErrorPages(404, "/error_files/err404.html");
+    config->addErrorPages(405, "/error_files/err405.html");
+    config->addErrorPages(505, "/error_files/err505.html");
+    config->addLocation(location);
+    config->addLocation(default_location_2());
+    return (*config);
 }
 
 int main()
 {
     Server server;
     Socket socket;
-    Config config;
-    Config config2;
+    //Config config;
     
-    config2.setPort(7996);
-    config2.setServerOrClient(SERVER);
-    server.addSocketServer(config2); //Segfault ici mais rare ?
-    config = default_config();
-    server.addSocketServer(config);
+    //config = default_config();
+    server.addSocketServer(default_config());
     server.launchingServ();
 }
