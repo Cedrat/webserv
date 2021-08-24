@@ -83,7 +83,7 @@ void Request::setMethod(std::string method)
 
 void Request::send()
 {
-   _data_to_send.send(); 
+   _data_to_send.send();
 }
 
 void Request::setError(int error)
@@ -116,7 +116,7 @@ void Request::verifyMethod(Config config)
     Location location = findBestLocation(config);
 
     if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
-        setError(METHOD_NOT_ALLOWED); 
+        setError(METHOD_NOT_ALLOWED);
 }
 
 Location Request::findBestLocation(Config config)
@@ -159,7 +159,7 @@ void Request::addToRequestHeader(std::string request)
 
 void Request::setWhereIsRequest(int where_is_request)
 {
-   _where_is_request = where_is_request; 
+   _where_is_request = where_is_request;
 }
 
 std::string Request::getHostName() const
@@ -178,12 +178,12 @@ void        Request::addToRequest(std::string request)
 
     std::cout << "Request in progress\n" << _request << "end of request" << std::endl;
 }
-void    Request::verifyHostName(Config config) 
+void    Request::verifyHostName(Config config)
 {
     (void) config;
     checkAndAddHostName(_request);
     if (getHostName() == "")
-         setError(400); 
+         setError(400);
 }
 
 int Request::getWhereIsRequest() const
@@ -194,7 +194,7 @@ int Request::getWhereIsRequest() const
 void    Request::checkDuplicate(std::string request)
 {
     std::string request_line;
-    
+
     request_line = request.substr(0, request.find("\n"));
     request_line += "\n";
     if (isAValidMethodLine(request_line) == OK && _where_is_request != ZERO_REQUEST)
@@ -228,7 +228,7 @@ void Request::checkDuplicate(std::vector<std::string> all_lines)
 void    Request::checkSyntaxRequest(std::string request)
 {
     std::vector<std::string> all_lines;
-    
+
     char motif2[] = "[a-zA-z0-9]+: .*\r\n";
     all_lines = split_string(request, "\n");
     for (size_t i = 0; i < all_lines.size(); i++)
@@ -270,10 +270,9 @@ void Request::checkPath()
 void    Request::checkSyntaxRequest()
 {
     std::vector<std::string> all_lines;
-    
+
     char motif2[] = "[a-zA-z0-9]+: .*\r\n";
     all_lines = split_string(_request, "\n");
-    std::cout << "request __ " << _request << std::endl;
     checkDuplicate(all_lines);
 
     if (isAValidMethodLine(all_lines[0] + "\n") != OK)
@@ -327,5 +326,5 @@ void Request::checkAndAddHostName(std::string request)
         _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
         std::cout << "L'Host name retenu est " << _host_name << std::endl;
         _where_is_request = REQUEST_FINISHED;
-    } 
+    }
 }

@@ -21,9 +21,9 @@ class Socket
 
         void        addSocketServer(Config & config);
         void        addSocketClient(Config & config, fd socket_client);
-        
+
         int                     getNbOfSockets() const;
-        pollfd *                getSockets() ;
+        std::vector<struct pollfd>               	getSockets() ;
         Config                  getConfig(int index_of_socket_needed) const;
         int                     getIndexRequest(fd fd_to_request);
         int                     getRequestStatus(fd current_fd);
@@ -33,14 +33,14 @@ class Socket
         Config                  getConfigByFd(int current_fd);
         void                    resetRequest(fd request_fd);
 
-        
+
         void        removeSocket(fd fd_to_remove);
 
         bool        isAFdServer(fd i) const;
-       
+
         void        receiveData(fd fd_to_read);
 
-        void        verifyRequest(size_t index_request); 
+        void        verifyRequest(size_t index_request);
 };
 
 #endif

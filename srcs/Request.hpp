@@ -2,6 +2,7 @@
 # define REQUEST_HPP
 
 #include <string>
+#include <vector>
 
 # define OK 200
 # define BAD_REQUEST 400
@@ -20,16 +21,16 @@ class ResponseHTTP;
 class Request
 {
     private :
-        std::string _request; 
+        std::string _request;
         std::string _method_line;
         std::string _method;
         std::string _path_file_request;
         std::string _host_name;
-        int _error; 
+        int _error;
         int _where_is_request;
         bool _sending_data;
         ResponseHTTP _data_to_send;
-        
+
 
     public :
         Request();
@@ -53,15 +54,15 @@ class Request
         std::string     getPathFileRequest(void) const;
 
         int         isAValidMethodLine(std::string method_line);
-        
+
         void        addToRequestHeader(std::string request_linei);
         void        addToRequest(std::string request);
         void        resetRequest();
 
-        
+
         void        verifyMethod(Config config);
         void        verifyHostName(Config config);
-        
+
         Location    findBestLocation(Config config);
 
         void        checkDuplicate(std::string request);
@@ -74,7 +75,7 @@ class Request
         void        setFdAnswer(int);
 
         void        send();
-        
+
         void        checkPath();
 
         void        resetByteSend();

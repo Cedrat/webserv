@@ -18,13 +18,13 @@ Socket::~Socket()
 
 }
 
-pollfd * Socket::getSockets() 
+std::vector<struct pollfd> Socket::getSockets()
 {
     if (_sockets.size() == 0)
         throw "No Sockets";
-    return (&_sockets[0]);
+    return (_sockets);
 }
-static pollfd create_a_listenable_socket(int port)
+pollfd create_a_listenable_socket(int port)
 {
    struct sockaddr_in   my_addr;
    struct pollfd        mypollfd;
@@ -40,10 +40,10 @@ static pollfd create_a_listenable_socket(int port)
 
     if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
         throw "Error from binding";
-    
+
     if (listen(new_socket, BACKLOG) == -1)
         throw "Error from listening";
-    
+
     //fcntl(new_socket, F_SETFL, O_NONBLOCK);
     mypollfd.fd = new_socket;
     mypollfd.events = POLLIN;
@@ -115,7 +115,7 @@ void    Socket::receiveData(fd fd_to_read)
     {   std::cout << "we return here" << std::endl;
         _requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
         _requests[getIndexRequest(fd_to_read)].setError(200);
-        return ; 
+        return ;
     }
     if (bytes_read > 0)
     {
@@ -123,7 +123,7 @@ void    Socket::receiveData(fd fd_to_read)
         str_request = buffer;
 
 
-       
+
         if (_requests[getIndexRequest(fd_to_read)].getRequest() == "" && str_request == "\r\n")
         {
             return ;
@@ -142,7 +142,6 @@ void    Socket::receiveData(fd fd_to_read)
         {
             _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
         }
-        std::cout << _requests[getIndexRequest(fd_to_read)].getRequest() << std::endl;
         if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\r\n\r\n") != std::string::npos)
         {
             //_requests[getIndexRequest(fd_to_read)].addToRequestHeader(_requests[getIndexRequest(fd_to_read)].getRequest());
@@ -181,7 +180,7 @@ Request & Socket::getRefRequest(fd fd_request)
 {
     return (_requests[getIndexRequest(fd_request)]);
 }
-void Socket::addSocketClient(Config & config, fd socket_client) 
+void Socket::addSocketClient(Config & config, fd socket_client)
 {
     pollfd new_socket;
     Request new_request;
@@ -198,7 +197,7 @@ void Socket::verifyRequest(size_t index_request)
 {
     _requests[index_request].verifyMethod(_config_socket[index_request]);
     _requests[index_request].verifyHostName(_config_socket[index_request]);
-    
+
 }
 
 int Socket::getRequestStatus(fd current_fd)

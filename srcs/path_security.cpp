@@ -40,6 +40,5 @@ std::string factorised_path(std::string path)
     }
     if (path[path.size() - 1] == '/' || new_path == "")
         new_path += "/";
-    std::cout << "Factorised path is " << new_path << std::endl;
     return (new_path);
 }

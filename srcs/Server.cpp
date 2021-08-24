@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "../includes/utils.hpp"
 #include "ResponseHTTP.hpp"
+#include "cstdlib"
 
 Server::Server(void) : _is_running(false)
 {
@@ -27,7 +28,7 @@ void Server::launchingServ()
 	_is_running = TRUE;
 	while (_is_running)
 	{
-		try 
+		try
 		{
 			acceptConnection(_sockets.getSockets(), getNbOfFd());
 		}
@@ -38,28 +39,27 @@ void Server::launchingServ()
 	}
 }
 
-void	Server::acceptConnection(pollfd *poll_fd, int nfds)
+void	Server::acceptConnection(std::vector<struct pollfd> pollfd, int nfds)
 {
 	std::cout << "Waiting for poll()" << std::endl;
+	struct pollfd* poll_fd = pollfd.data();
     poll(poll_fd, nfds, -1);
     for (int i = 0; i < nfds;i++)
     {
-		std::cout << "what integer ? " << i << std::endl;
-		std::cout << poll_fd[i].revents << std::endl;
         if (poll_fd[i].revents != 0 && isAFdServer(poll_fd[i].fd) == SERVER)
             addClient(poll_fd[i].fd);
 		else if (poll_fd[i].revents & POLLHUP && isAFdServer(poll_fd[i].fd) == CLIENT)
-		{ 
+		{
 			close(poll_fd[i].fd);
 			_sockets.removeSocket(poll_fd[i].fd);
 			nfds--;
-			std::cout << "Client closed HERE HERE BOY BOY" << std::endl;
+			std::cout << "Client closed" << std::endl;
 		}
 		else if (poll_fd[i].revents & POLLOUT && isAFdServer(poll_fd[i].fd) == CLIENT)
-		{ 
+		{
 			std::cout << "send Data" << std::endl;
 			sendData(poll_fd[i].fd);
-		
+
 			if (_sockets.getRequest(poll_fd[i].fd).getError() == 400)
 			{
 					close(poll_fd[i].fd);
@@ -72,7 +72,6 @@ void	Server::acceptConnection(pollfd *poll_fd, int nfds)
 			else
 			{
 				_sockets.resetRequest(poll_fd[i].fd);
-				std::cout << "oooooooooooooo\n" << _sockets.getRequest(poll_fd[i].fd).getPathFileRequest() << "\nooooooooooooo" << std::endl;
 				poll_fd[i].events = POLLIN;
 				poll_fd[i].revents = 0;
 			}
@@ -97,7 +96,6 @@ void	Server::sendData(fd fd_client)
 
 	struct stat sb;
 	std::string path = create_path(request, config);
-	std::cout << "_________________\n" << request.getRequest() << "\n____________________" << std::endl;
 	std::cout << request.getPathFileRequest() << std::endl;
 	std::cout << "path required " << path << std::endl;
 	if (request.getSendingData() == FALSE)
@@ -107,26 +105,25 @@ void	Server::sendData(fd fd_client)
 			response_error_header(404, config, fd_client);
 		}
 		else if (request.getError() == OK && request.getMethod() == "GET")
-		{	
+		{
 			response_good_file(path, fd_client, 0);
 			request.setPathFileAnswer(path.c_str());
 			request.setSendingData(TRUE);
 			request.setFinished(FALSE);
 			request.setFdAnswer(fd_client);
-			std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
 		}
 		else if (request.getError() == OK && request.getMethod() == "DELETE")
 		{
 			delete_and_give_response(path.c_str(), fd_client);
 			std::cout << "DELETE COMPLETED" << std::endl;
 		}
-		else 
+		else
 			response_error_header(request.getError(), config, fd_client);
 	}
-	else 
+	else
 	{
 		std::cout << "blop" << std::endl;
-		std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
+		//std::cout << "ANANAS " << request.getResponseHTTP().getPath() << fd_client << std::endl;
 		request.send();
 		if (request.getResponseHTTP().getFinished() == TRUE)
 		{
@@ -145,7 +142,7 @@ bool Server::isAFdServer(int fd_to_check)
 // {
 //     fd fd_to_accept;
 //     fd fd_client;
-    
+
 // 	fd_to_accept = findAvailableServerSocket(_sockets.getSockets(), getNbOfFd());
 
 // 	if (isAFdServer(fd_to_accept) == SERVER)
@@ -153,19 +150,19 @@ bool Server::isAFdServer(int fd_to_check)
 //     	struct sockaddr_in their_addr;
 //    		socklen_t their_size = sizeof(struct sockaddr_in);
 //    		fd_client = accept(fd_to_accept, (struct sockaddr *)&their_addr, &their_size);
-		
+
 // 		Config config = _sockets.getConfig(_sockets.getIndexRequest(fd_to_accept));
 // 		config.setServerOrClient(CLIENT);
 
 // 		addSocketClient(config, fd_client);
 // 		std::cout << "New client connected : " << fd_client << std::endl;
 // 	}
-// 	else if (fd_to_accept > 0) 
+// 	else if (fd_to_accept > 0)
 // 	{
 // 		std::cout << "Client " << fd_to_accept << " send a message for you !" << std::endl;
 // 		_sockets.receiveData(fd_to_accept);
 // 	}
-    
+
 // }
 
 void Server::addSocketServer(Config & config)
@@ -190,7 +187,7 @@ void Server::addClient(fd new_fd_client)
 		struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
    		fd_client = accept(new_fd_client, (struct sockaddr *)&their_addr, &their_size);
-		
+
 		Config * config = new Config;
 		*config = _sockets.getConfig(_sockets.getIndexRequest(new_fd_client));
 		config->setServerOrClient(CLIENT);

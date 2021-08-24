@@ -9,7 +9,7 @@
 ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE)
 {}
 
-ResponseHTTP::ResponseHTTP(const char * path, int client_fd) : _path_file(path), 
+ResponseHTTP::ResponseHTTP(const char * path, int client_fd) : _path_file(path),
 _byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd)
 {}
 
@@ -30,7 +30,9 @@ void ResponseHTTP::send()
     std::fstream fs;
     char buffer[BUFFER_SIZE];
 
-    fs.open(_path_file, std::fstream::binary | std::fstream::in);
+
+	std::cout << _path_file << "blanco" << std::endl;
+    fs.open(_path_file.c_str(), std::fstream::binary | std::fstream::in);
     fs.seekg(_byte_send);
 
     fs.read(buffer, BUFFER_SIZE);
@@ -64,7 +66,7 @@ void ResponseHTTP::resetByteSend()
     _byte_send = 0;
 }
 
-const char * ResponseHTTP::getPath()
+std::string ResponseHTTP::getPath()
 {
     return (_path_file);
 }

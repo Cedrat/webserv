@@ -18,7 +18,8 @@ void response_error_header(int num_code,  Config config, fd fd_to_answer)
     std::ifstream file;
     std:: string page;
 
-    file.open("./www/" + path);
+	path = "./www" + path;
+    file.open(path.c_str());
     while (std::getline(file, line))
     {
         page += line + "\n";
@@ -38,7 +39,7 @@ void response_good_file(std::string path, fd fd_to_answer, bool ai)
     stat(path.c_str(), &sb);
     if (ai == FALSE || S_ISREG(sb.st_mode))
     {
-        file.open(path);
+        file.open(path.c_str());
         while (std::getline(file, line))
         {
             page += line + "\n";

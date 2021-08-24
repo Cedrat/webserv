@@ -1,32 +1,43 @@
 #include <vector>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <errno.h>
 #include "main_segfault.hpp"
 
 
-void create(std::vector<DoubleInt> &ref)
+pollfd create()
 {
-    DoubleInt  * Bises = new DoubleInt;
+	struct pollfd lop;
 
-    ref.push_back(*Bises);
+	lop.fd = 1;
+	lop.events = 0;
+	lop.revents = 0;
+
+	return(lop);
 }
 
-int main()
+pollfd * convert(std::vector<pollfd> conv)
 {
-    std::vector<DoubleInt> more_int;
-    DoubleInt  * Bises = new DoubleInt;
-    
-    // create(more_int);
-    // create(more_int);
-    // create(more_int);
-    // create(more_int);
-    // create(more_int);
-    // create(more_int);
-    more_int.push_back(*Bises);
-    std::cout << more_int[0].first << std::endl;
+	return(conv.data());
+}
 
+int main(int argc)
+{
+    std::vector<pollfd> more_int;
+
+	for (int i = 0; i < argc; i++)
+    {
+           more_int.push_back(create());
+    }
+	pollfd * test = convert(more_int);
     for (int i = 0; i < more_int.size(); i++)
     {
-       std::cout << &more_int[i] << std::endl;
+       std::cout << test[i].fd << std::endl;
     }
 
 }

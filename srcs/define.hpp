@@ -4,7 +4,7 @@
 # define FALSE 0
 # define TRUE 1
 
-# define BUFFER_SIZE 10000
+# define BUFFER_SIZE 100
 
 
 #endif
