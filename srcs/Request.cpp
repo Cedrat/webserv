@@ -176,7 +176,6 @@ void        Request::addToRequest(std::string request)
 {
     _request += request;
 
-    std::cout << "Request in progress\n" << _request << "end of request" << std::endl;
 }
 void    Request::verifyHostName(Config config)
 {

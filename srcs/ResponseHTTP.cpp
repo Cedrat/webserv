@@ -29,25 +29,24 @@ void ResponseHTTP::send()
 {
     std::fstream fs;
     char buffer[BUFFER_SIZE];
+    int ret = 0;
 
-
-	std::cout << _path_file << "blanco" << std::endl;
-    fs.open(_path_file.c_str(), std::fstream::binary | std::fstream::in);
+    fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app);
     fs.seekg(_byte_send);
-
     fs.read(buffer, BUFFER_SIZE);
-    std::cout << "bisounours" << _byte_send << std::endl;
-    //std::cout << buffer << std::endl;
+    std::cout << fs.gcount() << "surveillange" << std::endl;
     if (fs)
-        ::send(_fd_to_answer, buffer, BUFFER_SIZE, 0);
+    {
+        ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
+    }
     else
     {
-        ::send(_fd_to_answer, buffer, fs.gcount(), 0);
-        std::cout << "Finished boy" << std::endl;
+        ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
+     }
+     
+    _byte_send += ret;
+    if (ret  == fs.gcount() && fs.eof())
         _finished = TRUE;
-    }
-    _byte_send += fs.gcount();
-    std::cout << "Is Finished ?" << _finished << std::endl;
     fs.close();
 }
 

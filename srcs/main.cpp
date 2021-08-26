@@ -31,25 +31,25 @@ Location default_location_2()
    return (location);
 }
 
-Config & default_config()
+Config default_config()
 {
-   Config  * config = new Config;
+   Config  config; 
    Location location;
 
-    config->setPrincipalServer(TRUE);
-    config->setHost(0);
-    config->setPort(7995);
-    config->setServerOrClient(SERVER);
-    config->setMaxBodySize(1024);
-    config->addServerName("localhost");
-    config->addErrorPages(400, "/error_files/err400.html");
+    config.setPrincipalServer(TRUE);
+    config.setHost(0);
+    config.setPort(7995);
+    config.setServerOrClient(SERVER);
+    config.setMaxBodySize(1024);
+    config.addServerName("localhost");
+    config.addErrorPages(400, "/error_files/err400.html");
     location = default_location();
-    //config->addErrorPages(404, "/error_files/err404.html");
-    config->addErrorPages(405, "/error_files/err405.html");
-    config->addErrorPages(505, "/error_files/err505.html");
-    config->addLocation(location);
-    config->addLocation(default_location_2());
-    return (*config);
+    //config.addErrorPages(404, "/error_files/err404.html");
+    config.addErrorPages(405, "/error_files/err405.html");
+    config.addErrorPages(505, "/error_files/err505.html");
+    config.addLocation(location);
+    config.addLocation(default_location_2());
+    return (config);
 }
 
 int main()

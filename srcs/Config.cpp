@@ -2,12 +2,12 @@
 
 Config::Config()
 {
-    std::cout << "A config was created" << std::endl;
+
 }
 
 Config::~Config()
 {
-    std::cout << "A config was destroyed" << std::endl;
+
 }
 
 int Config::getPort() const 

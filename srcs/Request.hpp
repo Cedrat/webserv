@@ -21,11 +21,11 @@ class ResponseHTTP;
 class Request
 {
     private :
-        std::string _request;
-        std::string _method_line;
         std::string _method;
-        std::string _path_file_request;
+        std::string _request;
         std::string _host_name;
+        std::string _method_line;
+        std::string _path_file_request;
         int _error;
         int _where_is_request;
         bool _sending_data;
@@ -36,13 +36,13 @@ class Request
         Request();
         ~Request();
 
-        void        setMethod(std::string method);
         void        setError(int error);
-        void        setPathFileRequest(std::string path_file_request);
-        void        setWhereIsRequest(int where_is_request);
-        void        setResponseHTTP(ResponseHTTP  rep);
         void        setSendingData(bool);
+        void        setMethod(std::string method);
+        void        setResponseHTTP(ResponseHTTP  rep);
         void        setPathFileAnswer(const char* path);
+        void        setWhereIsRequest(int where_is_request);
+        void        setPathFileRequest(std::string path_file_request);
 
         int             getError() const;
         std::string     getMethod() const;
@@ -55,9 +55,9 @@ class Request
 
         int         isAValidMethodLine(std::string method_line);
 
-        void        addToRequestHeader(std::string request_linei);
-        void        addToRequest(std::string request);
         void        resetRequest();
+        void        addToRequest(std::string request);
+        void        addToRequestHeader(std::string request_linei);
 
 
         void        verifyMethod(Config config);
@@ -65,12 +65,12 @@ class Request
 
         Location    findBestLocation(Config config);
 
-        void        checkDuplicate(std::string request);
-        void        checkDuplicate(std::vector<std::string> all_lines);
-        void        checkSyntaxRequest(std::string request);
         void        checkSyntaxRequest();
+        void        checkDuplicate(std::string request);
         void        checkAndAddMethod(std::string request);
+        void        checkSyntaxRequest(std::string request);
         void        checkAndAddHostName(std::string request);
+        void        checkDuplicate(std::vector<std::string> all_lines);
 
         void        setFdAnswer(int);
 

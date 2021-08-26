@@ -24,6 +24,13 @@ std::vector<struct pollfd> Socket::getSockets()
         throw "No Sockets";
     return (_sockets);
 }
+
+std::vector<struct pollfd> & Socket::getRefSockets()
+{
+    if (_sockets.size() == 0)
+        throw "No Sockets";
+    return (_sockets);
+}
 pollfd create_a_listenable_socket(int port)
 {
    struct sockaddr_in   my_addr;
