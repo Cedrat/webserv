@@ -9,6 +9,7 @@ locationConfig::locationConfig()
     this->_upload_folder = "-1";
     this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
     this->_isFile = false;
+    this->_redirect.push_back("-1");
 }
 
 locationConfig::~locationConfig() { }
@@ -99,7 +100,7 @@ void locationConfig::setUploadFolder( std::vector<std::string> line )
     {
         if (line.size() == 1)
         {
-            _upload_folder = "./www/post_test";
+            _upload_folder = "./www/post_test"; //A modifier
             return ;
         }
         _upload_folder = line[1];
@@ -127,6 +128,20 @@ void locationConfig::setCgi( std::vector<std::string> line )
         throw std::invalid_argument("Error : location block can't contain more than one cgi directive");
 }
 
+void locationConfig::setRedirect( std::vector<std::string> line )
+{
+    if (_redirect[0] == "-1")
+    {
+        _redirect.clear();
+        for(size_t i = 1; i < line.size(); i++)
+            _redirect.push_back(line[i]);
+        if (_redirect.size() == 1)
+            _redirect.push_back("redirect");
+    }
+    else
+        throw std::invalid_argument("Error : location block can't contain more than one rewrite directive");
+}
+
 void locationConfig::setUncalledDirectives( std::string defaultRoot )
 {
     if (_root == "-1") //Recuperer root du serveur si pas de root dans location
@@ -151,9 +166,10 @@ void locationConfig::setUncalledDirectives( std::string defaultRoot )
         {
             if (_methods[i] == "POST")
                 throw std::invalid_argument("Error : You must specify an upload directory if you use the POST method");
-        }
-        _upload_folder = "../www/post_test";
+        }   
     }
+    //upload_folder reste = "-1" si pas de methode POST
+    //redirect reste = "-1" si pas specifie
     //On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas demandé
 }
 
@@ -167,10 +183,10 @@ bool locationConfig::checkLocationData( std::string defaultRoot )
 {
     setUncalledDirectives(defaultRoot);
 
-    checks _checks[6] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
+    checks _checks[7] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
             &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
-            &locationConfig::checkCgi};
-    for (int i = 0; i < 6; i++)
+            &locationConfig::checkCgi, &locationConfig::checkRedirect};
+    for (int i = 0; i < 7; i++)
     {
         if ((this->*_checks[i])() == false)
             return false;
@@ -184,10 +200,11 @@ bool locationConfig::checkLocation()
     // un path '/' match toutes les requêtes
     if (_location.size() == 1 && _location[0] == '/')
         return true;
-    //On accepte uniquement les char alnum et le '/'
+    //On accepte uniquement les char alnum et le '/', le '.', le '-' et le '_'
     for (size_t i = 0; i < _location.size(); i++)
     {
-        if (!isalnum(_location[i]) && _location[i] != '/' && _location[i] != '.')
+        if (!isalnum(_location[i]) && _location[i] != '/' && _location[i] != '.' 
+            && _location[i] != '-' && _location[i] != '_')
         {
             std::cerr << "Error in location path : Invalid character" << std::endl;
             return false;
@@ -198,38 +215,31 @@ bool locationConfig::checkLocation()
 
 bool locationConfig::checkRoot()
 {
-    struct stat state;
-
-    stat(_root.c_str(), &state);
-    if (!S_ISDIR(state.st_mode))
+    for (size_t i = 0; i < _root.size(); i++)
     {
-        std::cerr << "Error in root directive" << std::endl;
-        return false;
+        if (!isalnum(_root[i]) && _root[i] != '/' && _root[i] != '.' 
+            && _root[i] != '-' && _root[i] != '_')
+        {
+            std::cerr << "Error in root : Invalid character" << std::endl;
+            return false;
+        }
     }
     return true;
 }
 
 bool locationConfig::checkIndex()
 {
-    if (_index.size() == 1 && _index[0] == "-1")  //Si path = fichier, pas besoin d'index
-        return true;
-    std::ifstream ifs;
-    std::string path = _root;
-
     for (size_t i = 0; i < _index.size(); i++)
     {
-        if (path[path.size() - 1] == '/' && _index[i][0] == '/')
-            path = _root.substr(0, _root.size() - 1);
-        if (path[path.size() - 1] != '/' && _index[i][0] != '/')
-            path += '/';
-        path += _index[i];
-        ifs.open(path.c_str(), std::ifstream::in);
-        if (ifs.is_open() == false)
+        for (size_t j = 0; j < _index[i].size(); j++)
         {
-            ifs.close();
-            std::cerr << "Error in index directive" << std::endl;
-            return false;
-        } 
+            if (!isalnum(_index[i][j]) && _index[i][j] != '/' && _index[i][j] != '.' 
+                && _index[i][j] != '-' && _index[i][j] != '_')
+            {
+                std::cerr << "Error in index : Invalid character" << std::endl;
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -263,13 +273,16 @@ bool locationConfig::checkMethods()
 
 bool locationConfig::checkUploadFolder()
 {
-    struct stat state;
-
-    stat(_upload_folder.c_str(), &state);
-    if (!S_ISDIR(state.st_mode))
+    if (_upload_folder == "-1")
+        return true;
+    for (size_t i = 0; i < _upload_folder.size(); i++)
     {
-        std::cerr << "Error in upload_folder directive" << std::endl;
-        return false;
+        if (!isalnum(_upload_folder[i]) && _upload_folder[i] != '/' && _upload_folder[i] != '.' 
+            && _upload_folder[i] != '-' && _upload_folder[i] != '_')
+        {
+            std::cerr << "Error in upload_folder : Invalid character" << std::endl;
+            return false;
+        }
     }
     return true;
 }
@@ -283,17 +296,33 @@ bool locationConfig::checkCgi()
         if (it->first == "0" && it->second == "0")
             return true;
         if (isExtension(it->first) == false)
-            throw std::invalid_argument("Error in cgi directive"); 
-
-        std::ifstream ifs;
-        ifs.open(it->second.c_str(), std::ifstream::in);
-        if (ifs.is_open() == false)
         {
-            ifs.close();
-            std::cerr << "Error in cgi directive" << std::endl;
+            std::cerr << "Error in cgi directive : Invalid extension" << std::endl;
             return false;
-        }    
+        }
+
+        for (size_t i = 0; i < it->second.size(); i++)
+        {
+            if (!isalnum(it->second[i]) && it->second[i] != '/' && it->second[i] != '.' 
+                && it->second[i] != '-' && it->second[i] != '_')
+            {
+                std::cerr << "Error in CGI binary name : Invalid character" << std::endl;
+                return false;
+            }
+        }  
     }
+    return true;
+}
+
+bool locationConfig::checkRedirect()
+{
+    if (_redirect.size() == 1 && _redirect[0] == "-1")
+        return true;
+
+    if (_redirect[0] == "permanent" || _redirect[0] == "redirect" 
+        || (_redirect[1] != "permanent" && _redirect[1] != "redirect"))
+        return false; //permanent == 301, redirect == 302 (temporaire)
+
     return true;
 }
 
@@ -343,6 +372,11 @@ std::map<std::string, std::string> locationConfig::getCgi() const
     return this->_cgi;
 }
 
+std::vector<std::string> locationConfig::getRedirect() const
+{
+    return this->_redirect;
+}
+
 
 
 
@@ -361,5 +395,9 @@ void locationConfig::debug()
     for (size_t i = 0; i < _index.size(); i++)
         std::cout << "index " << i << " - " <<  _index[i] << std::endl;
     std::cout << "Upload folder : " << getUploadFolder() << std::endl;
+    if (_redirect.size() == 2)
+        std::cout << "Redirection " << _redirect[0] << " - Type : " << _redirect[1] << std::endl;
+    else
+        std::cout << "Redirection " << _redirect[0] << std::endl;
     std::cout << "*** End ***\n" << std::endl;
 }

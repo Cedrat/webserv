@@ -250,9 +250,9 @@ bool ConfigParser::isServerProperty( std::string line )
 
 bool ConfigParser::isLocationProperty( std::string line )
 {
-    std::string locationProperties[6] = {"root", "method", "autoindex", "index", "upload_folder", "cgi"};
+    std::string locationProperties[7] = {"root", "method", "autoindex", "index", "upload_folder", "cgi", "rewrite"};
    
-    for(unsigned long i = 0; i < 6; i++)
+    for(unsigned long i = 0; i < 7; i++)
     {
         if (line == locationProperties[i])
             return true;
@@ -294,6 +294,8 @@ bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationC
         location->setUploadFolder(line);
     else if (line[0] == "cgi" && line.size() == 3)
         location->setCgi(line);
+    else if (line[0] == "rewrite" && line.size() >= 2 && line.size() <= 3)
+        location->setRedirect(line);
     else
     {
         std::cerr << "Error in config file : Wrong or missing argument in location block" << std::endl;

@@ -190,14 +190,15 @@ bool serverConfig::checkErrorPages()
         if (it->first < 300 || it->first > 599)
             return false;
 
-        std::ifstream ifs;
-        ifs.open(it->second.c_str(), std::ifstream::in);
-        if (ifs.is_open() == false)
+        for (size_t i = 0; i < it->second.size(); i++)
         {
-            ifs.close();
-            std::cerr << "Error in error_page directive" << std::endl;
-            return false;
-        }    
+            if (!isalnum(it->second[i]) && it->second[i] != '/' && it->second[i] != '.' 
+                && it->second[i] != '-' && it->second[i] != '_')
+            {
+                std::cerr << "Error in error_page : Invalid character" << std::endl;
+                return false;
+            }
+        }  
     }
     return true;
 }
@@ -214,13 +215,14 @@ bool serverConfig::checkMaxClientBodySize()
 
 bool serverConfig::checkRoot()
 {
-    struct stat state;
-
-    stat(_root.c_str(), &state);
-    if (!S_ISDIR(state.st_mode))
+    for (size_t i = 0; i < _root.size(); i++)
     {
-        std::cerr << "Error in root directive" << std::endl;
-        return false;
+        if (!isalnum(_root[i]) && _root[i] != '/' && _root[i] != '.' 
+            && _root[i] != '-' && _root[i] != '_')
+        {
+            std::cerr << "Error in root : Invalid character" << std::endl;
+            return false;
+        }
     }
     return true;
 }
