@@ -20,5 +20,6 @@
     bool isExtension( std::string ext );
 
     bool isAcceptableName( std::string line );
+    bool isAcceptableURI( std::string line );
 
 #endif

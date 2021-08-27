@@ -89,3 +89,14 @@ bool isAcceptableName( std::string line )
     }
     return true;
 }
+
+bool isAcceptableURI( std::string line )
+{
+    for (size_t i = 0; i < line.size(); i++)
+    {
+        if (!isalnum(line[i]) && line[i] != '/' && line[i] != '.' && line[i] != '+'
+            && line[i] != '-' && line[i] != '_' && line[i] != '%' && line[i] != '$')
+            return false;
+    }
+    return true;
+}

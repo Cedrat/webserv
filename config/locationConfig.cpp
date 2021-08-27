@@ -201,28 +201,20 @@ bool locationConfig::checkLocation()
     if (_location.size() == 1 && _location[0] == '/')
         return true;
     //On accepte uniquement les char alnum et le '/', le '.', le '-' et le '_'
-    for (size_t i = 0; i < _location.size(); i++)
+    if (!isAcceptableURI(_location))
     {
-        if (!isalnum(_location[i]) && _location[i] != '/' && _location[i] != '.' 
-            && _location[i] != '-' && _location[i] != '_')
-        {
-            std::cerr << "Error in location path : Invalid character" << std::endl;
-            return false;
-        }
+        std::cerr << "Error in location path : Invalid character" << std::endl;
+        return false;
     }
     return true;
 }
 
 bool locationConfig::checkRoot()
 {
-    for (size_t i = 0; i < _root.size(); i++)
+    if (!isAcceptableURI(_root))
     {
-        if (!isalnum(_root[i]) && _root[i] != '/' && _root[i] != '.' 
-            && _root[i] != '-' && _root[i] != '_')
-        {
-            std::cerr << "Error in root : Invalid character" << std::endl;
-            return false;
-        }
+        std::cerr << "Error in root directive : Invalid character" << std::endl;
+        return false;
     }
     return true;
 }
@@ -231,15 +223,11 @@ bool locationConfig::checkIndex()
 {
     for (size_t i = 0; i < _index.size(); i++)
     {
-        for (size_t j = 0; j < _index[i].size(); j++)
+        if (!isAcceptableURI(_index[i]))
         {
-            if (!isalnum(_index[i][j]) && _index[i][j] != '/' && _index[i][j] != '.' 
-                && _index[i][j] != '-' && _index[i][j] != '_')
-            {
-                std::cerr << "Error in index : Invalid character" << std::endl;
-                return false;
-            }
-        }
+            std::cerr << "Error in index directive : Invalid character" << std::endl;
+            return false;
+        }    
     }
     return true;
 }
@@ -275,14 +263,10 @@ bool locationConfig::checkUploadFolder()
 {
     if (_upload_folder == "-1")
         return true;
-    for (size_t i = 0; i < _upload_folder.size(); i++)
+    if (!isAcceptableURI(_upload_folder))
     {
-        if (!isalnum(_upload_folder[i]) && _upload_folder[i] != '/' && _upload_folder[i] != '.' 
-            && _upload_folder[i] != '-' && _upload_folder[i] != '_')
-        {
-            std::cerr << "Error in upload_folder : Invalid character" << std::endl;
-            return false;
-        }
+        std::cerr << "Error in upload_folder directive : Invalid character" << std::endl;
+        return false;
     }
     return true;
 }
@@ -300,16 +284,11 @@ bool locationConfig::checkCgi()
             std::cerr << "Error in cgi directive : Invalid extension" << std::endl;
             return false;
         }
-
-        for (size_t i = 0; i < it->second.size(); i++)
+        if (!isAcceptableURI(it->second))
         {
-            if (!isalnum(it->second[i]) && it->second[i] != '/' && it->second[i] != '.' 
-                && it->second[i] != '-' && it->second[i] != '_')
-            {
-                std::cerr << "Error in CGI binary name : Invalid character" << std::endl;
-                return false;
-            }
-        }  
+            std::cerr << "Error in CGI binary name : Invalid character" << std::endl;
+            return false;
+        } 
     }
     return true;
 }
