@@ -118,18 +118,17 @@ void    Socket::receiveData(fd fd_to_read)
     std::string str_request;
     bytes_read = recv(fd_to_read, &buffer, BUFFER_SIZE, 0);
     std::cout << "bytes_read = " << bytes_read << std::endl;
+        buffer[bytes_read] = 0;
+        str_request = buffer;
     if (bytes_read < 0)
     {   std::cout << "we return here" << std::endl;
         _requests[getIndexRequest(fd_to_read)].setWhereIsRequest(ZERO_REQUEST);
         _requests[getIndexRequest(fd_to_read)].setError(200);
         return ;
     }
-    if (bytes_read > 0)
+    std::cout << "HEADER " << _requests[getIndexRequest(fd_to_read)].getHeaderCompleted() << std::endl;
+    if (bytes_read > 0 && _requests[getIndexRequest(fd_to_read)].getHeaderCompleted() == FALSE)
     {
-        buffer[bytes_read] = 0;
-        str_request = buffer;
-
-
 
         if (_requests[getIndexRequest(fd_to_read)].getRequest() == "" && str_request == "\r\n")
         {
@@ -145,16 +144,39 @@ void    Socket::receiveData(fd fd_to_read)
             _requests[getIndexRequest(fd_to_read)].checkSyntaxRequest();
 
         }
-        if (_requests[getIndexRequest(fd_to_read)].getError() != 200)
+        if (_requests[getIndexRequest(fd_to_read)].getError() == BAD_REQUEST)
         {
+             _requests[getIndexRequest(fd_to_read)].setKeepAlive(FALSE);
             _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
         }
         if (_requests[getIndexRequest(fd_to_read)].getRequest().find("\r\n\r\n") != std::string::npos)
         {
             //_requests[getIndexRequest(fd_to_read)].addToRequestHeader(_requests[getIndexRequest(fd_to_read)].getRequest());
             verifyRequest(getIndexRequest(fd_to_read));
-            _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+            _requests[getIndexRequest(fd_to_read)].setHeaderCompleted(TRUE); //Ne tient pas entre les requetes, a voir tout a l'heure
+            std::cout << "num error " <<_requests[getIndexRequest(fd_to_read)].getError() << std::endl;
+            if (_requests[getIndexRequest(fd_to_read)].getMethod() != "POST")
+                _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+            else
+                _requests[getIndexRequest(fd_to_read)].checkAndAddContentLength(_requests[getIndexRequest(fd_to_read)].getRequest());
+            str_request.erase(0, str_request.find("\r\n\r\n") + 4);
             std::cout << "Request completed" << std::endl;
+        }
+    }
+    if (bytes_read > 0 && _requests[getIndexRequest(fd_to_read)].getHeaderCompleted() == TRUE  && _requests[getIndexRequest(fd_to_read)].getMethod() == "POST")
+    {
+        std::cout << "CONTENT LENGTH" << _requests[getIndexRequest(fd_to_read)].getContentLength() << std::endl;
+        if ((_requests[getIndexRequest(fd_to_read)].getContentLength() - (int)str_request.size()) > 0)
+        {
+            create_file(create_path(_requests[getIndexRequest(fd_to_read)],getConfigByFd(fd_to_read)), str_request);
+            _requests[getIndexRequest(fd_to_read)].setContentLength(_requests[getIndexRequest(fd_to_read)].getContentLength() - str_request.size());
+            std::cout << _requests[getIndexRequest(fd_to_read)].getContentLength() << "str" << str_request.size() << std::endl;
+        }
+        else
+        {
+            create_file(create_path(_requests[getIndexRequest(fd_to_read)],getConfigByFd(fd_to_read)), str_request);
+            _sockets[getIndexRequest(fd_to_read)].events = POLLOUT;
+            std::cout << "POST FINISHED" << std::endl;
         }
     }
 }
@@ -203,8 +225,8 @@ void Socket::addSocketClient(Config & config, fd socket_client)
 void Socket::verifyRequest(size_t index_request)
 {
     _requests[index_request].verifyMethod(_config_socket[index_request]);
-    _requests[index_request].verifyHostName(_config_socket[index_request]);
-
+    if (_requests[index_request].getError() == 200)
+        _requests[index_request].verifyHostName(_config_socket[index_request]);
 }
 
 int Socket::getRequestStatus(fd current_fd)

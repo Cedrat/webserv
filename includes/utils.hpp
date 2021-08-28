@@ -48,4 +48,7 @@ std::string create_ai_page(const char * path);
 std::string create_path(Request request, Config config);
 
 std::string    decoding_http_string(std::string str);
+
+int string_to_int(std::string str);
+void create_file(std::string path_name, std::string buffer);
 #endif

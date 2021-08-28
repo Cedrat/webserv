@@ -10,19 +10,14 @@
     <body>
     <p>Hola ! Une petite erreur 404 ? Pour la forme ! <a href="pagequin'existepas.html"> ERROR 404 </a></p>
     <p>Une image de cone alors ? <a href="/test/cone.jpg"> un truc blanc et orange</a></p>
-    <form action="./created_with_succe.html" method="POST">
-        <div>
-          <label for="say">Quelle salutation voulez-vous dire ?</label>
-          <input name="say" id="say" value="Salut">
-        </div>
-        <div>
-          <label for="to">A qui voulez-vous le dire ?</label>
-          <input name="to" id="to" value="Maman">
-        </div>
-        <div>
-          <button>Envoyer mes salutations</button>
-        </div>
-      </form>
-
+    <form method="POST" action="./test/img" enctype="multipart/form-data">
+      <div>
+        <label for="file">Sélectionner le fichier à envoyer</label>
+        <input type="file" id="file" name="file" multiple>
+      </div>
+      <div>
+        <button>Envoyer</button>
+      </div>
+     </form>
     </body>
 </html>

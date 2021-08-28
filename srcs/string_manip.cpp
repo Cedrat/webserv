@@ -21,6 +21,13 @@ std::string int_to_string(int nb)
     return (str);
 }
 
+int string_to_int(std::string str)
+{
+
+    return (std::stoi(str));
+}
+
+
 std::vector<std::string> split_string(std::string str, std::string splitter)
 {
     std::vector<std::string> split_str;

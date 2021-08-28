@@ -16,7 +16,7 @@ std::string extract_path(std::string method_line)
     return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
 }
 
-Request::Request() : _error(OK), _where_is_request(ZERO_REQUEST), _sending_data(FALSE)
+Request::Request() :  _header_completed(FALSE),  _error(OK), _where_is_request(ZERO_REQUEST),_sending_data(FALSE)
 {
     (void)_error;
 }
@@ -111,12 +111,15 @@ std::string Request::getMethod() const
     return (_method);
 }
 
-void Request::verifyMethod(Config config)
+void Request::verifyMethod(Config  config)
 {
     Location location = findBestLocation(config);
 
     if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
+    {
+        std::cout << "METHOD_NOT_ALLOWED" << std::endl;
         setError(METHOD_NOT_ALLOWED);
+    }
 }
 
 Location Request::findBestLocation(Config config)
@@ -228,7 +231,7 @@ void    Request::checkSyntaxRequest(std::string request)
 {
     std::vector<std::string> all_lines;
 
-    char motif2[] = "[a-zA-z0-9]+: .*\r\n";
+    char motif2[] = "[a-zA-z0-9]+: .+\r\n";
     all_lines = split_string(request, "\n");
     for (size_t i = 0; i < all_lines.size(); i++)
     {
@@ -242,6 +245,7 @@ void    Request::checkSyntaxRequest(std::string request)
         }
         else if (all_lines[i].find(" ") != std::string::npos)
         {
+            std::cout << "BLALBLA" << std::endl;
             setError(BAD_REQUEST);
         }
     }
@@ -254,11 +258,22 @@ void Request::resetRequest()
     _method = "";
     _path_file_request = "";
     _host_name = "";
+    _header_completed = FALSE;
+    _keep_alive = TRUE;
     _error = OK;
     _where_is_request = ZERO_REQUEST;
 
 }
 
+void Request::setKeepAlive(bool boolean)
+{
+    _keep_alive = boolean;
+}
+
+bool Request::getKeepAlive()
+{
+    return (_keep_alive);
+}
 
 void Request::checkPath()
 {
@@ -270,7 +285,7 @@ void    Request::checkSyntaxRequest()
 {
     std::vector<std::string> all_lines;
 
-    char motif2[] = "[a-zA-z0-9]+: .*\r\n";
+    char motif2[] = "[a-zA-z0-9]+: .+\r\n";
     all_lines = split_string(_request, "\n");
     checkDuplicate(all_lines);
 
@@ -288,6 +303,16 @@ void    Request::checkSyntaxRequest()
             setError(BAD_REQUEST);
         }
     }
+}
+
+void Request::setContentLength(int content_length)
+{
+    _content_length = content_length;
+}
+
+int Request::getContentLength() const
+{
+    return(_content_length);
 }
 
 void Request::checkAndAddMethod(std::string request)
@@ -319,11 +344,34 @@ void Request::checkAndAddMethod(std::string request)
 
 void Request::checkAndAddHostName(std::string request)
 {
-    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
+    char motif[] = "[a-zA-z0-9]+: +.+\r\n";
     if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1 && getError() == OK)
     {
         _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
         std::cout << "L'Host name retenu est " << _host_name << std::endl;
         _where_is_request = REQUEST_FINISHED;
     }
+}
+
+void Request::checkAndAddContentLength(std::string request)
+{
+    char motif[] = "Content-Length:";
+    std::cout << "Content debut de fonction " << std::endl;
+    if (match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
+    {
+        _content_length = string_to_int(request.substr(request.find("Content-Length: ") + 16, request.find("\n", request.find("Content-Length: ") + 16) - (request.find("Content-Length: ") + 17)));
+        std::cout << "Content length " << _content_length << std::endl;
+        _where_is_request = REQUEST_FINISHED;
+    }
+}
+
+
+bool Request::getHeaderCompleted() const
+{
+    return (_header_completed);
+}
+
+void Request::setHeaderCompleted(bool boolean)
+{
+    _header_completed = boolean;
 }

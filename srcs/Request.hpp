@@ -26,6 +26,9 @@ class Request
         std::string _host_name;
         std::string _method_line;
         std::string _path_file_request;
+        int         _content_length;
+        bool        _header_completed;
+        bool        _keep_alive;
         int _error;
         int _where_is_request;
         bool _sending_data;
@@ -43,7 +46,12 @@ class Request
         void        setPathFileAnswer(const char* path);
         void        setWhereIsRequest(int where_is_request);
         void        setPathFileRequest(std::string path_file_request);
+        void        setKeepAlive(bool);
+        void        setHeaderCompleted(bool);
+        void        setContentLength(int);
 
+        int             getContentLength() const;
+        bool            getKeepAlive();
         int             getError() const;
         std::string     getMethod() const;
         std::string     getRequest() const;
@@ -52,6 +60,7 @@ class Request
         ResponseHTTP    getResponseHTTP() const;
         int             getWhereIsRequest() const;
         std::string     getPathFileRequest(void) const;
+        bool            getHeaderCompleted() const;
 
         int         isAValidMethodLine(std::string method_line);
 
@@ -60,7 +69,7 @@ class Request
         void        addToRequestHeader(std::string request_linei);
 
 
-        void        verifyMethod(Config config);
+        void        verifyMethod(Config   config);
         void        verifyHostName(Config config);
 
         Location    findBestLocation(Config config);
@@ -70,6 +79,7 @@ class Request
         void        checkAndAddMethod(std::string request);
         void        checkSyntaxRequest(std::string request);
         void        checkAndAddHostName(std::string request);
+        void        checkAndAddContentLength(std::string request);
         void        checkDuplicate(std::vector<std::string> all_lines);
 
         void        setFdAnswer(int);

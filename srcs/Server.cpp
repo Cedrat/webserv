@@ -60,7 +60,7 @@ void	Server::acceptConnection(std::vector<struct pollfd>& pollfd, int nfds)
 			std::cout << "send Data" << std::endl;
 			sendData(pollfd[i].fd);
 
-			if (_sockets.getRequest(pollfd[i].fd).getError() == 400)
+			if (_sockets.getRequest(pollfd[i].fd).getError() == 400 && _sockets.getRequest(pollfd[i].fd).getResponseHTTP().getFinished() == TRUE)
 			{
 					close(pollfd[i].fd);
 				_sockets.removeSocket(pollfd[i].fd);
@@ -101,7 +101,15 @@ void	Server::sendData(fd fd_client)
 	std::cout << "path required " << path << std::endl;
 	if (request.getSendingData() == FALSE)
 	{
-		if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
+		if (request.getError() != 200)
+		{
+			path = response_error_header(request.getError(), config, fd_client);
+			request.setPathFileAnswer(path.c_str());
+			request.setSendingData(TRUE);
+			request.setFinished(FALSE);
+			request.setFdAnswer(fd_client);	
+		}
+		else if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
 		{
 			path = response_error_header(404, config, fd_client);
 			request.setPathFileAnswer(path.c_str());
@@ -122,15 +130,6 @@ void	Server::sendData(fd fd_client)
 		{
 			delete_and_give_response(path.c_str(), fd_client);
 			std::cout << "DELETE COMPLETED" << std::endl;
-		}
-		else
-		{
-			path = response_error_header(request.getError(), config, fd_client);
-			request.setPathFileAnswer(path.c_str());
-			request.setSendingData(TRUE);
-			request.setFinished(FALSE);
-			request.setFdAnswer(fd_client);
-		
 		}
 	}
 	else
