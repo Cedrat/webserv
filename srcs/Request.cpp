@@ -284,9 +284,14 @@ void Request::checkPath()
 void    Request::checkSyntaxRequest()
 {
     std::vector<std::string> all_lines;
+    std::string lines = _request;
 
+    std::cout << "___" << lines << "___" <<  std::endl;
+    if (lines.find("\r\n\r\n") != std::string::npos)
+        lines.erase(lines.find("\r\n\r\n"), lines.size() - (lines.find("\r\n\r\n")));
+    std::cout << "___" << lines << "___" <<  std::endl;
     char motif2[] = "[a-zA-z0-9]+: .+\r\n";
-    all_lines = split_string(_request, "\n");
+    all_lines = split_string(lines, "\n");
     checkDuplicate(all_lines);
 
     if (isAValidMethodLine(all_lines[0] + "\n") != OK)

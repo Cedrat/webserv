@@ -24,7 +24,7 @@ class Request;
 class ResponseHTTP;
 
 typedef int fd;
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 5
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1

@@ -1,14 +1,149 @@
------------------------------1303789902162797671256525726
-Content-Disposition: form-data; name="file"; filename="main_segfault.cpp"
+-----------------------------34398345326523999411052872565
+Content-Disposition: form-data; name="file"; filename="Makefile"
 Content-Type: application/octet-stream
 
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include "main_segfaul
+NAME = webserv
+
+PATH_SRC = ./srcs/
+SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp regexp.cpp  Request.cpp count_words.cpp response_error_header.cpp error_tables.cpp \
+		string_manip.cpp request_conditions.cpp path_security.cpp delete_and_give_response.cpp delete_f.cpp create_ai.cpp response_post.cpp \
+		create_path.cpp ResponseHTTP.cpp create_file.cpp
+PATH_OBJS = ./objs/
+OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
+DEBUG = -g3 -fsanitize=address
+
+CXX= clang++
+
+CFLAGS = -Wall -Wextra -Werror -std=c++98
+
+RM = rm -f
+
+%.o :%.cpp
+	$(CXX) $(CFLAGS) ${DEBUG} -c $< -o $@
+
+all : 		${NAME}
+
+
+${NAME}:	${OBJS}
+			$(CXX) ${CFLAGS} ${DEBUG} ${OBJS} -o $@
+
+clean :		
+			${RM} ${OBJS}
+
+fclean :	clean
+			${RM} ${NAME}
+
+re :		fclean all
+
+.PHONY : all clean fclean re
+
+-----------------------------34398345326523999411052872565--
+-----------------------------286567589732784940651194651024
+Content-Disposition: form-data; name="file"; filename="main_segfault.hpp"
+Content-Type: application/octet-stream
+
+#include <iostream>
+
+class DoubleInt
+{
+    public :
+    int first;
+    int second;
+
+    DoubleInt()
+    {
+        first = 1;
+        first = 2;
+        std::cout << "Constructor called" << std::endl;
+        }
+        ~DoubleInt()
+        {
+            std::cout << "Destructor called " << std::endl;
+        }
+};
+-----------------------------286567589732784940651194651024--
+-----------------------------1424540744251339953776514253
+Content-Disposition: form-data; name="file"; filename="main_test.cpp"
+Content-Type: application/octet-stream
+
+#include "./includes/utils.hpp"
+
+int main(int argc, char** argv)
+{
+    if (check_valid_path(argv[1]))
+        std::cout << factorised_path(argv[1]) << std::endl;
+    else
+        std::cout << "Security breach detected" << std::endl;
+}
+
+-----------------------------1424540744251339953776514253--
+-----------------------------424351691841382627861291216848
+Content-Disposition: form-data; name="file"; filename="Request.cpp"
+Content-Type: application/octet-stream
+
+#include "ResponseHTTP.hpp"
+#include "Request.hpp"
+#include "Config.hpp"
+#include <string>
+#include <iostream>
+#include <unistd.h>
+#include <stddef.h>
+
+std::string extract_method(std::string method_line)
+{
+    return (method_line.substr(0, method_line.find(" ")));
+}
+
+std::string extract_path(std::string method_line)
+{
+    return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
+}
+
+Request::Request() :  _header_completed(FALSE),  _error(OK), _where_is_request(ZERO_REQUEST),_sending_data(FALSE)
+{
+    (void)_error;
+}
+
+Request::~Request()
+{
+
+}
+
+void Request::setFinished(bool boolean)
+{
+    _data_to_send.setFinished(boolean);
+}
+
+void Request::setFdAnswer(fd fd_client)
+{
+    _data_to_send.setFdToAnswer(fd_client);
+}
+
+void Request::resetByteSend()
+{
+    _data_to_send.resetByteSend();
+}
+
+void    Request::setResponseHTTP(ResponseHTTP  rep)
+{
+    _data_to_send = rep;
+}
+
+void Request::setPathFileAnswer(const char *path)
+{
+    _data_to_send.setPathFile(path);
+}
+
+bool    Request::getSendingData() const
+{
+    return (_sending_data);
+}
+
+ResponseHTTP    Request::getResponseHTTP() const
+{
+    return _data_to_send;
+}
+
+void Request::setSendingData(bool boolean)
+{
+    _sending_data = bool
