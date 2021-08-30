@@ -166,7 +166,7 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
         _server.push_back(*server);
         _server[_serverNb].setLocation(_location);
         _location.clear();
-        //std::cout << _server[0].getOneLocation(0).getLocation() << std::endl;
+        _locationNb = 0;
         _serverNb++;
         return true;
     }   

@@ -221,8 +221,22 @@ bool serverConfig::checkRoot()
 
 bool serverConfig::isEqual(const serverConfig & rhs) const
 {
+    //Check server_names instead ?
+
     if (_port == rhs.getPort())
-        return true;
+    {
+        std::vector<std::string> names = rhs.getServerNames();
+        for (size_t i = 0; i < names.size() && i < _server_names.size(); i++)
+        {
+            if (names[i] == _server_names[i])
+                return true;
+        }
+    }
+
+
+
+    /*if (_port == rhs.getPort())
+        return true;*/
     return false;
 }
 
