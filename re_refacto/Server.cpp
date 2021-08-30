@@ -70,7 +70,7 @@ void Server::createSocketsServer(void)
 
 void Server::createAndAddSocketServer(size_t port)
 {
-    Socket socket(SERVER);
+    Socket socket(SERVER, port);
 
     _poll_fds.push_back(create_a_listenable_socket(port));
     _sockets.push_back(socket);
@@ -104,12 +104,19 @@ void Server::acceptConnection(void)
     int ret;
     std::cout << "waiting for poll()" << std::endl;
 
-    poll(poll_fd, _poll_fds.size(), -1);
+    poll(poll_fd, _poll_fds.size(), 1000);
     for (size_t i = 0; i < _poll_fds.size(); i++)
     {
-        if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
+        timeout(_sockets[i]);
+        if (_sockets[i].getTimeout() == -1)
         {
-            createAndAddSocketClient(_poll_fds[i].fd);
+            close(_poll_fds[i].fd);
+			removeSocket(i);
+			std::cout << "Client disconnected by timeout" << std::endl;
+        }
+        else if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
+        {
+            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort());
         }
         else if (_poll_fds[i].revents & POLLHUP)
 		{
@@ -119,18 +126,24 @@ void Server::acceptConnection(void)
 		}
         else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
+            _sockets[i].setTimeout(std::time(0));
+            receiveData(_poll_fds[i].fd);
             ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
             write(1, buffer, ret);
+            if (requestCompleted(_poll_fds[i].fd) == TRUE)
+            {
+                std::cout << "Request finished" << std::endl; 
+            }
 		}
     }
 }
 
-void Server::createAndAddSocketClient(fd new_fd_client)
+void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
 {
 		fd fd_client;
 		struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
-        Socket socket(CLIENT);
+        Socket socket(CLIENT, port);
         pollfd new_socket;
 
 
@@ -142,10 +155,35 @@ void Server::createAndAddSocketClient(fd new_fd_client)
         new_socket.events = POLLIN;
         new_socket.revents = 0;
 
+        Request request(fd_client, port);
         _poll_fds.push_back(new_socket);
+        _requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;
 }
 
+void Server::receiveData(fd fd_request)
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            _requests[i].receiveData();
+            std::cout << "yo" << std::endl;
+            return ;
+        }
+    }
+}
+
+bool Server::requestCompleted(fd fd_request)
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (_requests[i].getRequestCompleted());
+        }
+    }
+}
 void Server::removeSocket(size_t index)
 {
     _sockets.erase(_sockets.begin() + index);
