@@ -36,7 +36,7 @@ class serverConfig
         bool checkServerNames();
         bool checkErrorPages();
         bool checkMaxClientBodySize();
-        bool isEqual(const serverConfig & rhs) const;
+        bool isEqual(const serverConfig & rhs);
 
         
         int                         getPort() const;

@@ -219,24 +219,22 @@ bool serverConfig::checkRoot()
     return true;
 }
 
-bool serverConfig::isEqual(const serverConfig & rhs) const
+bool serverConfig::isEqual(const serverConfig & rhs)
 {
-    //Check server_names instead ?
-
     if (_port == rhs.getPort())
     {
         std::vector<std::string> names = rhs.getServerNames();
-        for (size_t i = 0; i < names.size() && i < _server_names.size(); i++)
+        std::vector<std::string>::iterator it = _server_names.begin();
+        for (std::vector<std::string>::iterator ite = _server_names.end(); it != ite; it++)
         {
-            if (names[i] == _server_names[i])
-                return true;
+            std::vector<std::string>::iterator rit = names.begin();
+            for (std::vector<std::string>::iterator rite = names.end(); rit != rite; rit++)
+            {
+                if (*it == *rit)
+                    return true;
+            }
         }
     }
-
-
-
-    /*if (_port == rhs.getPort())
-        return true;*/
     return false;
 }
 
@@ -307,8 +305,13 @@ void serverConfig::debug()
     std::cout << "*** Debug server ***" << std::endl;
     std::cout << "Is default server ? " << getDefaultServer() << std::endl;
     std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
-    for (size_t i = 0; i < _server_names.size(); i++)
-        std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+    if (_server_names.size() == 0)
+        std::cout << "server_name 0 - " <<  _server_names[0] << std::endl;
+    else
+    {
+        for (size_t i = 0; i < _server_names.size(); i++)
+            std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+    }
     std::cout << "Root : " << getRoot() << std::endl;
     std::cout << "max_body_size - " << _max_body_size << std::endl;
     std::map<int, std::string>::iterator it;
