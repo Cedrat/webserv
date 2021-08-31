@@ -12,9 +12,13 @@ export SERVER_PROTOCOL=HTTP/1.1
 export SERVER_PORT=7995
 
 export REQUEST_METHOD=GET
-export PATH_INFO=/cgi_tester        # Chemin du script
-export PATH_TRANSLATED=/test_cgi/cgi_tester # Chemin demandé par le client après que conversions virtuel → physique ont été faites par le serveur.
-export SCRIPT_NAME=/cgi_tester      # Le chemin virtuel vers le script étant exécuté
+#export PATH_INFO=/cgi_tester        # Chemin du script
+#export PATH_TRANSLATED=/test_cgi/cgi_tester # Chemin demandé par le client après que conversions virtuel → physique ont été faites par le serveur.
+#export SCRIPT_NAME=/youpi.bla      # Le chemin virtuel vers le script étant exécuté
+#export SCRIPT_FILENAME=/youpi.bla
+export AUTH_TYPE=Basic
+
+#PATH_TRANSLATED & SCRIPT_FILENAME are required for PHP !
 
 export REMOTE_HOST=                 # Le nom d'hôte du client. Vide si pas connu
 export REMOTE_ADDR=127.0.0.1        # IP du client
@@ -30,16 +34,14 @@ export HTTP_USER_AGENT=Mozilla/91.0.1 # Navigateur utilisé par le client
 export HTTP_HOST=localhost          # = server_name | Pas nécessaire !
 
 
+#./cgi_tester youpi.bla
 
 
 
 
-
-
-
-
-
-
-
-
-./cgi_tester youpi.bla
+#TEST PHP#
+export PATH_TRANSLATED=test.php
+export SCRIPT_FILENAME=test.php
+php-cgi test.php
+echo
+#--------#
