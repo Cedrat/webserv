@@ -1,0 +1,12 @@
+#include "../includes/utils.hpp"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
+
+int main()
+{
+    std::cout << open("./Config.cpp",O_RDONLY) << std::endl;
+    std::cout << open("./Config.cpp",O_RDONLY) << std::endl;
+}

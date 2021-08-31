@@ -25,7 +25,8 @@ class Server
         void    createAndAddSocketServer(size_t port);
         void    createAndAddSocketClient(fd new_fd_client, size_t port);
 
-        void    addConfig(Config const & config);
+        void            addConfig(Config const & config);
+        Request const & getRequest(fd);
 
         void    launchingServer();
         void    acceptConnection(void);
@@ -33,6 +34,8 @@ class Server
         void    receiveData(fd fd_request);
 
         bool    requestCompleted(fd);
+
+        size_t      getIndexRequest(fd) const;
 };
 
 #endif

@@ -5,10 +5,10 @@
 # include <stdbool.h>
 # include <iostream>
 # include <string>
-# include "../srcs/Config.hpp"
-# include "../srcs/ResponseHTTP.hpp"
-# include "../srcs/Location.hpp"
-# include "../srcs/Request.hpp"
+// # include "../srcs/Config.hpp"
+// # include "../srcs/ResponseHTTP.hpp"
+// # include "../srcs/Location.hpp"
+// # include "../srcs/Request.hpp"
 # include <sstream>
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -16,19 +16,26 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fstream>
+# include <ctime>
+# include <vector>
 
-
+class Socket;
 class Config;
 class Location;
 class Request;
 class ResponseHTTP;
 
 typedef int fd;
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 2048
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1
 
+
+void process_data(Request &request, std::vector<Config> configs);
+void response_header(int num_error, fd fd_to_send);
+void response_error_header(int num_error, fd fd_to_send);
+void timeout(Socket & socket);
 void response_post(int num_code,  Config config, fd fd_to_answer);
 int match_regex(char *request, char * motif);
 size_t count_words(std::string str);

@@ -7,9 +7,19 @@
 # define SERVER 0
 # define CLIENT 1
 
-#define BACKLOG 10
+# define BACKLOG 10
 
 # define TIMEOUT 60
+
+# define OK 200
+# define BAD_REQUEST 400
+# define METHOD_NOT_ALLOWED 405
+# define NOT_SUPPORTED 505
+
+# define NO_METHOD -1
+# define GET 0
+# define DELETE 1
+# define POST 2
 
 typedef int fd;
 

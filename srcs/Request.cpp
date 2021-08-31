@@ -111,6 +111,11 @@ std::string Request::getMethod() const
     return (_method);
 }
 
+int         Request::getError() const
+{
+    return (_error);
+}
+
 void Request::verifyMethod(Config  config)
 {
     Location location = findBestLocation(config);
@@ -230,10 +235,11 @@ void Request::checkDuplicate(std::vector<std::string> all_lines)
 void    Request::checkSyntaxRequest(std::string request)
 {
     std::vector<std::string> all_lines;
-
+    char motif_method[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
+    char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
     char motif2[] = "[a-zA-z0-9]+: .+\r\n";
     all_lines = split_string(request, "\n");
-    for (size_t i = 0; i < all_lines.size(); i++)
+    for (size_t i = 1; i < all_lines.size(); i++)
     {
         if (isAValidMethodLine(all_lines[i] + "\n") == OK)
         {
@@ -241,11 +247,9 @@ void    Request::checkSyntaxRequest(std::string request)
         }
         else if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
         {
-            //
         }
         else if (all_lines[i].find(" ") != std::string::npos)
         {
-            std::cout << "BLALBLA" << std::endl;
             setError(BAD_REQUEST);
         }
     }

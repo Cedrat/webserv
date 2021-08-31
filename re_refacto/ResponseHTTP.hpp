@@ -7,10 +7,12 @@
 class ResponseHTTP
 {
     private :
-        std::string    _path_file;
+        std::string     _path_file;
         size_t          _byte_send;
         bool            _finished;
-        int              _fd_to_answer;
+        int             _fd_to_answer;
+
+        int             _method;
 
     public :
         ResponseHTTP();

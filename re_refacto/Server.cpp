@@ -104,7 +104,7 @@ void Server::acceptConnection(void)
     int ret;
     std::cout << "waiting for poll()" << std::endl;
 
-    poll(poll_fd, _poll_fds.size(), 1000);
+    poll(poll_fd, _poll_fds.size(), -1);
     for (size_t i = 0; i < _poll_fds.size(); i++)
     {
         timeout(_sockets[i]);
@@ -132,9 +132,21 @@ void Server::acceptConnection(void)
             write(1, buffer, ret);
             if (requestCompleted(_poll_fds[i].fd) == TRUE)
             {
-                std::cout << "Request finished" << std::endl; 
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() == OK)
+                    process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                std::cout << "Request finished" << std::endl;
+                _poll_fds[i].events = POLLOUT;
+                _poll_fds[i].revents = 0;
             }
 		}
+        else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
+        {
+            std::cout << "datasend" << std::endl;
+            _poll_fds[i].events = POLLIN;
+            _poll_fds[i].revents = 0;
+            response_header(_requests[getIndexRequest(_poll_fds[i].fd)].getError(), _poll_fds[i].fd);
+            _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+        }
     }
 }
 
@@ -188,4 +200,26 @@ void Server::removeSocket(size_t index)
 {
     _sockets.erase(_sockets.begin() + index);
     _poll_fds.erase(_poll_fds.begin() + index);
+}
+
+Request const & Server::getRequest(fd fd_request)
+{
+        for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (_requests[i]);
+        }
+    }
+}
+
+size_t Server::getIndexRequest(fd fd_request) const
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (i);
+        }
+    }
 }
