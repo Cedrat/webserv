@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <cstdlib>
 
-std::string ft_cgi(char ** args, char **env, std::ofstream & os)
+std::string ft_cgi(char ** args, char **env)
 {
     std::string header;
 
@@ -16,54 +16,64 @@ std::string ft_cgi(char ** args, char **env, std::ofstream & os)
     int     status;
 
 
+//Creation de fichiers temporaires
+//Recup de leurs fd pour le fork
+    FILE* fIn = tmpfile();
+    //FILE* fOut = tmpfile();
+    FILE* fOut = fopen("test2.txt", "w"); // ->Ecrit bien dedans
+    int fdIn = fileno(fIn);
+    int fdOut = fileno(fOut);
+
+
     //Write le body dans fdin ?
+    //write(fdOut, _body, strlen(_body));
 
     pid = fork();
     if (pid == 0)       //Child
     {
-        //dup2 stdin
-        //dup2 stdout
+        std::cout << "\nEnter child process" << std::endl;
+
+        //Probleme ICI
+        //dup2(fdIn, 0);
+        dup2(fdOut, 1);
 
         //arg[0] = script path  ||  arg[1] = requested file path  ||  arg[3] = NULL
-        if(execve(args[0], args, env) < 0)
+        if ((execve(args[0], args, env)) < 0)
         {
             std::cerr << "Execve failed" << std::endl;
-            //close(fdin);
-            //close(fdout);
+            close(fdIn);
+            close(fdOut);
             exit(0);
         }
     }
     else if (pid > 0)   //Parent
     {
         waitpid(pid, &status, 0);
+        if (WIFEXITED(status))
+            std::cout << "Exit status : " << WEXITSTATUS(status) << std::endl;
 
-        //int ret = 1;
-        //char buffer[50] = {0};
-        //while (ret > 0)
-        //{
-        //   ret = read(fdout, buffer, 50 + 1);
-        //   os << buffer;
-        //   ou std::string body += buffer ?
-        //}
+        int ret = 1;
+        char buffer[50] = {0};
+        while (ret > 0)
+        {
+           ret = read(fdOut, buffer, 49);
+           header += buffer;
+        }
     }
     else
     {
         std::cerr << "Error with fork()" << std::endl;
-        //close(fdin);
-        //close(fdout);
+        close(fdIn);
+        close(fdOut);
         exit(0);
     }
 
-    //close(fdin);
-    //close(fdout);
-    //os.flush();
-    //Besoin de vider ofstream ?
+    std::cout << "Closing fds" << std::endl;
+    close(fdIn);
+    close(fdOut);
 
-    /*     Si ofstream -> pour le recup dans une string
-    std::stringstream ss;
-    ss << os.rdbuf();
-    header = ss.str();
-    std::cout << header << std::endl;*/
+    std::cout << "\nReturned :" << std::endl;
+    std::cout << header << std::endl;
 
     return header;
 }
@@ -71,25 +81,22 @@ std::string ft_cgi(char ** args, char **env, std::ofstream & os)
 
 int main(void)
 {
-    char *args[3] = {"/cgi_tester", "/youpi.bla", NULL};
-    char *env[] = {};
+    char *args[3] = {"./cgi_tester", "/youpi.bla", NULL};
+    char *env[20] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
+                "REDIRECT_STATUS=200", "SERVER_PROTOCOL=HTTP/1.1", "SERVER_PORT=7995", "REQUEST_METHOD=GET",
+                "PATH_INFO=/cgi_tester", "PATH_TRANSLATED=/youpi.bla", "SCRIPT_FILENAME=/youpi.bla",
+                "AUTH_TYPE=Basic", "REMOTE_HOST=", "REMOTE_ADDR=127.0.0.1", "CONTENT_LENGTH=0",
+                "CONTENT_TYPE=text/plain", "QUERY_STRING=", "HTTP_ACCEPT=text/*", "HTTP_HOST=localhost",
+                "HTTP_USER_AGENT=Mozilla/91.0.1", NULL};
 
 
-    //Créer fichier temporaire pour stocker au fur
-    //et a mesure le contenu du cgi
-    std::ofstream   os;
-    os.open("test.txt", std::ifstream::in | std::ifstream::out | std::ifstream::app | std::ifstream::trunc); //Nom du fichier
-    if (os.is_open())
-    {
-        std::cerr << "Error opening tmp" << std::endl;
-        exit(0);
-    }
+
 
     //Gestion de l'execution du cgi
-    ft_cgi(args, env, os);
+    ft_cgi(args, env);
 
     
-
+    //Pas necessaire, mais pour nettoyage just in case
 
     return 0;
 }
@@ -99,3 +106,7 @@ int main(void)
 
 //Get = QUERY_STRING
 //Post = pipe un body sur stdin
+
+
+//Ouvrir fichier = fd
+//Rediriger fd pour recup data dans child
