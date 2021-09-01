@@ -32,8 +32,13 @@ typedef int fd;
 #define TRUE 1
 
 
+size_t get_file_size(std::string path);
+bool check_if_file_exist(std::string path);
+std::string construct_path(std::string path, Location location);
+Location find_best_location(Request request, Config config);
+size_t find_index_best_config(std::vector<Config> configs, std::string host_name, size_t port);
 void process_data(Request &request, std::vector<Config> configs);
-void response_header(int num_error, fd fd_to_send);
+void response_header(Request request, fd fd_to_send);
 void response_error_header(int num_error, fd fd_to_send);
 void timeout(Socket & socket);
 void response_post(int num_code,  Config config, fd fd_to_answer);
@@ -58,4 +63,6 @@ std::string    decoding_http_string(std::string str);
 
 int string_to_int(std::string str);
 void create_file(std::string path_name, std::string buffer);
+
+bool check_if_method_is_authorized(Request &request, Config config);
 #endif

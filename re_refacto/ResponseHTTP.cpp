@@ -17,7 +17,7 @@ _byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd)
 ResponseHTTP::~ResponseHTTP()
 {}
 
-void    ResponseHTTP::setPathFile(const char *path)
+void    ResponseHTTP::setPathFile(std::string path)
 {
     _path_file = path;
 }
@@ -31,23 +31,31 @@ void ResponseHTTP::send()
     std::fstream fs;
     char buffer[BUFFER_SIZE];
     int ret = 0;
-
+    std::cout << "PATH : " << _path_file << std::endl; 
     fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app);
     fs.seekg(_byte_send);
     fs.read(buffer, BUFFER_SIZE);
-    if (fs)
-    {
-        ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
-    }  
+    std::cout << "how much read? " << fs.gcount() << std::endl;
+    ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
     _byte_send += ret;
+    _in_progress = TRUE;
     if (ret  == fs.gcount() && fs.eof())
+    {
+        _in_progress = FALSE;
         _finished = TRUE;
+    }
+    std::cout << _byte_send << "BYTE SEND" << std::endl;
     fs.close();
 }
 
-bool ResponseHTTP::getFinished()
+bool ResponseHTTP::getFinished() const
 {
     return (_finished);
+}
+
+bool ResponseHTTP::getInProgress() const
+{
+    return (_in_progress);
 }
 
 void ResponseHTTP::setFinished(bool boolean)
@@ -55,12 +63,18 @@ void ResponseHTTP::setFinished(bool boolean)
     _finished = boolean;
 }
 
+void ResponseHTTP::setInProgress(bool boolean)
+{
+    _in_progress = boolean;
+}
+
+
 void ResponseHTTP::resetByteSend()
 {
     _byte_send = 0;
 }
 
-std::string ResponseHTTP::getPath()
+std::string ResponseHTTP::getPath() const
 {
     return (_path_file);
 }

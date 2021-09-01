@@ -39,3 +39,10 @@ bool const VerifyDuplicata::isDuplicata() const
         return (TRUE);
     return (FALSE);
 }
+
+bool const VerifyDuplicata::isMissingData() const
+{
+    if (_nb_host < 1)
+        return (TRUE);
+    return (FALSE);
+}

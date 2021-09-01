@@ -3,8 +3,9 @@
 
 #include "define.hpp"
 #include <string>
+#include "ResponseHTTP.hpp"
 
-class ResponseHTTP;
+class Config;
 class Request
 {
     private :
@@ -18,6 +19,9 @@ class Request
         std::string _path;
         std::string _host_name;
         int         _content_length;
+        bool        _in_progress;
+
+        ResponseHTTP _response;
     
     public :
         Request(fd, size_t);
@@ -32,12 +36,18 @@ class Request
         std::string const & getHostName() const;
         int const &         getContentLength() const;
         std::string const & getRequest() const;        
+        bool const &        getInProgress() const;
 
+        void            setInProgress(bool); 
         void            setError(int error); 
         void            setMethod(std::string method);
         void            setPath(std::string path);
         void            setHostName(std::string host_name);
         void            setContentLength(int content_length);
+       
+       
+        void                    setResponseHTTP(Config config);
+        ResponseHTTP const &    getResponseHTTP() const;
         
         
         void        addRequest(std::string buffer);
@@ -45,6 +55,7 @@ class Request
 
         void        receiveData();
         void        resetRequest();
+        void        send();
 
 };
 

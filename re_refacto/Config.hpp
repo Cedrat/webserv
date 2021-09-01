@@ -24,7 +24,7 @@ class Config
         Config(void);
         ~Config(void);
        
-        size_t                        getPort(void) const;
+        size_t                      getPort(void) const;
         bool                        getServerOrClient(void) const;
         int                         getHost(void) const;
         int                         getMaxBodySize(void) const;

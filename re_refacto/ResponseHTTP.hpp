@@ -9,7 +9,8 @@ class ResponseHTTP
     private :
         std::string     _path_file;
         size_t          _byte_send;
-        bool            _finished;
+        bool            _in_progress;
+        bool            _finished; // implement response HTTP
         int             _fd_to_answer;
 
         int             _method;
@@ -22,12 +23,14 @@ class ResponseHTTP
         void    send();
 
         void    resetByteSend();
-        bool    getFinished();
-        void    setPathFile(const char* path);
+        bool    getFinished() const;
+        void    setPathFile(std::string path);
         void    setFdToAnswer(int);
         void    setFinished(bool);
+        void    setInProgress(bool);
+        bool    getInProgress() const;
         
-        std::string getPath();
+        std::string getPath() const;
         ResponseHTTP& operator=(const ResponseHTTP& other);
 };
 #endif

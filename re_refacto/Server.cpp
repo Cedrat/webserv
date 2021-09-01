@@ -126,10 +126,11 @@ void Server::acceptConnection(void)
 		}
         else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
+            std::cout << "POLLIN" << std::endl;
             _sockets[i].setTimeout(std::time(0));
             receiveData(_poll_fds[i].fd);
-            ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
-            write(1, buffer, ret);
+            // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
+            // write(1, buffer, ret);
             if (requestCompleted(_poll_fds[i].fd) == TRUE)
             {
                 if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() == OK)
@@ -141,11 +142,23 @@ void Server::acceptConnection(void)
 		}
         else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
         {
-            std::cout << "datasend" << std::endl;
-            _poll_fds[i].events = POLLIN;
-            _poll_fds[i].revents = 0;
-            response_header(_requests[getIndexRequest(_poll_fds[i].fd)].getError(), _poll_fds[i].fd);
-            _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+            _sockets[i].setTimeout(std::time(0));
+            std::cout << "POLLOUT" << std::endl;
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == FALSE)
+            {
+                response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(TRUE);
+            }
+            else
+                _requests[getIndexRequest(_poll_fds[i].fd)].send();
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getResponseHTTP().getFinished() == TRUE)
+            {
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+                _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+                std::cout << "reseted" << std::endl;
+                _poll_fds[i].events = POLLIN;
+                _poll_fds[i].revents = 0;
+            }
         }
     }
 }
