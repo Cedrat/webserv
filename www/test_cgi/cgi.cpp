@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <cstdlib>
 
-std::string ft_cgi(char ** args, char **env)
+std::string ft_cgi(const char ** args, const char ** env)
 {
     std::string header;
 
@@ -31,14 +31,15 @@ std::string ft_cgi(char ** args, char **env)
     pid = fork();
     if (pid == 0)       //Child
     {
-        std::cout << "\nEnter child process" << std::endl;
+        std::cout << "\nEnter child process :" << std::endl;
 
         //Probleme ICI
-        //dup2(fdIn, 0);
-        dup2(fdOut, 1);
+        //dup2(fdIn, STDIN_FILENO);
+        dup2(fdOut, STDOUT_FILENO);
+        //dup2(fdOut, STDERR_FILENO);
 
         //arg[0] = script path  ||  arg[1] = requested file path  ||  arg[3] = NULL
-        if ((execve(args[0], args, env)) < 0)
+        if ((execve(args[0], const_cast<char *const *>(args), const_cast<char**>(env))) < 0)
         {
             std::cerr << "Execve failed" << std::endl;
             close(fdIn);
@@ -50,13 +51,13 @@ std::string ft_cgi(char ** args, char **env)
     {
         waitpid(pid, &status, 0);
         if (WIFEXITED(status))
-            std::cout << "Exit status : " << WEXITSTATUS(status) << std::endl;
+            std::cout << "\nExit status : " << WEXITSTATUS(status) << std::endl;
 
         int ret = 1;
         char buffer[50] = {0};
         while (ret > 0)
         {
-           ret = read(fdOut, buffer, 49);
+           ret = read(fdOut, buffer, 49); //Lire sur fdin ?
            header += buffer;
         }
     }
@@ -71,6 +72,7 @@ std::string ft_cgi(char ** args, char **env)
     std::cout << "Closing fds" << std::endl;
     close(fdIn);
     close(fdOut);
+    fclose(fOut);
 
     std::cout << "\nReturned :" << std::endl;
     std::cout << header << std::endl;
@@ -81,22 +83,17 @@ std::string ft_cgi(char ** args, char **env)
 
 int main(void)
 {
-    char *args[3] = {"./cgi_tester", "/youpi.bla", NULL};
-    char *env[20] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
+    const char *args[3] = {"./cgi_tester", "/youpi.bla", NULL};
+    const char *env[21] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
                 "REDIRECT_STATUS=200", "SERVER_PROTOCOL=HTTP/1.1", "SERVER_PORT=7995", "REQUEST_METHOD=GET",
                 "PATH_INFO=/cgi_tester", "PATH_TRANSLATED=/youpi.bla", "SCRIPT_FILENAME=/youpi.bla",
                 "AUTH_TYPE=Basic", "REMOTE_HOST=", "REMOTE_ADDR=127.0.0.1", "CONTENT_LENGTH=0",
                 "CONTENT_TYPE=text/plain", "QUERY_STRING=", "HTTP_ACCEPT=text/*", "HTTP_HOST=localhost",
-                "HTTP_USER_AGENT=Mozilla/91.0.1", NULL};
-
-
-
+                "HTTP_USER_AGENT=Mozilla/91.0.1", "HTTP_COOKIE=", NULL};
 
     //Gestion de l'execution du cgi
     ft_cgi(args, env);
 
-    
-    //Pas necessaire, mais pour nettoyage just in case
 
     return 0;
 }
