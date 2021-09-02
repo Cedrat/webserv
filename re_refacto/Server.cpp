@@ -92,7 +92,7 @@ void Server::launchingServer(void)
 		}
 		catch (char const* str)
 		{
-			std::cout << str << std::endl;
+			std::cout << "ERROR CATCH" << str << std::endl;
 		}
 	} 
 }
@@ -107,6 +107,7 @@ void Server::acceptConnection(void)
     poll(poll_fd, _poll_fds.size(), -1);
     for (size_t i = 0; i < _poll_fds.size(); i++)
     {
+        //std::cout << _poll_fds.size() << "SIZE" << std::endl;
         timeout(_sockets[i]);
         if (_sockets[i].getTimeout() == -1)
         {
@@ -114,32 +115,14 @@ void Server::acceptConnection(void)
 			removeSocket(i);
 			std::cout << "Client disconnected by timeout" << std::endl;
         }
+        else if (_poll_fds[i].revents & POLLERR && _sockets[i].getServerOrClient() == CLIENT)
+        {
+            std::cout << "BIG_ERR" << std::endl;
+        }
         else if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
         {
             createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort());
         }
-        else if (_poll_fds[i].revents & POLLHUP)
-		{
-			close(_poll_fds[i].fd);
-			removeSocket(i);
-			std::cout << "Client disconnected by ragequit" << std::endl;
-		}
-        else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
-		{
-            std::cout << "POLLIN" << std::endl;
-            _sockets[i].setTimeout(std::time(0));
-            receiveData(_poll_fds[i].fd);
-            // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
-            // write(1, buffer, ret);
-            if (requestCompleted(_poll_fds[i].fd) == TRUE)
-            {
-                if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() == OK)
-                    process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
-                std::cout << "Request finished" << std::endl;
-                _poll_fds[i].events = POLLOUT;
-                _poll_fds[i].revents = 0;
-            }
-		}
         else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
         {
             _sockets[i].setTimeout(std::time(0));
@@ -149,8 +132,8 @@ void Server::acceptConnection(void)
                 response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(TRUE);
             }
-            else
-                _requests[getIndexRequest(_poll_fds[i].fd)].send();
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
+                    _requests[getIndexRequest(_poll_fds[i].fd)].send();
             if (_requests[getIndexRequest(_poll_fds[i].fd)].getResponseHTTP().getFinished() == TRUE)
             {
                 _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
@@ -159,7 +142,43 @@ void Server::acceptConnection(void)
                 _poll_fds[i].events = POLLIN;
                 _poll_fds[i].revents = 0;
             }
+            // else
+            // {
+            //     _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+            //     _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+            //     _poll_fds[i].events = POLLIN;
+            //     _poll_fds[i].revents = 0;
+
+            // }
+            std::cout << "POLLOUT ENDED" << std::endl;
         }
+        else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
+		{
+            std::cout << "POLLIN" << std::endl;
+            _sockets[i].setTimeout(std::time(0));
+            std::cout << "LINES " << _requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() << std::endl;
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
+            {
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+                _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+            }
+            receiveData(_poll_fds[i].fd);
+            // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
+            // write(1, buffer, ret);
+            if (requestCompleted(_poll_fds[i].fd) == TRUE)
+            {
+                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                std::cout << "Request finished" << std::endl;
+                _poll_fds[i].events = POLLOUT;
+                _poll_fds[i].revents = 0;
+            }
+		}
+        else if (_poll_fds[i].revents & POLLHUP)
+		{
+			close(_poll_fds[i].fd);
+			removeSocket(i);
+			std::cout << "Client disconnected by ragequit" << std::endl;
+		}
     }
 }
 

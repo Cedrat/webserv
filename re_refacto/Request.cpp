@@ -110,7 +110,7 @@ void Request::receiveData()
     str_request = buffer;
     addRequest(str_request);
     checkSyntaxRequest();
-    std::cout << str_request << std::endl;
+    std::cout << "|||||" << str_request << "|||||" << std::endl;
     if (_request.find("\r\n\r\n") != std::string::npos)
         _request_completed = TRUE;
 }
@@ -121,12 +121,16 @@ void    Request::checkSyntaxRequest()
     char motif_method[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
     char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
     char motif2[] = "[a-zA-z0-9]+: +.*[^ ]+\r\n";
+    std::cout << "_______" << _request << "_______" << std::endl;
     all_lines = split_string(_request, "\n");
-    if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_version_not_supported) >= 1)
-        setError(NOT_SUPPORTED);
-    else if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_method) < 1)
-        setError(BAD_REQUEST);
-    if (getError() == OK)
+    if (_request != "")
+    {
+        if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_version_not_supported) >= 1)
+            setError(NOT_SUPPORTED);
+        else if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_method) < 1)
+            setError(BAD_REQUEST);
+    }
+    if (getError() == OK && _request != "")
     {
         for (size_t i = 1; i < all_lines.size(); i++)
         {
@@ -162,11 +166,15 @@ void    Request::setResponseHTTP(Config config)
 
     _response.setPathFile(construct_path(_path, location));
     
-    if (check_if_file_exist(_response.getPath()) == FALSE)
+    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != 400)
         setError(NOT_FOUND);
     _response.resetByteSend();
     _response.setFdToAnswer(getFd());
-    _response.setFinished(FALSE); 
+    _response.setFinished(FALSE);
+    if (getError() != OK)
+    {
+        _response.setPathFile("./../www/default_error_files/default_err" + int_to_string(getError()) + ".html");
+    }
     std::cout << "Final path is = " << _response.getPath() << std::endl;
 }
 

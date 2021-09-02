@@ -1,9 +1,19 @@
 #include "./includes/utils.hpp"
 
-int main(int argc, char** argv)
+
+mutex *
+
+struct philo
 {
-    if (check_valid_path(argv[1]))
-        std::cout << factorised_path(argv[1]) << std::endl;
-    else
-        std::cout << "Security breach detected" << std::endl;
+    fourchette_gauche = mutex;
+    fourchette_droite = mutex;
 }
+
+10 threads qui veulent écrire en même temps 
+
+
+pthread_mutex_lock(mutex)
+write(1);
+phthread_mutex_unlock(mutex)
+
+

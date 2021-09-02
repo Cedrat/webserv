@@ -29,22 +29,21 @@ void ResponseHTTP::setFdToAnswer(int fd_client)
 void ResponseHTTP::send()
 {
     std::fstream fs;
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE + 1];
     int ret = 0;
     std::cout << "PATH : " << _path_file << std::endl; 
-    fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app);
+    fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app); 
     fs.seekg(_byte_send);
     fs.read(buffer, BUFFER_SIZE);
+    buffer[fs.gcount()] = '\0'; 
     std::cout << "how much read? " << fs.gcount() << std::endl;
     ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
     _byte_send += ret;
-    _in_progress = TRUE;
-    if (ret  == fs.gcount() && fs.eof())
+    if (fs.eof())
     {
-        _in_progress = FALSE;
         _finished = TRUE;
     }
-    std::cout << _byte_send << "BYTE SEND" << std::endl;
+    std::cout << ret << "BYTE SEND" << std::endl;
     fs.close();
 }
 

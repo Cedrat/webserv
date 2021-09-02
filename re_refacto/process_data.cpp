@@ -16,38 +16,37 @@ void process_data(Request &request, std::vector<Config> configs)
     if (verify.isDuplicata() == TRUE)
     {
         request.setError(BAD_REQUEST);
-        return;
     }
     if (verify.isMissingData() == TRUE)
     {
         request.setError(BAD_REQUEST);
-        return; 
     }
-    request.setMethod(extract_method(str_request));
-    std::cout << "Method = " << request.getMethod() << std::endl;
-    request.setHostName(extract_host_name(str_request));
-    request.setPath(extract_path(str_request));
-    std::cout << "Path = " << request.getPath() << std::endl;
-    request.setHostName(extract_host_name(str_request));
-    std::cout << "Host-Name = " << request.getHostName() << std::endl;
-    if (verify.getNbContentLength() == 1)
-        request.setContentLength(extract_content_length(str_request));
-    std::cout << "Content_length = " << request.getContentLength() << std::endl;
-    
-    if (check_valid_path(request.getPath()) == FALSE)
+    if (request.getError() == OK)
     {
-        request.setError(BAD_REQUEST);
-        return;
-    }
+        request.setMethod(extract_method(str_request));
+        std::cout << "Method = " << request.getMethod() << std::endl;
+        request.setHostName(extract_host_name(str_request));
+        request.setPath(extract_path(str_request));
+        std::cout << "Path = " << request.getPath() << std::endl;
+        request.setHostName(extract_host_name(str_request));
+        std::cout << "Host-Name = " << request.getHostName() << std::endl;
+        if (verify.getNbContentLength() == 1)
+            request.setContentLength(extract_content_length(str_request));
+        std::cout << "Content_length = " << request.getContentLength() << std::endl;
 
-    request.setPath(factorised_path(request.getPath()));
+        if (check_valid_path(request.getPath()) == FALSE)
+        {
+            request.setError(BAD_REQUEST); 
+        }
 
-    size_t index_best_config = find_index_best_config(configs, request.getHostName(), request.getPort());
-    if (check_if_method_is_authorized(request, configs[index_best_config]) == FALSE)
-    {
-        request.setError(METHOD_NOT_ALLOWED);
-        return ;
+        request.setPath(factorised_path(request.getPath()));
+
     }
+        size_t index_best_config = find_index_best_config(configs, request.getHostName(), request.getPort());
+        if (check_if_method_is_authorized(request, configs[index_best_config]) == FALSE)
+        {
+            request.setError(METHOD_NOT_ALLOWED);
+        }
     request.setResponseHTTP(configs[index_best_config]);
 }
 

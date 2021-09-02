@@ -5,9 +5,9 @@ VerifyDuplicata::VerifyDuplicata(std::string request) : _nb_host(0), _nb_content
     std::vector<std::string> lines;
 
     lines = split_string(request, "\n");
-
     for (size_t i = 1; i < lines.size(); i++)
     {
+        std::cout << "LINES " << i << "  " << lines[i] << std::endl;
         if (lines[i].find("Host") == 0)
         {
             _nb_host++;
