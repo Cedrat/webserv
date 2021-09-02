@@ -5,8 +5,16 @@
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <cstdlib>
+
+std::string generateTempFileName()
+{
+    std::ostringstream ss;
+    ss << "/tmp/" << "00";  //Besoin d'une fonction pour donner nom aleatoire
+    return ss.str();    
+}
+
+
 
 std::string ft_cgi(const char ** args, const char ** env)
 {
@@ -23,6 +31,8 @@ std::string ft_cgi(const char ** args, const char ** env)
     FILE* fOut = fopen("test2.txt", "w");
     int fdIn = fileno(fIn);
     int fdOut = fileno(fOut);
+
+    //int fd = open("test.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
     //Write le body dans fdin ?
     write(fdIn, "test", 4);
@@ -65,6 +75,7 @@ std::string ft_cgi(const char ** args, const char ** env)
         std::cerr << "Error with fork()" << std::endl;
         close(fdIn);
         close(fdOut);
+        remove("test2.txt");
         exit(0);
     }
 
