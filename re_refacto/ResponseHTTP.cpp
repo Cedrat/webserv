@@ -5,6 +5,7 @@
 #include "define.hpp"
 #include <iostream>
 #include "../includes/utils.hpp"
+#include <csignal>
 
 
 ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE)
@@ -28,6 +29,7 @@ void ResponseHTTP::setFdToAnswer(int fd_client)
 }
 void ResponseHTTP::send()
 {
+    signal(SIGPIPE, SIG_IGN);
     std::fstream fs;
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;

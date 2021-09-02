@@ -156,7 +156,6 @@ void Server::acceptConnection(void)
 		{
             std::cout << "POLLIN" << std::endl;
             _sockets[i].setTimeout(std::time(0));
-            std::cout << "LINES " << _requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() << std::endl;
             if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
             {
                 _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);

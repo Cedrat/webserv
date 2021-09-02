@@ -4,7 +4,7 @@
 #include "Config.hpp"
 #include "Location.hpp"
 
-Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port)
+Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) , _in_progress(FALSE)
 {
     resetRequest();
 }
