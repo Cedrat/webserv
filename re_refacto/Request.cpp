@@ -111,6 +111,7 @@ void Request::receiveData()
     addRequest(str_request);
     checkSyntaxRequest();
     std::cout << "|||||" << str_request << "|||||" << std::endl;
+    std::cout << "Bytes read " << ret << std::endl;
     if (_request.find("\r\n\r\n") != std::string::npos)
         _request_completed = TRUE;
 }

@@ -152,9 +152,16 @@ void Server::acceptConnection(void)
             // }
             std::cout << "POLLOUT ENDED" << std::endl;
         }
+        else if (_poll_fds[i].revents & POLLHUP)
+		{
+			close(_poll_fds[i].fd);
+			removeSocket(i);
+			std::cout << "Client disconnected by ragequit" << std::endl;
+		}
         else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
             std::cout << "POLLIN" << std::endl;
+            std::cout << "REVENTS" << _poll_fds[i].revents << std::endl;
             _sockets[i].setTimeout(std::time(0));
             if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
             {
@@ -162,6 +169,7 @@ void Server::acceptConnection(void)
                 _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
             }
             receiveData(_poll_fds[i].fd);
+            
             // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
             // write(1, buffer, ret);
             if (requestCompleted(_poll_fds[i].fd) == TRUE)
@@ -171,12 +179,6 @@ void Server::acceptConnection(void)
                 _poll_fds[i].events = POLLOUT;
                 _poll_fds[i].revents = 0;
             }
-		}
-        else if (_poll_fds[i].revents & POLLHUP)
-		{
-			close(_poll_fds[i].fd);
-			removeSocket(i);
-			std::cout << "Client disconnected by ragequit" << std::endl;
 		}
     }
 }

@@ -41,7 +41,7 @@ void ResponseHTTP::send()
     std::cout << "how much read? " << fs.gcount() << std::endl;
     ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
     _byte_send += ret;
-    if (fs.eof())
+    if (ret == fs.gcount() && fs.eof())
     {
         _finished = TRUE;
     }
