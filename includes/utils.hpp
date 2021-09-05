@@ -26,12 +26,13 @@ class Request;
 class ResponseHTTP;
 
 typedef int fd;
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1000000
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1
 
-
+std::string redir_path(std::string path, std::string path_redir, std::string part_to_replace);
+bool is_folder(const char * path);
 size_t get_file_size(std::string path);
 bool check_if_file_exist(std::string path);
 std::string construct_path(std::string path, Location location);

@@ -4,7 +4,8 @@
 #include "Config.hpp"
 #include "Location.hpp"
 
-Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) , _in_progress(FALSE)
+Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
+ _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE)
 {
     resetRequest();
 }
@@ -108,6 +109,8 @@ void Request::receiveData()
         std::cout << "read error" << std::endl;
     buffer[ret] = 0;
     str_request = buffer;
+    if (str_request == "\r\n" && _request == "")
+        return ;
     addRequest(str_request);
     checkSyntaxRequest();
     std::cout << "|||||" << str_request << "|||||" << std::endl;
@@ -142,6 +145,10 @@ void    Request::checkSyntaxRequest()
             {
                 setError(BAD_REQUEST);
             }
+            else if (all_lines[i] == "")
+            {
+                setError(BAD_REQUEST);
+            }
         }
     }
 }
@@ -167,14 +174,34 @@ void    Request::setResponseHTTP(Config config)
 
     _response.setPathFile(construct_path(_path, location));
     
-    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != 400)
+    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != 400 && getError() == OK)
         setError(NOT_FOUND);
     _response.resetByteSend();
     _response.setFdToAnswer(getFd());
     _response.setFinished(FALSE);
+    if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+        _response.setPageAutoIndex();
+    
+    if (getError() == OK && getMethod() == "DELETE")
+        {
+            std::cout <<  "DELETE PATH" << _response.getPath() << std::endl;
+            if (check_if_file_exist(_response.getPath().c_str()))
+            {
+                delete_f(_response.getPath().c_str());
+                setError(NO_CONTENT);
+            }
+            else 
+                setError(NOT_FOUND);
+        }
+    if (location.getRedirect() != "")
+    {
+        setError(MOVED_PERMANENTLY);// creer Set path redirect;
+        setPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
+    } 
     if (getError() != OK)
     {
-        _response.setPathFile("./../www/default_error_files/default_err" + int_to_string(getError()) + ".html");
+        _response.setAutoIndex(FALSE);
+        _response.setPathFile(config.getPathError(getError()));
     }
     std::cout << "Final path is = " << _response.getPath() << std::endl;
 }

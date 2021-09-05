@@ -7,6 +7,7 @@ std::map<int, std::string> error_table()
 
     error_list[200] = "200 OK";
     error_list[204] = "204 No Content";
+    error_list[301] = "301 Moved Permanently";
     error_list[400] = "400 Bad Request";
     error_list[404] = "404 Not Found";
     error_list[405] = "405 Method Not Allowed";

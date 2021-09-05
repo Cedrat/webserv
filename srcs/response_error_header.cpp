@@ -24,7 +24,7 @@ std::string  response_error_header(int num_code,  Config config, fd fd_to_answer
     {
         page += line + "\n";
     }
-    page = "HTTP/1.1 " + get_string_error(num_code) + "\nContent-Length: " + int_to_string(page.size() - 1) + "\n\n" ;
+    page = "HTTP/1.1 " + get_string_error(num_code) + "\nContent-Length: " + int_to_string(page.size()) + "\n\n" ;
 
     send(fd_to_answer, page.c_str(), page.size(), 0);
     

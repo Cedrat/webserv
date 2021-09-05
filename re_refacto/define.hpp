@@ -12,6 +12,8 @@
 # define TIMEOUT 60
 
 # define OK 200
+# define NO_CONTENT 204
+# define MOVED_PERMANENTLY 301
 # define BAD_REQUEST 400
 # define NOT_FOUND 404
 # define METHOD_NOT_ALLOWED 405

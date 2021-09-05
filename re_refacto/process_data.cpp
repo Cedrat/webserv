@@ -43,11 +43,12 @@ void process_data(Request &request, std::vector<Config> configs)
 
     }
         size_t index_best_config = find_index_best_config(configs, request.getHostName(), request.getPort());
-        if (check_if_method_is_authorized(request, configs[index_best_config]) == FALSE)
+        if (check_if_method_is_authorized(request, configs[index_best_config]) == FALSE && request.getError() == OK)
         {
             request.setError(METHOD_NOT_ALLOWED);
         }
-    request.setResponseHTTP(configs[index_best_config]);
+        request.checkSyntaxRequest();
+        request.setResponseHTTP(configs[index_best_config]);
 }
 
 std::string extract_method(std::string request)

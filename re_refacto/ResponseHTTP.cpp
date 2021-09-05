@@ -23,30 +23,55 @@ void    ResponseHTTP::setPathFile(std::string path)
     _path_file = path;
 }
 
+void    ResponseHTTP::setPageAutoIndex()
+{
+    _ai_file = create_ai_page(_path_file.c_str()); 
+    _ai = TRUE;
+}
+
+std::string const & ResponseHTTP::getPageAutoIndex() const
+{
+    return (_ai_file);
+}
+
+void ResponseHTTP::setAutoIndex(bool boolean)
+{
+    _ai = boolean;
+}
+
 void ResponseHTTP::setFdToAnswer(int fd_client)
 {
     _fd_to_answer= fd_client;
 }
 void ResponseHTTP::send()
 {
-    signal(SIGPIPE, SIG_IGN);
-    std::fstream fs;
-    char buffer[BUFFER_SIZE + 1];
-    int ret = 0;
-    std::cout << "PATH : " << _path_file << std::endl; 
-    fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app); 
-    fs.seekg(_byte_send);
-    fs.read(buffer, BUFFER_SIZE);
-    buffer[fs.gcount()] = '\0'; 
-    std::cout << "how much read? " << fs.gcount() << std::endl;
-    ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
-    _byte_send += ret;
-    if (ret == fs.gcount() && fs.eof())
+        signal(SIGPIPE, SIG_IGN);
+    if (_ai == FALSE)
     {
+        std::fstream fs;
+        char buffer[BUFFER_SIZE + 1];
+        int ret = 0;
+        std::cout << "PATH : " << _path_file << std::endl; 
+        fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app); 
+        fs.seekg(_byte_send);
+        fs.read(buffer, BUFFER_SIZE);
+        buffer[fs.gcount()] = '\0'; 
+        std::cout << "how much read? " << fs.gcount() << std::endl;
+        ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);
+        _byte_send += ret;
+        if (ret == fs.gcount() && fs.eof())
+        {
+            _finished = TRUE;
+        }
+        std::cout << ret << "BYTE SEND" << std::endl;
+        fs.close();
+    }
+    else
+    {
+        ::send(_fd_to_answer, _ai_file.c_str(), _ai_file.size(), 0);
+        setAutoIndex(FALSE);
         _finished = TRUE;
     }
-    std::cout << ret << "BYTE SEND" << std::endl;
-    fs.close();
 }
 
 bool ResponseHTTP::getFinished() const
