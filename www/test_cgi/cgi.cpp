@@ -7,14 +7,6 @@
 #include <sys/stat.h>
 #include <cstdlib>
 
-std::string generateTempFileName()
-{
-    std::ostringstream ss;
-    ss << "/tmp/" << "00";  //Besoin d'une fonction pour donner nom aleatoire
-    return ss.str();    
-}
-
-
 
 std::string ft_cgi(const char ** args, const char ** env)
 {
@@ -93,7 +85,8 @@ int main(void)
 {
     std::string header;
 
-    const char *args[3] = {"./../../../../.brew/bin/php-cgi", "/test.php", NULL};
+    //const char *args[3] = {"./../../../../.brew/bin/php-cgi", "/test.php", NULL};
+    const char *args[3] = {"./../../../../../../../usr/bin/php-cgi", "/test.php", NULL};
     const char *env[21] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
                 "REDIRECT_STATUS=200", "SERVER_PROTOCOL=HTTP/1.1", "SERVER_PORT=7995", "REQUEST_METHOD=GET",
                 "PATH_INFO=/php-cgi", "PATH_TRANSLATED=/php-cgi", "SCRIPT_FILENAME=test.php",

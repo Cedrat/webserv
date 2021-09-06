@@ -294,7 +294,7 @@ bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationC
         location->setUploadFolder(line);
     else if (line[0] == "cgi" && line.size() == 3)
         location->setCgi(line);
-    else if (line[0] == "rewrite" && line.size() >= 2 && line.size() <= 3)
+    else if (line[0] == "rewrite" && line.size() == 2)
         location->setRedirect(line);
     else
     {

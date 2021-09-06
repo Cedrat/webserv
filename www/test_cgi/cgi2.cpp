@@ -50,12 +50,11 @@ std::string ft_cgi(std::string fileName, const char ** args, const char ** env)
     pid_t   pid;
     int     status;
 
-//Creation du fichier temporaire
-//Creation des pipes
+//Creation du fichier temporaire & des pipes
     int fd[2];
     int tmp = open(fileName.c_str(), O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
 
-    if (pipe(fd) < 0 || tmp < 0)
+    if ((pipe(fd) < 0) || (tmp < 0))
     {
         std::cerr << "Pipe or tmp file opening failed" << std::endl;
         exit(0);
@@ -115,14 +114,15 @@ int main(void)
                 "CONTENT_TYPE=text/plain", "QUERY_STRING=", "HTTP_ACCEPT=text/*", "HTTP_HOST=localhost",
                 "HTTP_USER_AGENT=Mozilla/91.0.1", "HTTP_COOKIE=", NULL};
 
-/***
-    const char *args[3] = {"./cgi_tester", "/youpi.bla", NULL};
-    const char *env[21] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
-                "REDIRECT_STATUS=200", "SERVER_PROTOCOL=HTTP/1.1", "SERVER_PORT=7995", "REQUEST_METHOD=GET",
-                "PATH_INFO=/cgi_tester", "PATH_TRANSLATED=/cgi_tester", "SCRIPT_FILENAME=youpi.bla",
-                "AUTH_TYPE=Basic", "REMOTE_HOST=", "REMOTE_ADDR=127.0.0.1", "CONTENT_LENGTH=0",
-                "CONTENT_TYPE=text/plain", "QUERY_STRING=", "HTTP_ACCEPT=text/*", "HTTP_HOST=localhost",
-                "HTTP_USER_AGENT=Mozilla/91.0.1", "HTTP_COOKIE=", NULL};
+/***    
+*    const char *args[3] = {"./ubuntu_cgi_tester", "/youpi.bla", NULL};
+*    const char *args[3] = {"./cgi_tester", "/youpi.bla", NULL};
+*    const char *env[21] = {"SERVER_SOFTWARE=Webserv/1.0", "SERVER_NAME=127.0.0.1", "GATEWAY_INTERFACE=CGI/1.1",
+*                "REDIRECT_STATUS=200", "SERVER_PROTOCOL=HTTP/1.1", "SERVER_PORT=7995", "REQUEST_METHOD=GET",
+*                "PATH_INFO=/cgi_tester", "PATH_TRANSLATED=/cgi_tester", "SCRIPT_FILENAME=youpi.bla",
+*                "AUTH_TYPE=Basic", "REMOTE_HOST=", "REMOTE_ADDR=127.0.0.1", "CONTENT_LENGTH=0",
+*                "CONTENT_TYPE=text/plain", "QUERY_STRING=", "HTTP_ACCEPT=text/*", "HTTP_HOST=localhost",
+*                "HTTP_USER_AGENT=Mozilla/91.0.1", "HTTP_COOKIE=", NULL};
 ***/
 
     //Gestion de l'execution du cgi
