@@ -51,6 +51,8 @@ export HTTP_HOST=localhost          # = server_name | Pas nécessaire !
 export PATH_INFO=/php-cgi
 export PATH_TRANSLATED=/php-cgi
 export SCRIPT_FILENAME=test.php
+export SCRIPT_NAME=test.php
+export REQUEST_URI=/php-cgi
 
 
 php-cgi
