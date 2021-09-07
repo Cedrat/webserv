@@ -68,6 +68,7 @@ void ResponseHTTP::send()
     }
     else
     {
+        std::cout << _ai_file << std::endl;
         ::send(_fd_to_answer, _ai_file.c_str(), _ai_file.size(), 0);
         setAutoIndex(FALSE);
         _finished = TRUE;

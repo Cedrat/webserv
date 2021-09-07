@@ -6,7 +6,9 @@ void response_header(Request request, fd fd_to_send)
 {
     std::string response_header;
     std::string path = request.getResponseHTTP().getPath();
-    if (request.getError() != MOVED_PERMANENTLY)
+    if (request.getResponseHTTP().getPageAutoIndex() != "")
+        response_header = "HTTP/1.1 " + get_string_error(request.getError()) + "\nContent-Length: " + int_to_string(request.getResponseHTTP().getPageAutoIndex().size()) + "\n\n";
+    else if (request.getError() != MOVED_PERMANENTLY)
         response_header = "HTTP/1.1 " + get_string_error(request.getError()) + "\nContent-Length: " + int_to_string((int)get_file_size(path)) + "\n\n";
     else
     {
