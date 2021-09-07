@@ -14,8 +14,8 @@ export SERVER_PORT=7995
 export REQUEST_METHOD=GET
 #export PATH_INFO=/cgi_tester        # Chemin du script
 #export PATH_TRANSLATED=/cgi_tester   # Chemin absolu d'acces au script
-#export SCRIPT_NAME=/youpi.bla       # Le chemin virtuel vers le script étant exécuté
-#export SCRIPT_FILENAME=/youpi.bla   # Chemin d'acces complet au script cgi
+#export SCRIPT_NAME=youpi.bla       # Le chemin virtuel vers le script étant exécuté
+#export SCRIPT_FILENAME=youpi.bla   # Chemin d'acces complet au script cgi
 export AUTH_TYPE=Basic
 
 
@@ -40,10 +40,19 @@ export HTTP_HOST=localhost          # = server_name | Pas nécessaire !
 
 
 
+#TEST UBUNTU_CGI#
+#export PATH_INFO=/ubuntu_cgi_tester
+#export PATH_TRANSLATED=/ubuntu_cgi_tester
+#./ubuntu_cgi_tester youpi.bla
+
+
+
 #TEST PHP#
 export PATH_INFO=/php-cgi
 export PATH_TRANSLATED=/php-cgi
 export SCRIPT_FILENAME=test.php
+export SCRIPT_NAME=test.php
+export REQUEST_URI=/php-cgi
 
 
 php-cgi

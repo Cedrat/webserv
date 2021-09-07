@@ -49,7 +49,7 @@ class locationConfig
         std::vector<std::string>   getMethods() const;
         std::vector<std::string>   getIndex() const;
         std::map<std::string, std::string> getCgi() const;
-        std::vector<std::string>   getRedirect() const;
+        std::string                getRedirect() const;
 
         void                        debug();
 
@@ -62,7 +62,7 @@ class locationConfig
         std::string                         _upload_folder;
         std::map<std::string, std::string>  _cgi;
         bool                                _isFile;
-        std::vector<std::string>            _redirect;
+        std::string                         _redirect;
 
 };
 

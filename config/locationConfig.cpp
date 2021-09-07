@@ -9,7 +9,7 @@ locationConfig::locationConfig()
     this->_upload_folder = "-1";
     this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
     this->_isFile = false;
-    this->_redirect.push_back("-1");
+    this->_redirect = "-1";
 }
 
 locationConfig::~locationConfig() { }
@@ -25,9 +25,9 @@ void locationConfig::setLocationDirective( std::vector<std::string> line )
 {
     this->_location = line[1];
 
-    size_t dotPos = _location.find(".", 0);
+    /*size_t dotPos = _location.find(".", 0);
     if (dotPos != std::string::npos && _location[dotPos + 1])
-        this->_isFile = true; 
+        this->_isFile = true;*/
 }
 
 void locationConfig::setRoot( std::vector<std::string> line )
@@ -130,13 +130,9 @@ void locationConfig::setCgi( std::vector<std::string> line )
 
 void locationConfig::setRedirect( std::vector<std::string> line )
 {
-    if (_redirect[0] == "-1")
+    if (_redirect == "-1")
     {
-        _redirect.clear();
-        for(size_t i = 1; i < line.size(); i++)
-            _redirect.push_back(line[i]);
-        if (_redirect.size() == 1)
-            _redirect.push_back("redirect");
+        _redirect = line[1];
     }
     else
         throw std::invalid_argument("Error : location block can't contain more than one rewrite directive");
@@ -205,6 +201,23 @@ bool locationConfig::checkLocation()
     {
         std::cerr << "Error in location path : Invalid character" << std::endl;
         return false;
+    }
+
+    size_t dotPos = _location.find(".", 0);
+    if (dotPos != std::string::npos && _location[dotPos + 1])
+    {
+        std::ifstream location;
+        std::string checkFile;
+        if (_root[_root.size() - 1] == '/' && _location[0] == '/')
+            checkFile = _root.substr(0, (_root.size() - 1)) + _location;
+        else if (_root[_root.size() - 1] != '/' && _location[0] != '/')
+            checkFile = _root + "/" + _location;
+        location.open(checkFile, std::ifstream::in);
+        if (location.is_open())
+        {
+            this->_isFile = true;
+            location.close();
+        }   
     }
     return true;
 }
@@ -295,12 +308,13 @@ bool locationConfig::checkCgi()
 
 bool locationConfig::checkRedirect()
 {
-    if (_redirect.size() == 1 && _redirect[0] == "-1")
+    if (_redirect == "-1")
         return true;
-
-    if (_redirect[0] == "permanent" || _redirect[0] == "redirect" 
-        || (_redirect[1] != "permanent" && _redirect[1] != "redirect"))
-        return false; //permanent == 301, redirect == 302 (temporaire)
+    if (!isAcceptableURI(_redirect))
+    {
+        std::cerr << "Error in rewrite directive : Invalid character" << std::endl;
+        return false;
+    } 
 
     return true;
 }
@@ -351,7 +365,7 @@ std::map<std::string, std::string> locationConfig::getCgi() const
     return this->_cgi;
 }
 
-std::vector<std::string> locationConfig::getRedirect() const
+std::string locationConfig::getRedirect() const
 {
     return this->_redirect;
 }
@@ -374,9 +388,7 @@ void locationConfig::debug()
     for (size_t i = 0; i < _index.size(); i++)
         std::cout << "index " << i << " - " <<  _index[i] << std::endl;
     std::cout << "Upload folder : " << getUploadFolder() << std::endl;
-    if (_redirect.size() == 2)
-        std::cout << "Redirection " << _redirect[0] << " - Type : " << _redirect[1] << std::endl;
-    else
-        std::cout << "Redirection " << _redirect[0] << std::endl;
+    std::cout << "Is the location a file ? " << _isFile << std::endl;
+    std::cout << "Redirection " << _redirect << std::endl;
     std::cout << "*** End ***\n" << std::endl;
 }
