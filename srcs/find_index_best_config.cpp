@@ -29,4 +29,5 @@ size_t find_index_best_config(std::vector<Config> configs, std::string host_name
                 return(i);
         }
     }
+    throw ("no config corresponding");
 }

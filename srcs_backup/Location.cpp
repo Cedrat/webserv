@@ -60,16 +60,6 @@ std::string Location::getDefaultFile(void) const
     return (_default_file);
 }
 
-void Location::setRedirect(std::string redirect)
-{
-    _redirect = redirect;
-}
-
-std::string Location::getRedirect() const
-{
-    return (_redirect);
-}
-
  std::vector<std::string>    Location::getMethods(void) const
  {
      return (_methods);

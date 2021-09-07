@@ -9,12 +9,13 @@ Config::~Config()
 {
 
 }
-size_t Config::getPort() const 
+
+int Config::getPort() const 
 {
     return (_port);
 }
 
-void Config::setPort(size_t port)
+void Config::setPort(int port)
 {
     _port = port;
 }
@@ -83,8 +84,8 @@ std::string Config::getPathError(int num_error) const
 {
     std::map<int, std::string>::const_iterator  it = _error_pages.find(num_error);
     if (it == _error_pages.end())
-        return ("./../www/default_error_files/default_err" + int_to_string(num_error) + ".html");
-    return ("./../www"+ it->second);
+        return ("./www/default_error_files/default_err" + int_to_string(num_error) + ".html");
+    return ("./www" + it->second);
 }
 
 std::vector<Location> Config::getLocations() const

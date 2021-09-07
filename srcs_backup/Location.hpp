@@ -15,7 +15,7 @@ class Location
         bool                                _autoindex;
         std::string                         _default_file; 
         std::string                         _upload_folder;
-        std::string                         _redirect;
+
         std::map<std::string, std::string>  _cgi; //???
 
     public : 
@@ -28,7 +28,6 @@ class Location
         void    setDefaultFile(std::string default_file);
         void    setUploadFolder(std::string upload_folder);
         void    setRoot(std::string root);
-        void    setRedirect(std::string redirect);
 
         bool                        getAutoIndex(void) const;
         std::string                 getRoot(void) const;
@@ -36,7 +35,6 @@ class Location
         std::string                 getDefaultFile(void) const;
         std::string                 getUploadFolder(void) const;
         std::vector<std::string>    getMethods(void) const;
-        std::string                 getRedirect(void) const;
 
         bool                        checkIfMethodIsPresent(std::string method) const;
 };

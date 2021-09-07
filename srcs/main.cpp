@@ -20,7 +20,7 @@ Location default_location_2()
 {
    Location location;
 
-   location.setAutoIndex(TRUE);
+   location.setAutoIndex(FALSE);
    location.addMethod("GET");
    location.addMethod("POST");
    location.addMethod("DELETE");
@@ -28,6 +28,22 @@ Location default_location_2()
    location.setUploadFolder("/upload/");
    location.setRoot("./www");
    location.setLocation("/test/");
+   return (location);
+}
+
+Location default_location_3()
+{
+   Location location;
+
+   location.setAutoIndex(TRUE);
+   location.addMethod("GET");
+   location.addMethod("POST");
+   location.addMethod("DELETE");
+   location.setDefaultFile("test_index.html");
+   location.setUploadFolder("/upload/");
+   location.setRoot("./www");
+   location.setLocation("/redir/");
+   location.setRedirect("/test/");
    return (location);
 }
 
@@ -49,16 +65,17 @@ Config default_config()
     config.addErrorPages(505, "/error_files/err505.html");
     config.addLocation(location);
     config.addLocation(default_location_2());
+    config.addLocation(default_location_3());
     return (config);
 }
 
 int main()
 {
-    Server server;
-    Socket socket;
-    //Config config;
+   Server server;
+   Config config;
     
-    //config = default_config();
-    server.addSocketServer(default_config());
-    server.launchingServ();
+   config = default_config();
+   server.addConfig(config);
+   server.createSocketsServer();
+   server.launchingServer();
 }

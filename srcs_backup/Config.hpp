@@ -4,8 +4,10 @@
 #include <vector>
 #include "Location.hpp"
 #include <iterator>
-#include "define.hpp"
+#include "../includes/utils.hpp"
 
+# define CLIENT 0
+# define SERVER 1
 
 class Location;
 class Config
@@ -13,7 +15,7 @@ class Config
     private : 
         bool                        _principal_server;
         bool                        _server_or_client;
-        size_t                         _port;
+        int                         _port;
         int                         _host;
         int                         _max_body_size;
         std::vector<std::string>    _server_names;
@@ -24,7 +26,7 @@ class Config
         Config(void);
         ~Config(void);
        
-        size_t                      getPort(void) const;
+        int                         getPort(void) const;
         bool                        getServerOrClient(void) const;
         int                         getHost(void) const;
         int                         getMaxBodySize(void) const;
@@ -36,7 +38,7 @@ class Config
         bool    IsServerOrClient(void) const;
         bool    IsPrincipalServer(void) const;
 
-        void    setPort(size_t port);
+        void    setPort(int port);
         void    setServerOrClient(bool soc);
         void    setPrincipalServer(bool);
         void    setHost(int host);

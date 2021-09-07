@@ -1,97 +1,62 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
+#include "define.hpp"
 #include <string>
-#include <vector>
-
-# define OK 200
-# define BAD_REQUEST 400
-# define NOT_SUPPORTED 505
-# define METHOD_NOT_ALLOWED 405
-# define BAD_HOST 666
-
-# define ZERO_REQUEST 0
-# define METHOD_LINE 1
-# define HOST_LINE 2
-# define REQUEST_FINISHED 3
+#include "ResponseHTTP.hpp"
 
 class Config;
-class Location;
-class ResponseHTTP;
 class Request
 {
     private :
-        std::string _method;
+        fd _fd;
+        size_t _port;
         std::string _request;
+        bool _request_completed;
+        int     _error;
+
+        std::string _method;
+        std::string _path;
         std::string _host_name;
-        std::string _method_line;
-        std::string _path_file_request;
         int         _content_length;
-        bool        _header_completed;
-        bool        _keep_alive;
-        int _error;
-        int _where_is_request;
-        bool _sending_data;
-        ResponseHTTP _data_to_send;
+        bool        _in_progress;
 
-
+        ResponseHTTP _response;
+    
     public :
-        Request();
+        Request(fd, size_t);
         ~Request();
 
-        void        setError(int error);
-        void        setSendingData(bool);
-        void        setMethod(std::string method);
-        void        setResponseHTTP(ResponseHTTP  rep);
-        void        setPathFileAnswer(const char* path);
-        void        setWhereIsRequest(int where_is_request);
-        void        setPathFileRequest(std::string path_file_request);
-        void        setKeepAlive(bool);
-        void        setHeaderCompleted(bool);
-        void        setContentLength(int);
+        fd const &          getFd() const;
+        size_t const &      getPort() const;
+        bool const &        getRequestCompleted() const;
+        int const &         getError() const;
+        std::string const & getMethod() const;
+        std::string const & getPath() const;
+        std::string const & getHostName() const;
+        int const &         getContentLength() const;
+        std::string const & getRequest() const;        
+        bool const &        getInProgress() const;
 
-        int             getContentLength() const;
-        bool            getKeepAlive();
-        int             getError() const;
-        std::string     getMethod() const;
-        std::string     getRequest() const;
-        std::string     getHostName() const;
-        bool            getSendingData() const;
-        ResponseHTTP    getResponseHTTP() const;
-        int             getWhereIsRequest() const;
-        std::string     getPathFileRequest(void) const;
-        bool            getHeaderCompleted() const;
-
-        int         isAValidMethodLine(std::string method_line);
-
-        void        resetRequest();
-        void        addToRequest(std::string request);
-        void        addToRequestHeader(std::string request_linei);
-
-
-        void        verifyMethod(Config   config);
-        void        verifyHostName(Config config);
-
-        Location    findBestLocation(Config config);
-
+        void            setInProgress(bool); 
+        void            setError(int error); 
+        void            setMethod(std::string method);
+        void            setPath(std::string path);
+        void            setHostName(std::string host_name);
+        void            setContentLength(int content_length);
+       
+       
+        void                    setResponseHTTP(Config config);
+        ResponseHTTP const &    getResponseHTTP() const;
+        
+        
+        void        addRequest(std::string buffer);
         void        checkSyntaxRequest();
-        void        checkDuplicate(std::string request);
-        void        checkAndAddMethod(std::string request);
-        void        checkSyntaxRequest(std::string request);
-        void        checkAndAddHostName(std::string request);
-        void        checkAndAddContentLength(std::string request);
-        void        checkDuplicate(std::vector<std::string> all_lines);
 
-        void        setFdAnswer(int);
-
+        void        receiveData();
+        void        resetRequest();
         void        send();
 
-        void        checkPath();
-
-        void        resetByteSend();
-        void        setFinished(bool);
 };
-
-bool check_if_request_is_in_progress(int request_status);
 
 #endif

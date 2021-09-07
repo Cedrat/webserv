@@ -1,9 +1,10 @@
 NAME = webserv
 
 PATH_SRC = ./srcs/
-SRCS = main.cpp Config.cpp Location.cpp Server.cpp Socket.cpp regexp.cpp  Request.cpp count_words.cpp response_error_header.cpp error_tables.cpp \
-		string_manip.cpp request_conditions.cpp path_security.cpp delete_and_give_response.cpp delete_f.cpp create_ai.cpp response_post.cpp \
-		create_path.cpp ResponseHTTP.cpp create_file.cpp
+SRCS =  Config.cpp                              Server.cpp                              check_if_method_is_authorized.cpp       error_tables.cpp                        main.cpp                                regexp.cpp \
+Location.cpp                            Socket.cpp                              construct_path.cpp                      find_index_best_config.cpp              path_security.cpp                       response_error_header.cpp \
+Request.cpp                             VerifyDuplicata.cpp                     create_ai.cpp                           get_file_size.cpp                       process_data.cpp                        string_manip.cpp \
+ResponseHTTP.cpp                        check_if_file_exist.cpp                 delete_f.cpp                            is_folder.cpp                           redir_path.cpp                          timeout.cpp
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 DEBUG = -g3 -fsanitize=address

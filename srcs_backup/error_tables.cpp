@@ -1,6 +1,5 @@
 
 #include "../includes/utils.hpp"
-#include <map>
 
 std::map<int, std::string> error_table()
 {

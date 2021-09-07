@@ -16,8 +16,8 @@ class VerifyDuplicata
         int const & getNbHost() const;
         int const & getNbContentLength() const;
 
-        bool const isDuplicata() const;
-        bool const isMissingData() const;
+        bool isDuplicata() const;
+        bool isMissingData() const;
 };
 
 #endif

@@ -1,208 +1,259 @@
 #include "Server.hpp"
-#include "../includes/utils.hpp"
-#include "ResponseHTTP.hpp"
-#include "cstdlib"
+#include "search_in_vector.hpp"
+#include "Config.hpp"
+#include "Socket.hpp"
+#include "Request.hpp"
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <poll.h>
+#include <netinet/in.h>
 
-Server::Server(void) : _is_running(false)
+pollfd create_a_listenable_socket(size_t port)
+{
+   struct sockaddr_in   my_addr;
+   struct pollfd        mypollfd;
+   fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    fcntl(new_socket, F_SETFL, O_NONBLOCK | SO_REUSEADDR);
+    if (new_socket == -1)
+        throw "Error when create socket";
+
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(port);
+    my_addr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
+        throw "Error from binding";
+
+    if (listen(new_socket, BACKLOG) == -1)
+        throw "Error from listening";
+
+    //fcntl(new_socket, F_SETFL, O_NONBLOCK);
+    mypollfd.fd = new_socket;
+    mypollfd.events = POLLIN;
+    mypollfd.revents = 0;
+
+    return (mypollfd);
+}
+
+Server::Server() : _is_running(FALSE)
 {
 
 }
 
-Server::~Server(void)
+Server::~Server()
 {
 
 }
 
-void Server::setSockets(Socket sockets)
+void Server::createSocketsServer(void) 
 {
-   //_sockets = sockets;
-   (void)sockets;
-}
-bool Server::isRunning(void)
-{
-    return (_is_running);
+    std::vector<size_t> lists_ports;
+
+    for (size_t i = 0; i < _configs.size(); i++)
+    {
+        if (search_in_vector(lists_ports, _configs[i].getPort()) == FALSE)
+        {
+            lists_ports.push_back(_configs[i].getPort());
+            createAndAddSocketServer(_configs[i].getPort());
+            std::cout << "CREATE" << std::endl;
+        }
+    }
 }
 
-void Server::launchingServ()
+void Server::createAndAddSocketServer(size_t port)
 {
-	_is_running = TRUE;
+    Socket socket(SERVER, port);
+
+    _poll_fds.push_back(create_a_listenable_socket(port));
+    _sockets.push_back(socket);
+}
+
+void Server::addConfig(Config const & config)
+{
+    _configs.push_back(config);
+}
+
+void Server::launchingServer(void)
+{
+    _is_running = TRUE;
 	while (_is_running)
 	{
 		try
 		{
-			acceptConnection(_sockets.getRefSockets(), getNbOfFd());
+			acceptConnection();
 		}
 		catch (char const* str)
 		{
-			std::cout << str << std::endl;
+			std::cout << "ERROR CATCH" << str << std::endl;
 		}
-	}
+	} 
 }
 
-void	Server::acceptConnection(std::vector<struct pollfd>& pollfd, int nfds)
+void Server::acceptConnection(void)
 {
-	std::cout << "Waiting for poll()" << std::endl;
-	struct pollfd* poll_fd = pollfd.data();
-    poll(poll_fd, nfds, -1);
-    for (int i = 0; i < nfds;i++)
+    struct pollfd* poll_fd = _poll_fds.data();
+    std::cout << "waiting for poll()" << std::endl;
+
+    poll(poll_fd, _poll_fds.size(), -1);
+    for (size_t i = 0; i < _poll_fds.size(); i++)
     {
-        if (pollfd[i].revents != 0 && isAFdServer(pollfd[i].fd) == SERVER)
-            addClient(pollfd[i].fd);
-		else if (pollfd[i].revents & POLLHUP && isAFdServer(pollfd[i].fd) == CLIENT)
+        //std::cout << _poll_fds.size() << "SIZE" << std::endl;
+        timeout(_sockets[i]);
+        if (_sockets[i].getTimeout() == -1)
+        {
+            close(_poll_fds[i].fd);
+			removeSocket(i);
+			std::cout << "Client disconnected by timeout" << std::endl;
+        }
+        else if (_poll_fds[i].revents & POLLERR && _sockets[i].getServerOrClient() == CLIENT)
+        {
+            std::cout << "BIG_ERR" << std::endl;
+        }
+        else if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
+        {
+            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort());
+        }
+        else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
+        {
+            _sockets[i].setTimeout(std::time(0));
+            std::cout << "POLLOUT" << std::endl;
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == FALSE)
+            {
+                response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(TRUE);
+            }
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
+                    _requests[getIndexRequest(_poll_fds[i].fd)].send();
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getResponseHTTP().getFinished() == TRUE)
+            {
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+                _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+                std::cout << "reseted" << std::endl;
+                _poll_fds[i].events = POLLIN;
+                _poll_fds[i].revents = 0;
+            }
+            // else
+            // {
+            //     _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+            //     _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+            //     _poll_fds[i].events = POLLIN;
+            //     _poll_fds[i].revents = 0;
+
+            // }
+            std::cout << "POLLOUT ENDED" << std::endl;
+        }
+        else if (_poll_fds[i].revents & POLLHUP)
 		{
-			close(pollfd[i].fd);
-			_sockets.removeSocket(pollfd[i].fd);
-			nfds--;
+			close(_poll_fds[i].fd);
+			removeSocket(i);
 			std::cout << "Client disconnected by ragequit" << std::endl;
 		}
-		else if (pollfd[i].revents & POLLOUT && isAFdServer(pollfd[i].fd) == CLIENT)
+        else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
-			std::cout << "send Data" << std::endl;
-			sendData(pollfd[i].fd);
-
-			if (_sockets.getRequest(pollfd[i].fd).getError() == 400 && _sockets.getRequest(pollfd[i].fd).getResponseHTTP().getFinished() == TRUE)
-			{
-					close(pollfd[i].fd);
-				_sockets.removeSocket(pollfd[i].fd);
-				nfds--;
-				std::cout << "Client closed because error 400" << std::endl;
-			}
-			else if (_sockets.getRequest(pollfd[i].fd).getSendingData() == TRUE)
-				std::cout << "transfer in progress" << std::endl;
-			else
-			{
-				_sockets.resetRequest(pollfd[i].fd);
-				pollfd[i].events = POLLIN;
-				pollfd[i].revents = 0;
-				std::cout << "BANANATIME" << std::endl;
-			}
-		}
-		else if (pollfd[i].revents & POLLIN && isAFdServer(pollfd[i].fd) == CLIENT)
-		{
-			receiveData(pollfd[i].fd);
-			std::cout << "re" << std::endl;
+            std::cout << "POLLIN" << std::endl;
+            std::cout << "REVENTS" << _poll_fds[i].revents << std::endl;
+            _sockets[i].setTimeout(std::time(0));
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
+            {
+                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+                _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+            }
+            receiveData(_poll_fds[i].fd);
+            
+            // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
+            // write(1, buffer, ret);
+            if (requestCompleted(_poll_fds[i].fd) == TRUE)
+            {
+                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                std::cout << "Request finished" << std::endl;
+                _poll_fds[i].events = POLLOUT;
+                _poll_fds[i].revents = 0;
+            }
 		}
     }
 }
 
-void	Server::receiveData(fd fd_client)
-{
-	_sockets.receiveData(fd_client);
-}
-
-void	Server::sendData(fd fd_client)
-{
-	Request&  request = _sockets.getRefRequest(fd_client);
-	Config	config = _sockets.getConfigByFd(fd_client);
-
-	struct stat sb;
-	std::string path = create_path(request, config);
-	std::cout << request.getPathFileRequest() << "ecureuil" <<  std::endl;
-	std::cout << "path required " << path << std::endl;
-	if (request.getSendingData() == FALSE)
-	{
-		if (request.getError() != 200)
-		{
-			path = response_error_header(request.getError(), config, fd_client);
-			request.setPathFileAnswer(path.c_str());
-			request.setSendingData(TRUE);
-			request.setFinished(FALSE);
-			request.setFdAnswer(fd_client);	
-		}
-		else if (stat(path.c_str(), &sb) == -1 || (S_ISREG(sb.st_mode) == 0 && S_ISDIR(sb.st_mode) == 0))
-		{
-			path = response_error_header(404, config, fd_client);
-			request.setPathFileAnswer(path.c_str());
-			request.setSendingData(TRUE);
-			request.setFinished(FALSE);
-			request.setFdAnswer(fd_client);
-		
-		}
-		else if (request.getError() == OK && request.getMethod() == "GET")
-		{
-			response_good_file(path, fd_client, 0);
-			request.setPathFileAnswer(path.c_str());
-			request.setSendingData(TRUE);
-			request.setFinished(FALSE);
-			request.setFdAnswer(fd_client);
-		}
-		else if (request.getError() == OK && request.getMethod() == "DELETE")
-		{
-			delete_and_give_response(path.c_str(), fd_client);
-			std::cout << "DELETE COMPLETED" << std::endl;
-		}
-	}
-	else
-	{
-		request.send();
-		if (request.getResponseHTTP().getFinished() == TRUE)
-		{
-			request.setSendingData(FALSE);
-			request.resetByteSend();
-			std::cout << "loop hero" << std::endl;
-		}
-	}
-}
-
-bool Server::isAFdServer(int fd_to_check)
-{
-	return (_sockets.isAFdServer(fd_to_check));
-}
-
-// void Server::acceptConnection()
-// {
-//     fd fd_to_accept;
-//     fd fd_client;
-
-// 	fd_to_accept = findAvailableServerSocket(_sockets.getSockets(), getNbOfFd());
-
-// 	if (isAFdServer(fd_to_accept) == SERVER)
-// 	{
-//     	struct sockaddr_in their_addr;
-//    		socklen_t their_size = sizeof(struct sockaddr_in);
-//    		fd_client = accept(fd_to_accept, (struct sockaddr *)&their_addr, &their_size);
-
-// 		Config config = _sockets.getConfig(_sockets.getIndexRequest(fd_to_accept));
-// 		config.setServerOrClient(CLIENT);
-
-// 		addSocketClient(config, fd_client);
-// 		std::cout << "New client connected : " << fd_client << std::endl;
-// 	}
-// 	else if (fd_to_accept > 0)
-// 	{
-// 		std::cout << "Client " << fd_to_accept << " send a message for you !" << std::endl;
-// 		_sockets.receiveData(fd_to_accept);
-// 	}
-
-// }
-
-void Server::addSocketServer(Config  config)
-{
-    _sockets.addSocketServer(config);
-}
-
-void Server::addSocketClient(Config  config,fd fd_client)
-{
-    _sockets.addSocketClient(config, fd_client);
-}
-
-int Server::getNbOfFd() const
-{
-    return (_sockets.getNbOfSockets());
-}
-
-void Server::addClient(fd new_fd_client)
+void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
 {
 		fd fd_client;
-
 		struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
+        Socket socket(CLIENT, port);
+        pollfd new_socket;
+
+
+        
+        _sockets.push_back(socket);
    		fd_client = accept(new_fd_client, (struct sockaddr *)&their_addr, &their_size);
 
-		Config  config;
-		config = _sockets.getConfig(_sockets.getIndexRequest(new_fd_client));
-		config.setServerOrClient(CLIENT);
+		new_socket.fd = fd_client;
+        new_socket.events = POLLIN;
+        new_socket.revents = 0;
 
-		addSocketClient(config, fd_client);
+        Request request(fd_client, port);
+        _poll_fds.push_back(new_socket);
+        _requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;
+}
+
+void Server::receiveData(fd fd_request)
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            _requests[i].receiveData();
+            std::cout << "yo" << std::endl;
+            return ;
+        }
+    }
+}
+
+bool Server::requestCompleted(fd fd_request)
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (_requests[i].getRequestCompleted());
+        }
+    }
+    throw ("no request corresponding");
+}
+void Server::removeSocket(size_t index)
+{
+    _sockets.erase(_sockets.begin() + index);
+    _poll_fds.erase(_poll_fds.begin() + index);
+}
+
+Request const & Server::getRequest(fd fd_request)
+{
+        for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (_requests[i]);
+        }
+    }
+    throw ("no fd corresponding");
+}
+
+size_t Server::getIndexRequest(fd fd_request) const
+{
+    for (size_t i = 0; i < _requests.size(); i++)
+    {
+        if (_requests[i].getFd() == fd_request)
+        {
+            return (i);
+        }
+    }
+    throw ("no fd corresponding");
 }

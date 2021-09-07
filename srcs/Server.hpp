@@ -1,39 +1,41 @@
 #ifndef SERVER_HPP
-# define SERVER_HPP
+#define SERVER_HPP
 
-#include "Socket.hpp"
-#include "../includes/utils.hpp"
+#include <vector>
+#include "define.hpp"
 
+class Request;
+class Config;
+class Socket;
 class Server
 {
     private :
         bool _is_running;
-        Socket _sockets;
+
+        std::vector<struct pollfd> _poll_fds;
+        std::vector<Socket> _sockets;
+        std::vector<Config> _configs;
+        std::vector<Request> _requests; 
 
     public :
-                Server(void);
-                ~Server(void);
+        Server(void);
+        ~Server();
 
-        void    setSockets(Socket sockets);
+        void    createSocketsServer(void);
+        void    createAndAddSocketServer(size_t port);
+        void    createAndAddSocketClient(fd new_fd_client, size_t port);
 
-        int     getNbOfFd() const;
+        void            addConfig(Config const & config);
+        Request const & getRequest(fd);
 
-        bool    isRunning(void);
+        void    launchingServer();
+        void    acceptConnection(void);
+        void    removeSocket(size_t index);
+        void    receiveData(fd fd_request);
 
-        void    addClient(fd new_fd_client);
-        void    addSocketServer(Config config);
-        void    addSocketClient(Config config, fd socket_client);
+        bool    requestCompleted(fd);
 
-        void    launchingServ();
-        void    acceptConnection();
-        void    acceptConnection(std::vector<struct pollfd> &poll_fd, int nfds);
-        fd      findAvailableServerSocket(pollfd *poll_fd, int nfds);
-        bool    isAFdServer(fd fd_to_check);
-
-        void    receiveData(fd fd_client);
-        void    sendData(fd fd_client);
-
-
+        size_t      getIndexRequest(fd) const;
 };
 
 #endif

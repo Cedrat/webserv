@@ -33,14 +33,14 @@ int const & VerifyDuplicata::getNbContentLength() const
 {
     return (_nb_content_length);
 }
-bool const VerifyDuplicata::isDuplicata() const
+bool VerifyDuplicata::isDuplicata() const
 {
     if (_nb_host > 1 || _nb_content_length > 1)
         return (TRUE);
     return (FALSE);
 }
 
-bool const VerifyDuplicata::isMissingData() const
+bool VerifyDuplicata::isMissingData() const
 {
     if (_nb_host < 1)
         return (TRUE);

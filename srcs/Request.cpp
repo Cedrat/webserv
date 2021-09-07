@@ -1,24 +1,13 @@
-#include "ResponseHTTP.hpp"
 #include "Request.hpp"
+#include "../includes/utils.hpp"
+#include "ResponseHTTP.hpp"
 #include "Config.hpp"
-#include <string>
-#include <iostream>
-#include <unistd.h>
-#include <stddef.h>
+#include "Location.hpp"
 
-std::string extract_method(std::string method_line)
+Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
+ _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE)
 {
-    return (method_line.substr(0, method_line.find(" ")));
-}
-
-std::string extract_path(std::string method_line)
-{
-    return (method_line.substr(method_line.find(" ") + 1, method_line.rfind(" ") - method_line.find(" ") - 1));
-}
-
-Request::Request() :  _header_completed(FALSE),  _error(OK), _where_is_request(ZERO_REQUEST),_sending_data(FALSE)
-{
-    (void)_error;
+    resetRequest();
 }
 
 Request::~Request()
@@ -26,361 +15,208 @@ Request::~Request()
 
 }
 
-void Request::setFinished(bool boolean)
+fd const & Request::getFd() const
 {
-    _data_to_send.setFinished(boolean);
+    return (_fd);
 }
 
-void Request::setFdAnswer(fd fd_client)
+size_t const & Request::getPort() const
 {
-    _data_to_send.setFdToAnswer(fd_client);
+    return (_port);
 }
 
-void Request::resetByteSend()
-{
-    _data_to_send.resetByteSend();
-}
-
-void    Request::setResponseHTTP(ResponseHTTP  rep)
-{
-    _data_to_send = rep;
-}
-
-void Request::setPathFileAnswer(const char *path)
-{
-    _data_to_send.setPathFile(path);
-}
-
-bool    Request::getSendingData() const
-{
-    return (_sending_data);
-}
-
-ResponseHTTP    Request::getResponseHTTP() const
-{
-    return _data_to_send;
-}
-
-void Request::setSendingData(bool boolean)
-{
-    _sending_data = boolean;
-}
-int Request::isAValidMethodLine(std::string method_line)
-{
-    char motif[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
-    char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
-    if (match_regex(const_cast<char *>(method_line.c_str()), motif) >= 1 && count_words(method_line) == 3)
-        return (OK);
-    else if (match_regex(const_cast<char *>(method_line.c_str()), motif_version_not_supported) >= 1 && count_words(method_line) == 3)
-        return (NOT_SUPPORTED);
-    return (BAD_REQUEST);
-}
-
-void Request::setMethod(std::string method)
-{
-        _method = method;
-}
-
-void Request::send()
-{
-   _data_to_send.send();
-}
-
-void Request::setError(int error)
-{
-    _error = error;
-}
-
-void Request::setPathFileRequest(std::string path_file)
-{
-    _path_file_request = path_file;
-}
-
-int Request::getError() const
+int const & Request::getError() const
 {
     return (_error);
 }
 
-std::string Request::getPathFileRequest(void) const
+void        Request::addRequest(std::string buffer)
 {
-    return (_path_file_request);
+    _request += buffer;
 }
 
-std::string Request::getMethod() const
+bool const &    Request::getRequestCompleted() const
 {
-    return (_method);
+    return (_request_completed);
 }
 
-int         Request::getError() const
+bool const &    Request::getInProgress() const
 {
-    return (_error);
+    return (_in_progress);
 }
 
-void Request::verifyMethod(Config  config)
+void    Request::setInProgress(bool boolean) 
 {
-    Location location = findBestLocation(config);
-
-    if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
-    {
-        std::cout << "METHOD_NOT_ALLOWED" << std::endl;
-        setError(METHOD_NOT_ALLOWED);
-    }
+    _in_progress = boolean;
 }
 
-Location Request::findBestLocation(Config config)
+
+
+std::string const &  Request::getMethod() const
 {
-   std::vector<Location>    locations;
-   Location                 best_location;
-   size_t                   nb_of_precision = 0;
-
-   locations = config.getLocations();
-
-   std::vector<Location>::iterator  it_begin = locations.begin();
-   std::vector<Location>::iterator  it_end = locations.end();
-
-   for (int i = 0; it_begin != it_end; i++, it_begin++)
-   {
-       if ((getPathFileRequest().find(locations[i].getLocation()) != std::string::npos) && nb_of_char_in_str('/', locations[i].getLocation()) > nb_of_precision)
-       {
-            best_location = locations[i];
-            nb_of_precision = nb_of_char_in_str('/', locations[i].getLocation());
-       }
-   }
-   return (best_location);
+    return _method;
+}
+std::string const & Request::getPath() const
+{
+    return _path;
+}
+std::string const & Request::getHostName() const
+{
+    return _host_name;
+}
+int const & Request::getContentLength() const
+{
+    return _content_length; 
 }
 
-void Request::addToRequestHeader(std::string request)
-{
-
-    //checkDuplicate(request);
-    if (_where_is_request == ZERO_REQUEST)
-    {
-        checkAndAddMethod(request);
-    }
-    if (_where_is_request == HOST_LINE)
-    {
-        checkAndAddHostName(request);
-    }
-    if (getError() == OK)
-        checkSyntaxRequest(request);
-}
-
-void Request::setWhereIsRequest(int where_is_request)
-{
-   _where_is_request = where_is_request;
-}
-
-std::string Request::getHostName() const
-{
-    return (_host_name);
-}
-
-std::string Request::getRequest() const
+std::string const & Request::getRequest() const
 {
     return (_request);
 }
 
-void        Request::addToRequest(std::string request)
+void Request::setError(int number_error)
 {
-    _request += request;
-
-}
-void    Request::verifyHostName(Config config)
-{
-    (void) config;
-    checkAndAddHostName(_request);
-    if (getHostName() == "")
-         setError(400);
+    _error = number_error;
 }
 
-int Request::getWhereIsRequest() const
+void Request::setMethod(std::string method)
 {
-    return(_where_is_request);
+    _method = method;
 }
-
-void    Request::checkDuplicate(std::string request)
+void Request::setPath(std::string path)
 {
-    std::string request_line;
-
-    request_line = request.substr(0, request.find("\n"));
-    request_line += "\n";
-    if (isAValidMethodLine(request_line) == OK && _where_is_request != ZERO_REQUEST)
-        setError(BAD_REQUEST);
-    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
-    if (_where_is_request == REQUEST_FINISHED && match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
-    {
-        //setError(BAD_REQUEST);
-    }
+    _path = path;
 }
-
-void Request::checkDuplicate(std::vector<std::string> all_lines)
+void Request::setHostName(std::string host_name)
 {
-
-    int nb_host(0);
-    char motif[] = "Host: [A-Za-z.]+[:0-9]*\r\n";
-    for (size_t i = 1; i < all_lines.size(); i++)
-    {
-        if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif) >= 1)
-        {
-            nb_host++;
-            checkAndAddHostName(all_lines[i]);
-            if (nb_host > 1)
-            {
-                setError(BAD_REQUEST);
-                return ;
-            }
-        }
-    }
+    _host_name = host_name;
 }
-void    Request::checkSyntaxRequest(std::string request)
-{
-    std::vector<std::string> all_lines;
-    char motif_method[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
-    char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
-    char motif2[] = "[a-zA-z0-9]+: .+\r\n";
-    all_lines = split_string(request, "\n");
-    for (size_t i = 1; i < all_lines.size(); i++)
-    {
-        if (isAValidMethodLine(all_lines[i] + "\n") == OK)
-        {
-
-        }
-        else if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
-        {
-        }
-        else if (all_lines[i].find(" ") != std::string::npos)
-        {
-            setError(BAD_REQUEST);
-        }
-    }
-}
-
-void Request::resetRequest()
-{
-    _request = "";
-    _method_line = "";
-    _method = "";
-    _path_file_request = "";
-    _host_name = "";
-    _header_completed = FALSE;
-    _keep_alive = TRUE;
-    _error = OK;
-    _where_is_request = ZERO_REQUEST;
-
-}
-
-void Request::setKeepAlive(bool boolean)
-{
-    _keep_alive = boolean;
-}
-
-bool Request::getKeepAlive()
-{
-    return (_keep_alive);
-}
-
-void Request::checkPath()
-{
-    if (check_valid_path(_path_file_request) == FALSE)
-        setError(BAD_REQUEST);
-}
-
-void    Request::checkSyntaxRequest()
-{
-    std::vector<std::string> all_lines;
-    std::string lines = _request;
-
-    std::cout << "___" << lines << "___" <<  std::endl;
-    if (lines.find("\r\n\r\n") != std::string::npos)
-        lines.erase(lines.find("\r\n\r\n"), lines.size() - (lines.find("\r\n\r\n")));
-    std::cout << "___" << lines << "___" <<  std::endl;
-    char motif2[] = "[a-zA-z0-9]+: .+\r\n";
-    all_lines = split_string(lines, "\n");
-    checkDuplicate(all_lines);
-
-    if (isAValidMethodLine(all_lines[0] + "\n") != OK)
-        setError(BAD_REQUEST);
-    for (size_t i = 1; i < all_lines.size(); i++)
-    {
-        if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
-        {
-            //
-        }
-        else if (all_lines[i].find(" ") != std::string::npos)
-        {
-            std::cout << "heho" << std::endl;
-            setError(BAD_REQUEST);
-        }
-    }
-}
-
 void Request::setContentLength(int content_length)
 {
     _content_length = content_length;
 }
 
-int Request::getContentLength() const
+
+
+void Request::receiveData()
 {
-    return(_content_length);
+    char buffer[BUFFER_SIZE];
+    std::string str_request;
+    int ret;
+    
+    ret = read(getFd(), buffer, BUFFER_SIZE);
+    if (ret < 0)
+        std::cout << "read error" << std::endl;
+    buffer[ret] = 0;
+    str_request = buffer;
+    if (str_request == "\r\n" && _request == "")
+        return ;
+    addRequest(str_request);
+    checkSyntaxRequest(); //si erreur, arretez la requete.
+
+    std::cout << "Bytes read " << ret << std::endl;
+    if (_request.find("\r\n\r\n") != std::string::npos && _request.find("POST") != 0)
+        _request_completed = TRUE;
+    else if (_request.find("\r\n\r\n") != std::string::npos)
+    {
+        
+    }
 }
 
-void Request::checkAndAddMethod(std::string request)
+void    Request::checkSyntaxRequest()
 {
-    std::string request_line;
-    request_line = request.substr(0, request.find("\n"));
-    request_line += "\n";
-
-    if (isAValidMethodLine(request_line) == OK)
+    std::vector<std::string> all_lines;
+    char motif_method[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
+    char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
+    char motif2[] = "[a-zA-z0-9]+: +.*[^ ]+\r\n";
+    std::cout << "_______" << _request << "_______" << std::endl;
+    all_lines = split_string(_request, "\n");
+    if (_request != "")
     {
-        setMethod(extract_method(request_line));
-        if (check_valid_path(extract_path(request_line)))
-        {
-            setPathFileRequest(decoding_http_string(factorised_path(extract_path(request_line))));
-        }
-        else
-        {
+        if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_version_not_supported) >= 1)
+            setError(NOT_SUPPORTED);
+        else if (match_regex(const_cast<char *>((all_lines[0] + "\n").c_str()), motif_method) < 1)
             setError(BAD_REQUEST);
+    }
+    if (getError() == OK && _request != "")
+    {
+        for (size_t i = 1; i < all_lines.size(); i++)
+        {
+            if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
+            {
+            }
+            else if (all_lines[i].find(" ") != std::string::npos)
+            {
+                setError(BAD_REQUEST);
+            }
+            else if (all_lines[i] == "")
+            {
+                setError(BAD_REQUEST);
+            }
         }
     }
-    else if (isAValidMethodLine(request_line) == NOT_SUPPORTED)
+}
+
+void    Request::resetRequest()
+{
+   _request = "";
+   _error = OK;
+   _request_completed = FALSE; 
+   _method = "";
+   _path = "";
+   _host_name = "";
+   _content_length = -1;
+   _request_completed = FALSE;
+   _response.resetByteSend();
+   _response.setInProgress(FALSE);
+   _response.setPathFile("");
+}
+
+void    Request::setResponseHTTP(Config config)
+{
+    Location location = find_best_location(*this, config);
+
+    _response.setPathFile(construct_path(_path, location));
+    
+    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != BAD_REQUEST && getError() == OK)
+        setError(NOT_FOUND);
+    _response.resetByteSend();
+    _response.setFdToAnswer(getFd());
+    _response.setFinished(FALSE);
+    if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+        _response.setPageAutoIndex();
+    
+    if (getError() == OK && getMethod() == "DELETE")
+        {
+            std::cout <<  "DELETE PATH" << _response.getPath() << std::endl;
+            if (check_if_file_exist(_response.getPath().c_str()))
+            {
+                delete_f(_response.getPath().c_str());
+                setError(NO_CONTENT);
+            }
+            else 
+                setError(NOT_FOUND);
+        }
+    if (location.getRedirect() != "")
     {
-        setError(NOT_SUPPORTED);
-    }
-    else if (isAValidMethodLine(request_line) == BAD_REQUEST)
-        setError(BAD_REQUEST);
-    _where_is_request = HOST_LINE;
-}
-
-void Request::checkAndAddHostName(std::string request)
-{
-    char motif[] = "[a-zA-z0-9]+: +.+\r\n";
-    if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1 && getError() == OK)
+        setError(MOVED_PERMANENTLY);// creer Set path redirect;
+        setPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
+    } 
+    if (getError() != OK)
     {
-        _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
-        std::cout << "L'Host name retenu est " << _host_name << std::endl;
-        _where_is_request = REQUEST_FINISHED;
+        _response.setAutoIndex(FALSE);
+        _response.setPathFile(config.getPathError(getError()));
     }
+    std::cout << "Final path is = " << _response.getPath() << std::endl;
 }
 
-void Request::checkAndAddContentLength(std::string request)
+ResponseHTTP const &    Request::getResponseHTTP() const
 {
-    char motif[] = "Content-Length:";
-    std::cout << "Content debut de fonction " << std::endl;
-    if (match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
-    {
-        _content_length = string_to_int(request.substr(request.find("Content-Length: ") + 16, request.find("\n", request.find("Content-Length: ") + 16) - (request.find("Content-Length: ") + 17)));
-        std::cout << "Content length " << _content_length << std::endl;
-        _where_is_request = REQUEST_FINISHED;
-    }
+    return (_response);
 }
 
-
-bool Request::getHeaderCompleted() const
+void Request::send()
 {
-    return (_header_completed);
-}
-
-void Request::setHeaderCompleted(bool boolean)
-{
-    _header_completed = boolean;
+    std::cout << "Welcome in send" << std::endl;
+    _response.send();
 }
