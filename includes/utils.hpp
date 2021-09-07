@@ -18,6 +18,7 @@
 # include <fstream>
 # include <ctime>
 # include <vector>
+#include <arpa/inet.h>
 
 class Socket;
 class Config;
@@ -31,6 +32,8 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+
+void add_config(const char *path_conf);
 std::string redir_path(std::string path, std::string path_redir, std::string part_to_replace);
 bool is_folder(const char * path);
 size_t get_file_size(std::string path);

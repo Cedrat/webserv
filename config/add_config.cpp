@@ -1,7 +1,9 @@
 #include "ConfigParser.hpp"
 
-int main()
+void add_config(const char *path_conf)
 {
+
+    (void) path_conf;
     char file[] = "./step.conf";
     try
     {
@@ -12,5 +14,4 @@ int main()
         std::cerr << e.what() << std::endl;
     }
 
-    return 0;
 }

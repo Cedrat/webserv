@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Syntax.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/07/26 15:09:37 by dchampda          #+#    #+#             */
-/*   Updated: 2021/07/26 15:09:38 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/09/07 16:44:55 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../../includes/Syntax.hpp"
+# include "../includes/Syntax.hpp"
+# include "../includes/utils.hpp"
 
 bool isIP( std::string line, char c, int host )
 {
