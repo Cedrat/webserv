@@ -78,7 +78,7 @@ int main()
     try
     {
          ConfigParser conf(file);
-         for(size_t i = 0; i < conf.getServer().size(); i++)
+         for(int i = 0; i < conf.getServerNb(); i++)
             server.addConfig(conf.getOneServer(i));
     }
     catch(std::exception & e)

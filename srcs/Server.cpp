@@ -61,6 +61,7 @@ void Server::createSocketsServer(void)
     {
         if (search_in_vector(lists_ports, _configs[i].getPort()) == FALSE)
         {
+            std::cout << _configs[i].getPort() << std::endl;
             lists_ports.push_back(_configs[i].getPort());
             createAndAddSocketServer(_configs[i].getPort());
             std::cout << "CREATE" << std::endl;

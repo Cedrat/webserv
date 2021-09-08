@@ -50,6 +50,7 @@ class ConfigParser
 
         std::vector<Config>   getServer();
         Config                getOneServer( size_t i );
+        int                   getServerNb();
 
         void openConfigFile( std::string const & file );
 

@@ -158,7 +158,7 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * ser
         {
             if (server->isEqual(_server[i]))
                 throw std::invalid_argument("Server bloc duplicata");
-            if (server->IsPrincipalServer() == true && _server[i].IsPrincipalServer() == true) //1er host = principal pour cet host
+            if ((_server[i].getPort() == server->getPort()) && server->IsPrincipalServer() == true && _server[i].IsPrincipalServer() == true)
                 server->setPrincipalServer(false);
         }
         if (server->checkServerData() == false)
@@ -315,4 +315,9 @@ std::vector<Config> ConfigParser::getServer()
 Config ConfigParser::getOneServer( size_t i )
 {
     return this->_server[i];
+}
+
+int ConfigParser::getServerNb()
+{
+    return this->_serverNb;
 }
