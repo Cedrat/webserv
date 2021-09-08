@@ -1,7 +1,8 @@
 #include "Server.hpp"
 #include "Socket.hpp"
 #include "Config.hpp"
-
+#include "../config/ConfigParser.hpp"
+/*
 Location default_location()
 {
    Location location;
@@ -45,9 +46,9 @@ Location default_location_3()
    location.setLocation("/redir/");
    location.setRedirect("/test/");
    return (location);
-}
+}*/
 
-Config default_config()
+/*Config default_config()
 {
    Config  config; 
    Location location;
@@ -67,15 +68,28 @@ Config default_config()
     config.addLocation(default_location_2());
     config.addLocation(default_location_3());
     return (config);
-}
+}*/
 
 int main()
 {
    Server server;
-   Config config;
-    
-   config = default_config();
-   server.addConfig(config);
-   server.createSocketsServer();
-   server.launchingServer();
+
+   char file[] = "./config/step.conf";
+    try
+    {
+         ConfigParser conf(file);
+         for(size_t i = 0; i < conf.getServer().size(); i++)
+            server.addConfig(conf.getOneServer(i));
+    }
+    catch(std::exception & e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+
+   //Config config;
+   //config = default_config();
+   //server.addConfig(config);
+   //server.createSocketsServer();
+   //server.launchingServer();
 }

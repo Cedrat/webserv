@@ -5,10 +5,9 @@ locationConfig::locationConfig()
     this->_root = "-1";
     //this->_autoindex = false;
     this->_methods.push_back("-1");
-    this->_index.push_back("-1");
+    this->_index = "-1";
     this->_upload_folder = "-1";
     this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
-    this->_isFile = false;
     this->_redirect = "-1";
 }
 
@@ -36,7 +35,7 @@ void locationConfig::setRoot( std::vector<std::string> line )
     {
         if (line.size() == 1)
         {
-            _root = "./";
+            _root = "";
             return ;
         }
         _root = line[1];
@@ -79,16 +78,9 @@ void locationConfig::setMethods( std::vector<std::string> line )
 
 void locationConfig::setIndex( std::vector<std::string> line )
 {
-    if (_index[0] == "-1")
+    if (_index == "-1")
     {
-        if (line.size() == 1)
-        {
-            _index[0] = "index.html";
-            return ;
-        }
-        _index.clear();
-        for (size_t i = 1; i < line.size(); i++)
-            _index.push_back(line[i]);
+        _index=line[1];
     }
     else
         throw std::invalid_argument("Error : location block can't contain more than one index directive");
@@ -138,24 +130,15 @@ void locationConfig::setRedirect( std::vector<std::string> line )
         throw std::invalid_argument("Error : location block can't contain more than one rewrite directive");
 }
 
-void locationConfig::setUncalledDirectives( std::string defaultRoot )
+void locationConfig::setUncalledDirectives()
 {
     if (_root == "-1") //Recuperer root du serveur si pas de root dans location
-    {
-        if (defaultRoot == "-1")
-            throw std::invalid_argument("Error : A root must be specified in the server bloc, before the location, if none is provided");
-        else
-            _root = defaultRoot;
-    }
+        _root = "";
     if (_methods[0] == "-1")
         _methods[0] = "GET";
-    if (_index[0] == "-1" && _isFile == false)
-    {
-        if (_root[_root.size() - 1] == '/')
-            _index[0] = "index.html";
+    if (_index == "-1")
+        _index = "index.html";
         else
-            _index[0] = "/index.html";
-    }
     if (_upload_folder == "-1")
     {
         for (size_t i = 0; i < _methods.size(); i++)
@@ -175,9 +158,9 @@ void locationConfig::setUncalledDirectives( std::string defaultRoot )
 /*************************************************************
 Config - checking
 *************************************************************/
-bool locationConfig::checkLocationData( std::string defaultRoot )
+bool locationConfig::checkLocationData()
 {
-    setUncalledDirectives(defaultRoot);
+    setUncalledDirectives();
 
     checks _checks[7] = {&locationConfig::checkLocation, &locationConfig::checkRoot, 
             &locationConfig::checkIndex, &locationConfig::checkMethods, &locationConfig::checkUploadFolder, 
@@ -202,23 +185,6 @@ bool locationConfig::checkLocation()
         std::cerr << "Error in location path : Invalid character" << std::endl;
         return false;
     }
-
-    size_t dotPos = _location.find(".", 0);
-    if (dotPos != std::string::npos && _location[dotPos + 1])
-    {
-        std::ifstream location;
-        std::string checkFile;
-        if (_root[_root.size() - 1] == '/' && _location[0] == '/')
-            checkFile = _root.substr(0, (_root.size() - 1)) + _location;
-        else if (_root[_root.size() - 1] != '/' && _location[0] != '/')
-            checkFile = _root + "/" + _location;
-        location.open(checkFile, std::ifstream::in);
-        if (location.is_open())
-        {
-            this->_isFile = true;
-            location.close();
-        }   
-    }
     return true;
 }
 
@@ -234,14 +200,11 @@ bool locationConfig::checkRoot()
 
 bool locationConfig::checkIndex()
 {
-    for (size_t i = 0; i < _index.size(); i++)
+    if (!isAcceptableURI(_index))
     {
-        if (!isAcceptableURI(_index[i]))
-        {
-            std::cerr << "Error in index directive : Invalid character" << std::endl;
-            return false;
-        }    
-    }
+        std::cerr << "Error in index directive : Invalid character" << std::endl;
+        return false;
+    }    
     return true;
 }
 
@@ -350,7 +313,7 @@ std::vector<std::string> locationConfig::getMethods() const
     return this->_methods;
 }
 
-std::vector<std::string> locationConfig::getIndex() const
+std::string locationConfig::getIndex() const
 {
     return this->_index;
 }
@@ -385,10 +348,8 @@ void locationConfig::debug()
     std::map<std::string, std::string>::iterator it;
     for (it = _cgi.begin(); it != _cgi.end(); it++)
         std::cout << "cgi - " << it->first << " " << it->second << std::endl;
-    for (size_t i = 0; i < _index.size(); i++)
-        std::cout << "index " << i << " - " <<  _index[i] << std::endl;
+    std::cout << "index " << " - " <<  _index << std::endl;
     std::cout << "Upload folder : " << getUploadFolder() << std::endl;
-    std::cout << "Is the location a file ? " << _isFile << std::endl;
     std::cout << "Redirection " << _redirect << std::endl;
     std::cout << "*** End ***\n" << std::endl;
 }

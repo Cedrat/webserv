@@ -5,38 +5,60 @@
 #include <vector>
 #include <map>
 #include "../includes/utils.hpp"
+# include "../includes/Syntax.hpp"
 
 class Location
 {
+    typedef bool(Location::*checks)();
+
     private :
         std::string                         _location;
         std::string                         _root;
         std::vector<std::string>            _methods;
         bool                                _autoindex;
-        std::string                         _default_file; 
+        bool                                _set_autoindex;
+        std::string                         _default_file; // = index
         std::string                         _upload_folder;
         std::string                         _redirect;
-        std::map<std::string, std::string>  _cgi; //???
+        std::map<std::string, std::string>  _cgi;
 
     public : 
         Location();
         ~Location();
 
-        void    setLocation(std::string location);
-        void    addMethod(std::string method);
-        void    setAutoIndex(bool _autoindex_on);
-        void    setDefaultFile(std::string default_file);
-        void    setUploadFolder(std::string upload_folder);
-        void    setRoot(std::string root);
-        void    setRedirect(std::string redirect);
+        //Assignation des valeurs
+        void setLocationDirective( std::vector<std::string> line );
+        void setRoot( std::vector<std::string> line );
+        void setAutoindex( std::vector<std::string> line );
+        void setMethods( std::vector<std::string> line );
+        void setDefaultFile( std::vector<std::string> line );
+        void setUploadFolder( std::vector<std::string> line );
+        void setCgi( std::vector<std::string> line );
+        void setRedirect( std::vector<std::string> line );
+        void setUncalledDirectives();
 
-        bool                        getAutoIndex(void) const;
-        std::string                 getRoot(void) const;
-        std::string                 getLocation(void) const;
-        std::string                 getDefaultFile(void) const;
-        std::string                 getUploadFolder(void) const;
-        std::vector<std::string>    getMethods(void) const;
-        std::string                 getRedirect(void) const;
+        //Verification des valeurs
+        bool checkLocationData();
+        bool checkLocation();
+        bool checkRoot();
+        bool checkDefaultFile();
+        bool checkMethods();
+        bool checkUploadFolder();
+        bool checkCgi();
+        bool checkRedirect();
+        bool isEqual(const Location & rhs) const;
+
+        //Recuperation des valeurs
+        std::string                getLocation() const;
+        std::string                getRoot() const;
+        std::string                getUploadFolder() const;
+        bool                       getAutoIndex() const;
+        std::vector<std::string>   getMethods() const;
+        std::string                getDefaultFile() const;
+        std::map<std::string, std::string> getCgi() const;
+        std::string                getRedirect() const;
+
+        void                        debug();
 
         bool                        checkIfMethodIsPresent(std::string method) const;
 };
