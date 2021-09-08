@@ -90,6 +90,6 @@ int main()
    //Config config;
    //config = default_config();
    //server.addConfig(config);
-   //server.createSocketsServer();
-   //server.launchingServer();
+   server.createSocketsServer();
+   server.launchingServer();
 }

@@ -135,6 +135,8 @@ void Location::setUncalledDirectives()
                 throw std::invalid_argument("Error : You must specify an upload directory if you use the POST method");
         }  
     }
+    if (_redirect == "-1")
+        _redirect = "";
     //upload_folder reste = "-1" si pas de methode POST
     //redirect reste = "-1" si pas specifie
     //On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas demandé
