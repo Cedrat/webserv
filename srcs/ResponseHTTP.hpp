@@ -23,7 +23,7 @@ class ResponseHTTP
         ResponseHTTP(const char *, int);
         ~ResponseHTTP();
 
-        void    send();
+        bool    send();
 
         void    resetByteSend();
         bool    getFinished() const;

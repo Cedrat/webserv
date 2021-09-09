@@ -5,9 +5,10 @@
 #include "Location.hpp"
 
 Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
- _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE)
+ _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE), 
+ _status(PARSING_REQUEST)
 {
-    resetRequest();
+
 }
 
 Request::~Request()
@@ -64,6 +65,8 @@ std::string const & Request::getHostName() const
 {
     return _host_name;
 }
+
+
 int const & Request::getContentLength() const
 {
     return _content_length; 
@@ -72,6 +75,11 @@ int const & Request::getContentLength() const
 std::string const & Request::getRequest() const
 {
     return (_request);
+}
+
+int const & Request::getStatus() const
+{
+    return (_status);
 }
 
 void Request::setError(int number_error)
@@ -96,14 +104,18 @@ void Request::setContentLength(int content_length)
     _content_length = content_length;
 }
 
+void Request::setStatus(const int status)
+{
+    _status = status;
+}
 
-
-void Request::receiveData()
+//split lines pour recuperation
+void Request::receiveData(std::vector<Config> & configs)
 {
     char buffer[BUFFER_SIZE];
     std::string str_request;
     int ret;
-    
+    (void) configs; // Pour si, il y a une post methode 
     ret = read(getFd(), buffer, BUFFER_SIZE);
     if (ret < 0)
         std::cout << "read error" << std::endl;
@@ -112,11 +124,9 @@ void Request::receiveData()
     if (str_request == "\r\n" && _request == "")
         return ;
     addRequest(str_request);
-    checkSyntaxRequest(); //si erreur, arretez la requete.
-
-    std::cout << "Bytes read " << ret << std::endl;
+    checkSyntaxRequest();
     if (_request.find("\r\n\r\n") != std::string::npos && _request.find("POST") != 0)
-        _request_completed = TRUE;
+        _status = SEND_HEADER; 
     else if (_request.find("\r\n\r\n") != std::string::npos)
     {
         
@@ -145,11 +155,11 @@ void    Request::checkSyntaxRequest()
             if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
             {
             }
-            else if (all_lines[i].find(" ") != std::string::npos)
+            else if (i == (all_lines.size()-1) && all_lines[i] == "\r")
             {
-                setError(BAD_REQUEST);
+
             }
-            else if (all_lines[i] == "")
+            else 
             {
                 setError(BAD_REQUEST);
             }
@@ -167,6 +177,7 @@ void    Request::resetRequest()
    _host_name = "";
    _content_length = -1;
    _request_completed = FALSE;
+   _status = PARSING_REQUEST;
    _response.resetByteSend();
    _response.setInProgress(FALSE);
    _response.setPathFile("");
@@ -218,5 +229,9 @@ ResponseHTTP const &    Request::getResponseHTTP() const
 void Request::send()
 {
     std::cout << "Welcome in send" << std::endl;
-    _response.send();
+    if (_response.send() == TRUE)
+    {
+        _status = REQUEST_ENDING;
+        _response.setInProgress(FALSE);
+    }
 }

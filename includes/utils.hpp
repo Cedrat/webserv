@@ -32,7 +32,7 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
-
+void set_responseHTTP_error(Request &request, std::vector<Config> configs);
 void add_config(const char *path_conf);
 std::string redir_path(std::string path, std::string path_redir, std::string part_to_replace);
 bool is_folder(const char * path);

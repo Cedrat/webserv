@@ -6,6 +6,16 @@
 #include "ResponseHTTP.hpp"
 
 class Config;
+
+//STATUS DEFINE
+# define PARSING_REQUEST 1
+# define POST_REQUEST 2
+# define POST_CGI_REQUEST 3
+# define SEND_HEADER 4
+# define SEND_ERROR_HEADER 5
+# define SEND_BODY 6
+# define REQUEST_ENDING 7
+
 class Request
 {
     private :
@@ -20,7 +30,7 @@ class Request
         std::string _host_name;
         int         _content_length;
         bool        _in_progress;
-
+        int         _status;
         ResponseHTTP _response;
     
     public :
@@ -37,9 +47,11 @@ class Request
         int const &         getContentLength() const;
         std::string const & getRequest() const;        
         bool const &        getInProgress() const;
+        int const &         getStatus() const;
 
         void            setInProgress(bool); 
-        void            setError(int error); 
+        void            setError(int error);
+        void            setStatus(const int status);
         void            setMethod(std::string method);
         void            setPath(std::string path);
         void            setHostName(std::string host_name);
@@ -53,7 +65,7 @@ class Request
         void        addRequest(std::string buffer);
         void        checkSyntaxRequest();
 
-        void        receiveData();
+        void        receiveData(std::vector<Config> & configs);
         void        resetRequest();
         void        send();
 

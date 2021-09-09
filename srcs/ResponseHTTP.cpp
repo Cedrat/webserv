@@ -43,9 +43,9 @@ void ResponseHTTP::setFdToAnswer(int fd_client)
 {
     _fd_to_answer= fd_client;
 }
-void ResponseHTTP::send()
+bool ResponseHTTP::send()
 {
-        signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
     if (_ai == FALSE)
     {
         std::fstream fs;
@@ -73,6 +73,7 @@ void ResponseHTTP::send()
         setAutoIndex(FALSE);
         _finished = TRUE;
     }
+    return (_finished);
 }
 
 bool ResponseHTTP::getFinished() const
