@@ -5,7 +5,7 @@
 #include "Location.hpp"
 
 Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
- _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE)
+ _request_completed(FALSE),  _error(OK), _content_length(-1), _in_progress(FALSE)
 {
     resetRequest();
 }

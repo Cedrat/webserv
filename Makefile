@@ -13,11 +13,11 @@ CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 OBJS_CONFIG = $(addprefix ${PATH_CONFIG},${CONFIG:.cpp=.o})
-DEBUG = -g3 -fsanitize=address
+DEBUG = -g3
 
 CXX= clang++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = #-Wall -Wextra -Werror #-std=c++98
 
 RM = rm -f
 
@@ -31,7 +31,7 @@ ${NAME}:	${OBJS} ${OBJS_CONFIG}
 			$(CXX) ${CFLAGS} ${DEBUG} ${OBJS} ${OBJS_CONFIG} -o $@
 
 clean :		
-			${RM} ${OBJS}
+			${RM} ${OBJS} ${OBJS_CONFIG}
 
 fclean :	clean
 			${RM} ${NAME}

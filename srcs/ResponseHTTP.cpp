@@ -8,11 +8,11 @@
 #include <csignal>
 
 
-ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE)
+ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE) , _ai(FALSE)
 {}
 
 ResponseHTTP::ResponseHTTP(const char * path, int client_fd) : _path_file(path),
-_byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd)
+_byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd), _ai(FALSE)
 {}
 
 ResponseHTTP::~ResponseHTTP()

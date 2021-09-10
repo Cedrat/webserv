@@ -7,6 +7,7 @@
 #include "define.hpp"
 
 # include "../includes/Syntax.hpp"
+# include "../includes/utils.hpp"
 # include "../includes/Formatting.hpp"
 
 class Location;

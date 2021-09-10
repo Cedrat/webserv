@@ -2,7 +2,8 @@
 # define FORMATTING_HPP
 
 
-#include <string>
+# include <string>
+# include <vector>
 
 std::string trimComment( std::string line );
 std::string trimStartAndEndWhitespaces( std::string line );

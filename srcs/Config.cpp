@@ -198,7 +198,7 @@ bool Config::checkMaxClientBodySize()
 
 bool Config::isEqual(const Config & rhs)
 {
-    if (_port == rhs.getPort())
+    if (_port == rhs.getPort() && _host == rhs.getHost())
     {
         std::vector<std::string> names = rhs.getServerNames();
         std::vector<std::string>::iterator it = _server_names.begin();
