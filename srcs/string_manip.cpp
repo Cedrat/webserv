@@ -23,8 +23,7 @@ std::string int_to_string(int nb)
 
 int string_to_int(std::string str)
 {
-
-    return (std::stoi(str));
+    return (atoi(str.c_str()));
 }
 
 

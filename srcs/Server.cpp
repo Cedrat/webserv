@@ -134,13 +134,15 @@ void Server::acceptConnection(void)
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_HEADER)
             {
-                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs); // PAS OUF HEIN
+                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs); // PAS OUF HEIN // La prochaine fois, tu mettras des commentaires explicites hein.
                 response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_BODY)
             {
                 _requests[getIndexRequest(_poll_fds[i].fd)].send();
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getRequestCompleted() == TRUE)
+                    _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(REQUEST_ENDING);
             }
             if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == REQUEST_ENDING)
             {

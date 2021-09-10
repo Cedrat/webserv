@@ -61,7 +61,7 @@ void ConfigParser::openConfigFile( std::string const & file )
         || file.size() <= 5)
         throw std::invalid_argument("Error : Invalid configuration file format");
 
-    this->_configFile.open(file, std::ifstream::in);
+    this->_configFile.open(file.c_str(), std::ifstream::in);
     if (this->_configFile.is_open() == false)
         throw std::invalid_argument("Error : Can't open file");
 }

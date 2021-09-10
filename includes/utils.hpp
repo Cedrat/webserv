@@ -19,6 +19,7 @@
 # include <ctime>
 # include <vector>
 #include <arpa/inet.h>
+# include <cstdlib>
 
 class Socket;
 class Config;

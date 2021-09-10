@@ -212,7 +212,7 @@ bool locationConfig::checkLocation()
             checkFile = _root.substr(0, (_root.size() - 1)) + _location;
         else if (_root[_root.size() - 1] != '/' && _location[0] != '/')
             checkFile = _root + "/" + _location;
-        location.open(checkFile, std::ifstream::in);
+        location.open(checkFile.c_str(), std::ifstream::in);
         if (location.is_open())
         {
             this->_isFile = true;

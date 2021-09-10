@@ -1,4 +1,5 @@
 #include "serverConfig.hpp"
+#include <cstdlib>
 
 serverConfig::serverConfig() 
 {
