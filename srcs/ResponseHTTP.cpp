@@ -8,11 +8,11 @@
 #include <csignal>
 
 
-ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE)
+ResponseHTTP::ResponseHTTP() : _byte_send(0), _finished(FALSE), _ai(FALSE)
 {}
 
 ResponseHTTP::ResponseHTTP(const char * path, int client_fd) : _path_file(path),
-_byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd)
+_byte_send(0), _finished(FALSE) , _fd_to_answer(client_fd) , _ai(FALSE)
 {}
 
 ResponseHTTP::~ResponseHTTP()
@@ -42,6 +42,18 @@ void ResponseHTTP::setAutoIndex(bool boolean)
 void ResponseHTTP::setFdToAnswer(int fd_client)
 {
     _fd_to_answer= fd_client;
+}
+
+void ResponseHTTP::reset()
+{
+        _path_file = "";
+        _ai_file = "";
+        _byte_send = 0;
+        _fd_to_answer = 0;
+        _ai = FALSE;
+        _finished = FALSE;
+
+        _path_redirect = "";
 }
 bool ResponseHTTP::send()
 {

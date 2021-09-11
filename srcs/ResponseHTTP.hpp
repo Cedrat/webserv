@@ -27,14 +27,17 @@ class ResponseHTTP
         bool    send();
 
         void    resetByteSend();
-        bool    getFinished() const;
         void    setPathFile(std::string path);
         void    setFdToAnswer(int);
         void    setFinished(bool);
         void    setInProgress(bool);
         void    setPageAutoIndex();
         void    setAutoIndex(bool);
+        
+        bool    getFinished() const;
         bool    getInProgress() const;
+
+        void    reset();
 
         std::string const & getPageAutoIndex() const;
 

@@ -33,6 +33,10 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+void set_responseHTTP_according_to_method(Request &request, Config const & config, Location const & location);
+std::string construct_path(std::string path, Location location);
+size_t find_index_best_config(std::vector<Config> configs, std::string host_name, size_t port, int host);
+std::string str_to_lower(std::string str);
 void set_responseHTTP_error(Request &request, std::vector<Config> configs);
 void add_config(const char *path_conf);
 std::string redir_path(std::string path, std::string path_redir, std::string part_to_replace);

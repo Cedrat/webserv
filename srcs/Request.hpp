@@ -20,9 +20,11 @@ class Request
 {
     private :
         fd _fd;
+        int     _host;
         size_t _port;
         std::string _request;
         bool _request_completed;
+        std::string _redirect_path;
         int     _error;
 
         std::string _method;
@@ -34,7 +36,7 @@ class Request
         ResponseHTTP _response;
     
     public :
-        Request(fd, size_t);
+        Request(fd, int, size_t);
         ~Request();
 
         fd const &          getFd() const;
@@ -48,6 +50,8 @@ class Request
         std::string const & getRequest() const;        
         bool const &        getInProgress() const;
         int const &         getStatus() const;
+        int const &         getHost() const;
+        std::string const & getRedirectPath() const;
 
         void            setInProgress(bool); 
         void            setError(int error);
@@ -56,9 +60,12 @@ class Request
         void            setPath(std::string path);
         void            setHostName(std::string host_name);
         void            setContentLength(int content_length);
+        void            setHost(const int host);
+        void            setRedirectPath(std::string const redirect_path);
        
        
-        void                    setResponseHTTP(Config config);
+        void                    setResponseHTTPGet(Config config);
+        void                    setResponseHTTPError(Config config);
         ResponseHTTP const &    getResponseHTTP() const;
         
         

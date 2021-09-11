@@ -4,7 +4,7 @@
 #include "Config.hpp"
 #include "Location.hpp"
 
-Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
+Request::Request(fd fd_request, int host, size_t port) : _fd(fd_request), _host(host), _port(port) ,
  _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE), 
  _status(PARSING_REQUEST)
 {
@@ -29,6 +29,16 @@ size_t const & Request::getPort() const
 int const & Request::getError() const
 {
     return (_error);
+}
+
+int const & Request::getHost() const
+{
+    return (_host);
+}
+
+void Request::setHost(const int host)
+{
+    _host = host;
 }
 
 void        Request::addRequest(std::string buffer)
@@ -181,51 +191,73 @@ void    Request::resetRequest()
    _response.resetByteSend();
    _response.setInProgress(FALSE);
    _response.setPathFile("");
+   _redirect_path = "";
 }
 
-void    Request::setResponseHTTP(Config config)
+void    Request::setResponseHTTPGet(Config config)
 {
     Location location = find_best_location(*this, config);
 
-    _response.setPathFile(construct_path(_path, location));
-    
-    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != BAD_REQUEST && getError() == OK)
-        setError(NOT_FOUND);
-    _response.resetByteSend();
+    _response.reset();
     _response.setFdToAnswer(getFd());
-    _response.setFinished(FALSE);
-    if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+    _response.setPathFile(construct_path(getPath(), location));
+    std::cout << "ERROR" << getPath() << std::endl;
+    if (location.getRedirect() == "" && check_if_file_exist(_response.getPath()) == FALSE)
+    {   
+        std::cout << "SET ERROR NOT FOUND " << std::endl;
+        setError(NOT_FOUND);
+        return ;
+    }
+    if (location.getRedirect() == "" && location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+    {
+        _response.setAutoIndex(TRUE);
         _response.setPageAutoIndex();
-    
-    if (getError() == OK && getMethod() == "DELETE")
-        {
-            std::cout <<  "DELETE PATH" << _response.getPath() << std::endl;
-            if (check_if_file_exist(_response.getPath().c_str()))
-            {
-                delete_f(_response.getPath().c_str());
-                setError(NO_CONTENT);
-            }
-            else 
-                setError(NOT_FOUND);
-        }
+    }
     if (location.getRedirect() != "")
     {
         setError(MOVED_PERMANENTLY);// creer Set path redirect;
-        setPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
-    } 
-    if (getError() != OK)
-    {
-        _response.setAutoIndex(FALSE);
+        setRedirectPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
         _response.setPathFile(config.getPathError(getError()));
-    }
-    std::cout << "Final path is = " << _response.getPath() << std::endl;
+        std::cout << "AI GE TPATH " << getPath() << std::endl;
+    } 
+    
+    // if (check_if_file_exist(_response.getPath()) == FALSE && getError() != BAD_REQUEST && getError() == OK)
+    //     setError(NOT_FOUND);
+    // _response.resetByteSend();
+    // _response.setFinished(FALSE);
+    // if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+    //     _response.setPageAutoIndex();
+    // if (getError() != OK)
+    // {
+    //     _response.setAutoIndex(FALSE);
+    //     _response.setPathFile(config.getPathError(getError()));
+    // }
+    // std::cout << "Final path is = " << _response.getPath() << std::endl;
 }
 
+
+void                    Request::setResponseHTTPError(Config config)
+{
+    _response.reset();
+
+    _response.setFdToAnswer(getFd());
+    _response.setPathFile(config.getPathError(getError()));
+
+}
 ResponseHTTP const &    Request::getResponseHTTP() const
 {
     return (_response);
 }
 
+void    Request::setRedirectPath(std::string const redirect_path)
+{
+    _redirect_path = redirect_path;
+}
+
+std::string const &  Request::getRedirectPath() const
+{
+    return (_redirect_path);
+}   
 void Request::send()
 {
     std::cout << "Welcome in send" << std::endl;

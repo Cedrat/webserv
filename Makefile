@@ -5,7 +5,7 @@ SRCS =  Config.cpp                              Server.cpp                      
 Location.cpp                            Socket.cpp                              construct_path.cpp                      find_index_best_config.cpp              path_security.cpp                       response_error_header.cpp \
 Request.cpp                             VerifyDuplicata.cpp                     create_ai.cpp                           get_file_size.cpp                       process_data.cpp                        string_manip.cpp \
 ResponseHTTP.cpp                        check_if_file_exist.cpp                 delete_f.cpp                            is_folder.cpp                           redir_path.cpp                          timeout.cpp \
-Syntax.cpp		Formatting.cpp			set_responseHTTP_error.cpp
+Syntax.cpp		Formatting.cpp			set_responseHTTP_error.cpp				set_responseHTTP_according_to_method.cpp
 
 PATH_CONFIG = ./config/
 CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
@@ -15,7 +15,7 @@ OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 OBJS_CONFIG = $(addprefix ${PATH_CONFIG},${CONFIG:.cpp=.o})
 DEBUG = -g3 # -fsanitize=address
 
-CXX= g++
+CXX= clang++
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98
 

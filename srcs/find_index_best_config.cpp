@@ -11,11 +11,11 @@ bool find_host_name(std::vector<std::string> hosts_names, std::string host_name)
     return (FALSE);
 }
 
-size_t find_index_best_config(std::vector<Config> configs, std::string host_name, size_t port)
+size_t find_index_best_config(std::vector<Config> configs, std::string host_name, size_t port, int host)
 {
     for (size_t i = 0; i < configs.size(); i++)
     {
-        if (configs[i].getPort() == port)
+        if (configs[i].getPort() == port && configs[i].getHost() == host)
         {
             if (find_host_name(configs[i].getServersNames(), host_name))
                 return (i);
@@ -23,7 +23,7 @@ size_t find_index_best_config(std::vector<Config> configs, std::string host_name
     }
     for (size_t i = 0; i < configs.size(); i++)
     {
-        if (configs[i].getPort() == port)
+        if (configs[i].getPort() == port && configs[i].getHost() == host)
         {
             if (configs[i].IsPrincipalServer() == TRUE)
                 return(i);

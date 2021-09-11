@@ -22,8 +22,8 @@ class Server
         ~Server();
 
         void    createSocketsServer(void);
-        void    createAndAddSocketServer(size_t port);
-        void    createAndAddSocketClient(fd new_fd_client, size_t port);
+        void    createAndAddSocketServer(size_t port, int host);
+        void    createAndAddSocketClient(fd new_fd_client, size_t port, int host);
 
         void            addConfig(Config const & config);
         Request const & getRequest(fd);

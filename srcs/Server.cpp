@@ -62,15 +62,15 @@ void Server::createSocketsServer(void)
         if (search_in_vector(lists_ports, _configs[i].getPort()) == FALSE)
         {
             lists_ports.push_back(_configs[i].getPort());
-            createAndAddSocketServer(_configs[i].getPort());
+            createAndAddSocketServer(_configs[i].getPort(), _configs[i].getHost());
             std::cout << "CREATE" << std::endl;
         }
     }
 }
 
-void Server::createAndAddSocketServer(size_t port)
+void Server::createAndAddSocketServer(size_t port, int host)
 {
-    Socket socket(SERVER, port);
+    Socket socket(SERVER, port, host);
 
     _poll_fds.push_back(create_a_listenable_socket(port));
     _sockets.push_back(socket);
@@ -119,7 +119,7 @@ void Server::acceptConnection(void)
         }
         else if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
         {
-            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort());
+            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort(), _sockets[i].getHost());
         }
         else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
         {
@@ -129,13 +129,17 @@ void Server::acceptConnection(void)
             {
                 set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
-                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                //process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_HEADER)
             {
-                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs); // PAS OUF HEIN // La prochaine fois, tu mettras des commentaires explicites hein.
-                response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
+                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() >= 302)
+                {
+                    set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                }
+                    response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_BODY)
@@ -161,6 +165,7 @@ void Server::acceptConnection(void)
 		}
         else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
+            std::cout << _requests[getIndexRequest(_poll_fds[i].fd)].getStatus() << std::endl;
             std::cout << "POLLIN" << std::endl;
             std::cout << "REVENTS" << _poll_fds[i].revents << std::endl;
             _sockets[i].setTimeout(std::time(0));
@@ -190,12 +195,12 @@ void Server::acceptConnection(void)
     }
 }
 
-void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
+void Server::createAndAddSocketClient(fd new_fd_client, size_t port, int host)
 {
 		fd fd_client;
 		struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
-        Socket socket(CLIENT, port);
+        Socket socket(CLIENT,  port, host);
         pollfd new_socket;
 
 
@@ -207,7 +212,7 @@ void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
         new_socket.events = POLLIN;
         new_socket.revents = 0;
 
-        Request request(fd_client, port);
+        Request request(fd_client, host,  port);
         _poll_fds.push_back(new_socket);
         _requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;

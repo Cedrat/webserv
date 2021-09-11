@@ -59,3 +59,12 @@ std::string    decoding_http_string(std::string str)
     }
     return(str);
 }
+
+std::string str_to_lower(std::string str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        str[0] = tolower(str[0]);
+    }
+    return (str);
+}

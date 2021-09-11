@@ -20,7 +20,7 @@ Location default_location_2()
 {
    Location location;
 
-   location.setAutoIndex(FALSE);
+   location.setAutoIndex(TRUE);
    location.addMethod("GET");
    location.addMethod("POST");
    location.addMethod("DELETE");
@@ -41,7 +41,7 @@ Location default_location_3()
    location.addMethod("DELETE");
    location.setDefaultFile("test_index.html");
    location.setUploadFolder("/upload/");
-   location.setRoot("./www");
+   location.setRoot("./www/redir");
    location.setLocation("/redir/");
    location.setRedirect("/test/");
    return (location);

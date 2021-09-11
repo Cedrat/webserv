@@ -40,5 +40,6 @@ std::string factorised_path(std::string path)
     }
     if (path[path.size() - 1] == '/' || new_path == "")
         new_path += "/";
+    new_path = decoding_http_string(new_path);
     return (new_path);
 }

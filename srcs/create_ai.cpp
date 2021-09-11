@@ -14,6 +14,7 @@ std::string create_ai_page(const char * path)
     dir = opendir(path);
     std::string ai_page;
     std::string name_file;
+    std::string str_path(path);
 
     
     ai_page += "<!DOCTYPE html>\n<html>\n";
@@ -21,9 +22,11 @@ std::string create_ai_page(const char * path)
     while ((info = readdir(dir)))
     {
         name_file = info->d_name;
-        ai_page += "<p><a href=\"" + name_file + "\">" + " " + name_file + "</a></p>\n";
+        ai_page += "<p><a href=\"" + str_path + "/" + name_file + "\">" + " " + name_file + "</a></p>\n";
     }
     ai_page += "</html>";
+
+    std::cout << "AI PAGE CREATED" << std::endl;
 
     return (ai_page);
 }
