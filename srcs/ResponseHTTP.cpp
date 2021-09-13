@@ -23,9 +23,9 @@ void    ResponseHTTP::setPathFile(std::string path)
     _path_file = path;
 }
 
-void    ResponseHTTP::setPageAutoIndex()
+void    ResponseHTTP::setPageAutoIndex(std::string short_path, std::string long_path)
 {
-    _ai_file = create_ai_page(_path_file.c_str()); 
+    _ai_file = create_ai_page(short_path.c_str(), long_path.c_str()); 
     _ai = TRUE;
 }
 

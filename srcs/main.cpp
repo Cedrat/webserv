@@ -26,7 +26,7 @@ Location default_location_2()
    location.addMethod("DELETE");
    location.setDefaultFile("test_index.html");
    location.setUploadFolder("/upload/");
-   location.setRoot("./www");
+   location.setRoot("./www/test");
    location.setLocation("/test/");
    return (location);
 }

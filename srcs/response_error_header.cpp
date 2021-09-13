@@ -15,7 +15,7 @@ void  response_header(Request request, fd fd_to_send)
     }
     else
     {
-        response_header = "HTTP/1.1 " + get_string_error(request.getError()) + "\nLocation: " + request.getRedirectPath() + "\nContent-Length: " + int_to_string((int)get_file_size(request.getPath())) + "\n\n";
+        response_header = "HTTP/1.1 " + get_string_error(request.getError()) + "\nLocation: " + request.getRedirectPath() + "\nContent-Length: " + int_to_string((int)get_file_size(path)) + "\n\n";
     }
     std::cout << "how much byte ? " << send(fd_to_send, response_header.c_str() , response_header.size() , 0) << std::endl;
 }

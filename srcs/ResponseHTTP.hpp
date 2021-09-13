@@ -31,7 +31,7 @@ class ResponseHTTP
         void    setFdToAnswer(int);
         void    setFinished(bool);
         void    setInProgress(bool);
-        void    setPageAutoIndex();
+        void    setPageAutoIndex(std::string path, std::string long_path);
         void    setAutoIndex(bool);
         
         bool    getFinished() const;

@@ -64,7 +64,29 @@ std::string str_to_lower(std::string str)
 {
     for (size_t i = 0; i < str.size(); i++)
     {
-        str[0] = tolower(str[0]);
+        str[i] = tolower(str[i]);
     }
     return (str);
+}
+
+void    trim(std::string & str, char trimmed_char)
+{
+    std::string::iterator it_begin = str.begin();
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (str[i] != trimmed_char)
+        {
+            break;
+        }
+        str.erase(it_begin + i);
+        i--;
+    }
+     for (size_t i = str.size() - 1; i > 0; i--)
+    {
+        if (str[i] != trimmed_char)
+        {
+            break;
+        }
+        str.erase(it_begin + i);
+    }
 }

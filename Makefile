@@ -17,7 +17,7 @@ DEBUG = -g3 # -fsanitize=address
 
 CXX= clang++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -Weffc++
 
 RM = rm -f
 

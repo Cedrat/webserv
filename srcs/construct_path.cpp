@@ -8,7 +8,7 @@ std::string construct_path(std::string path, Location location)
 {
     path = create_alias(path, location);
     std::cout << location.getAutoIndex() << std::endl;
-    if (path.rfind("/") == path.size() -1 && location.getAutoIndex() == FALSE)
+    if (path.rfind("/") == path.size() - 1 && location.getAutoIndex() == FALSE)
         path += location.getDefaultFile();
     std::cout << "Construct_path " << path << std::endl;
     return (path);

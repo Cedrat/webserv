@@ -139,7 +139,8 @@ void Request::receiveData(std::vector<Config> & configs)
         _status = SEND_HEADER; 
     else if (_request.find("\r\n\r\n") != std::string::npos)
     {
-        
+        std::cout << "HEY POST" << std::endl;
+        process_data(*this, configs);
     }
 }
 
@@ -211,7 +212,7 @@ void    Request::setResponseHTTPGet(Config config)
     if (location.getRedirect() == "" && location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
     {
         _response.setAutoIndex(TRUE);
-        _response.setPageAutoIndex();
+        _response.setPageAutoIndex(getPath(), _response.getPath());
     }
     if (location.getRedirect() != "")
     {
@@ -233,6 +234,24 @@ void    Request::setResponseHTTPGet(Config config)
     //     _response.setPathFile(config.getPathError(getError()));
     // }
     // std::cout << "Final path is = " << _response.getPath() << std::endl;
+}
+
+void    Request::setResponseHTTPDelete(Config config)
+{
+    Location location = find_best_location(*this, config);
+
+    _response.reset();
+    _response.setFdToAnswer(getFd());
+    _response.setPathFile(construct_path(getPath(), location));
+
+    if (check_if_file_exist(_response.getPath()) == FALSE)
+        setError(NOT_FOUND);
+    else
+    {
+        delete_f(_response.getPath().c_str());
+        setError(NO_CONTENT);
+        _response.setPathFile(config.getPathError(getError()));
+    }
 }
 
 

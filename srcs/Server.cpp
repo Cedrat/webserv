@@ -129,7 +129,6 @@ void Server::acceptConnection(void)
             {
                 set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
-                //process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_HEADER)
@@ -139,7 +138,7 @@ void Server::acceptConnection(void)
                 {
                     set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 }
-                    response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
+                response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
                 _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
             else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_BODY)

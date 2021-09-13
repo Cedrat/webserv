@@ -65,6 +65,7 @@ class Request
        
        
         void                    setResponseHTTPGet(Config config);
+        void                    setResponseHTTPDelete(Config config);
         void                    setResponseHTTPError(Config config);
         ResponseHTTP const &    getResponseHTTP() const;
         
