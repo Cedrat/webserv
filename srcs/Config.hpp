@@ -6,45 +6,70 @@
 #include <iterator>
 #include "define.hpp"
 
+# include "../includes/Syntax.hpp"
+# include "../includes/utils.hpp"
+# include "../includes/Formatting.hpp"
 
 class Location;
 class Config
 {
+    typedef bool(Config::*checks)();
+    
     private : 
-        bool                        _principal_server;
+        std::vector<Location>       _locations;
+
+        bool                        _principal_server;  //=_default_server
         bool                        _server_or_client;
-        size_t                         _port;
+
+        size_t                      _port;
         int                         _host;
         int                         _max_body_size;
         std::vector<std::string>    _server_names;
         std::map<int, std::string>  _error_pages;
-        std::vector<Location>       _locations;
+
 
     public :
         Config(void);
         ~Config(void);
-       
-        size_t                      getPort(void) const;
-        bool                        getServerOrClient(void) const;
-        int                         getHost(void) const;
-        int                         getMaxBodySize(void) const;
-        std::vector<std::string>    getServersNames(void) const;
-        std::map<int, std::string>  getErrorPages(void) const;
+
+        //Assignation des valeurs
+        void setHostAndPort( std::vector<std::string> line );
+        void setOneHostOrPort( std::string line );
+        void setServerNames( std::vector<std::string> line );
+        void setErrorPages( std::vector<std::string> line );
+        void setMaxClientBodySize( std::vector<std::string> line );
+        void setLocation( std::vector<Location> location );
+        void setUncalledDirectives();
+        void setPrincipalServer( bool value );
+        void setServerOrClient(bool server_or_client);
+
+
+        //Check des valeurs
+        bool checkServerData();
+        bool checkServerNames();
+        bool checkErrorPages();
+        bool checkMaxClientBodySize();
+        bool isEqual(const Config & rhs);
+
+
+
+        //Recuperation des valeurs
+        size_t                      getPort() const;
+        int                         getHost() const;
+        std::vector<std::string>    getServerNames() const;
+        int                         getMaxBodySize() const;
+        std::map<int, std::string>  getErrorPages() const;
+        std::vector<Location>       getLocations() const;
+        Location                    getOneLocation( size_t id ) const;
         std::string                 getPathError(int num_error) const;
-        std::vector<Location>       getLocations(void) const;
+        
+        bool                        IsServerOrClient(void) const;
+        bool                        IsPrincipalServer(void) const;
 
-        bool    IsServerOrClient(void) const;
-        bool    IsPrincipalServer(void) const;
+        void                        debug();
 
-        void    setPort(size_t port);
-        void    setServerOrClient(bool soc);
-        void    setPrincipalServer(bool);
-        void    setHost(int host);
-        void    setMaxBodySize(int max_body_size);
 
-        void    addServerName(std::string str);
-        void    addErrorPages(int error_nb, std::string path_error);
-        void    addLocation(Location location);
+
 
         bool    checkIfHostNameIsPresent(std::string host_name) const;
 

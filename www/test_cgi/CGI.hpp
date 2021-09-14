@@ -21,7 +21,7 @@ class CGI
         ~CGI();
 
         void        processCGI();
-        std::string execCGI( const char ** args, char ** env );
+        int execCGI( const char ** args, char ** env );
         std::string readCgiFile();
 
         std::string createTmpFile();

@@ -9,4 +9,5 @@ print "Content-Type: text/plain\n\n";
 
 for my $var ( sort keys %ENV ) {
     printf "%s=\"%s\"\n", $var, $ENV{$var};
+    sleep 1;
 }

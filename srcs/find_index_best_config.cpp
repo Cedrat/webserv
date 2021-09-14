@@ -17,7 +17,7 @@ size_t find_index_best_config(std::vector<Config> configs, std::string host_name
     {
         if (configs[i].getPort() == port && configs[i].getHost() == host)
         {
-            if (find_host_name(configs[i].getServersNames(), host_name))
+            if (find_host_name(configs[i].getServerNames(), host_name))
                 return (i);
         }
     }

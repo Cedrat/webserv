@@ -17,9 +17,9 @@
 # include <sys/stat.h>
 # include <fstream>
 # include <ctime>
-# include <vector>
-#include <arpa/inet.h>
 # include <cstdlib>
+# include <vector>
+# include <arpa/inet.h>
 
 class Socket;
 class Config;

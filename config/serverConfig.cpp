@@ -3,13 +3,13 @@
 
 serverConfig::serverConfig() 
 {
-    this->_host = -1;
+    this->_host = 0;
     this->_port = -1;
     this->_max_body_size = -1;
     this->_server_names.push_back("-1");
-    this->_root = "-1";
     this->_error_pages.insert(std::pair<int, std::string>(0, "0"));
     this->_default_server = false;
+    //this->_server_or_client = SERVER;
 }
 
 serverConfig::~serverConfig() { }
@@ -24,7 +24,7 @@ Config - setting
 **************************************************************/
 void serverConfig::setHostAndPort( std::vector<std::string> line )
 {
-    if (_port == -1 && _host == -1)
+    if (_port == 0 && _host == -1)
     {
         if (line.size() == 1)
             return ;
@@ -111,31 +111,14 @@ void serverConfig::setMaxClientBodySize( std::vector<std::string> line )
         throw std::invalid_argument("Error : Config file can't contain more than one client_max_body_size directive");
 }
 
-void serverConfig::setRoot( std::vector<std::string> line )
-{
-    if (_root == "-1")
-    {
-        if (line.size() == 1)
-        {
-            _root = "./";
-            return ;
-        }
-        this->_root = line[1];
-    }
-    else
-        throw std::invalid_argument("Error : Server block can't contain more than one root directive");
-}
-
 void serverConfig::setUncalledDirectives()
 {
-    if (_port == -1)
+    if (_port == 0)
         _port = 80;
     if (_host == -1)
         inet_pton(AF_INET, "0.0.0.1", &_host);
     if (_max_body_size == -1)
         _max_body_size = 1000;
-    if (_root == "-1")
-        _root = "./";
     if (_server_names[0] == "-1")
         _server_names[0] = "\"\"";
 }
@@ -155,9 +138,9 @@ bool serverConfig::checkServerData()
 {
     setUncalledDirectives();
 
-    checks _checks[4] = {&serverConfig::checkRoot, &serverConfig::checkServerNames, 
+    checks _checks[3] = {&serverConfig::checkServerNames, 
                     &serverConfig::checkErrorPages, &serverConfig::checkMaxClientBodySize};
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
     {
         if ((this->*_checks[i])() == false)
             return false;
@@ -210,16 +193,6 @@ bool serverConfig::checkMaxClientBodySize()
     return true;
 }
 
-bool serverConfig::checkRoot()
-{
-    if (!isAcceptableURI(_root))
-    {
-        std::cerr << "Error in root directive : Invalid character" << std::endl;
-        return false;
-    }
-    return true;
-}
-
 bool serverConfig::isEqual(const serverConfig & rhs)
 {
     if (_port == rhs.getPort())
@@ -245,7 +218,7 @@ bool serverConfig::isEqual(const serverConfig & rhs)
 /***********************************************************
 Getters
 ***********************************************************/
-int serverConfig::getPort() const
+size_t serverConfig::getPort() const
 {
     return this->_port;
 }
@@ -260,14 +233,9 @@ std::vector<std::string> serverConfig::getServerNames() const
     return this->_server_names;
 }
 
-int serverConfig::getMaxClientBodySize() const
+int serverConfig::getMaxBodySize() const
 {
     return this->_max_body_size;
-}
-
-std::string serverConfig::getRoot() const
-{
-    return this->_root;
 }
 
 std::map<int, std::string> serverConfig::getErrorPages() const
@@ -313,7 +281,6 @@ void serverConfig::debug()
         for (size_t i = 0; i < _server_names.size(); i++)
             std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
     }
-    std::cout << "Root : " << getRoot() << std::endl;
     std::cout << "max_body_size - " << _max_body_size << std::endl;
     std::map<int, std::string>::iterator it;
     for (it = _error_pages.begin(); it != _error_pages.end(); it++)

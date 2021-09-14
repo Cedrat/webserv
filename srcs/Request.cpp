@@ -266,6 +266,11 @@ void                    Request::setResponseHTTPError(Config config)
     _response.setFdToAnswer(getFd());
     _response.setPathFile(config.getPathError(getError()));
 }
+
+void                Request::setResponseHTTPPost(Config config)
+{
+   (void) config; 
+}
 ResponseHTTP const &    Request::getResponseHTTP() const
 {
     return (_response);

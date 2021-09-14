@@ -21,7 +21,7 @@
 # include <fstream>
 # include <iostream>
 
-# include "serverConfig.hpp"
+# include "../srcs/Config.hpp"
 # include "locationConfig.hpp"
 # include "../includes/Formatting.hpp"
 
@@ -36,19 +36,21 @@ class ConfigParser
 
         void parser( std::string const & file );
         bool treatServerBlock();
-        bool treatLocationBlock( std::vector<std::string> line, std::string defaultRoot );
+        bool treatLocationBlock( std::vector<std::string> line );
 
-        bool closeServerBlock( std::vector<std::string> line, serverConfig * server );
-        bool closeLocationBlock( std::vector<std::string> line, locationConfig * location, std::string defaultRoot );
+        bool closeServerBlock( std::vector<std::string> line, Config * server );
+        bool closeLocationBlock( std::vector<std::string> line, Location * location );
 
         bool isServerProperty( std::string line );
         bool isLocationProperty( std::string line );
         bool isLocation( std::vector<std::string> line );
 
-        bool addServerProperty( std::vector<std::string> line, serverConfig * server );
-        bool addLocationProperty( std::vector<std::string> line, locationConfig * location );
+        bool addServerProperty( std::vector<std::string> line, Config * server );
+        bool addLocationProperty( std::vector<std::string> line, Location * location );
 
-        std::vector<serverConfig> getServer();
+        std::vector<Config>   getServer();
+        Config                getOneServer( size_t i );
+        int                   getServerNb();
 
         void openConfigFile( std::string const & file );
 
@@ -62,8 +64,8 @@ class ConfigParser
         int                     _locationNb;
         std::ifstream           _configFile;
 
-        std::vector<serverConfig>   _server;
-        std::vector<locationConfig> _location;
+        std::vector<Config>     _server;
+        std::vector<Location>   _location;
 
 };
 

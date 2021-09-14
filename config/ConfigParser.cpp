@@ -72,7 +72,7 @@ void ConfigParser::openConfigFile( std::string const & file )
 **************************************************************/
 bool ConfigParser::treatServerBlock()
 {
-    serverConfig                server;
+    Config                server;
     std::vector<std::string>    line;
     bool                        closingBrace = false;
 
@@ -92,9 +92,9 @@ bool ConfigParser::treatServerBlock()
             if (addServerProperty(line, &server) == false)
                 return false;
         }
-        else if (isLocation(line) == true) //Envoyer vers la bonne fonction de locationConfig
+        else if (isLocation(line) == true) //Envoyer vers la bonne fonction de Location
         {
-            if (treatLocationBlock(line, server.getRoot()) == false)
+            if (treatLocationBlock(line) == false)
                 return false;
         }
         else //1er argument pas reconnu ou pas suivi d'un espace
@@ -107,9 +107,9 @@ bool ConfigParser::treatServerBlock()
 }
 
 
-bool ConfigParser::treatLocationBlock( std::vector<std::string> line, std::string defaultRoot )
+bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
 {
-    locationConfig location;
+    Location location;
     bool closingBrace = false;
 
     location.setLocationDirective(line);    
@@ -122,7 +122,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line, std::strin
         //Check derniere accolade
         if (line[0] == "}")
         {
-            closingBrace = closeLocationBlock(line, &location, defaultRoot);
+            closingBrace = closeLocationBlock(line, &location);
             break ;
         }
         else if (isLocationProperty(line[0]) == true)
@@ -146,7 +146,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line, std::strin
 /**************************************************************
 Enregistrement des structures de données
 **************************************************************/
-bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig * server )
+bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * server )
 {
     //if (_serverNb < 100) ?
 
@@ -154,12 +154,12 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
     {
         //On defini serveur par defaut, on check les donnees et absence de doublon
         //On ajoute le serveur complet a la liste & les blocs location
-        if (_serverNb == 0)
-            server->setDefaultServer(true);
         for (int i = 0; i < _serverNb; i++)
         {
             if (server->isEqual(_server[i]))
                 throw std::invalid_argument("Server bloc duplicata");
+            if ((_server[i].getPort() == server->getPort()) && server->IsPrincipalServer() == true && _server[i].IsPrincipalServer() == true)
+                server->setPrincipalServer(false);
         }
         if (server->checkServerData() == false)
             return false;
@@ -177,11 +177,11 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, serverConfig
     }    
 }
 
-bool ConfigParser::closeLocationBlock( std::vector<std::string> line, locationConfig * location, std::string defaultRoot )
+bool ConfigParser::closeLocationBlock( std::vector<std::string> line, Location * location )
 {
     if (line.size() == 1)
     {
-        if (location->checkLocationData(defaultRoot) == false)
+        if (location->checkLocationData() == false)
             return false;
         for (int i = 0; i < _locationNb; i++)
         {
@@ -238,9 +238,9 @@ Gestion des keywords
 **************************************************************/
 bool ConfigParser::isServerProperty( std::string line )
 {
-    std::string serverProperties[5] = {"listen", "server_name", "error_page", "client_max_body_size", "root"};
+    std::string serverProperties[4] = {"listen", "server_name", "error_page", "client_max_body_size"};
     
-    for(unsigned long i = 0; i < 5; i++)
+    for(unsigned long i = 0; i < 4; i++)
     {
         if (line == serverProperties[i])
             return true;
@@ -260,7 +260,7 @@ bool ConfigParser::isLocationProperty( std::string line )
     return false;
 }
 
-bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfig * server )
+bool ConfigParser::addServerProperty( std::vector<std::string> line, Config * server )
 {
     if (line[0] == "listen" && line.size() <=  2)
         server->setHostAndPort(line);
@@ -270,8 +270,6 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfi
         server->setErrorPages(line);
     else if (line[0] == "client_max_body_size" && line.size() == 2)
         server->setMaxClientBodySize(line);
-    else if (line[0] == "root" && line.size() <=  2)
-        server->setRoot(line);
     else
     {
         std::cerr << "Error in config file : Wrong or missing argument in server block" << std::endl;
@@ -280,16 +278,16 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, serverConfi
     return true;
 }
 
-bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationConfig * location )
+bool ConfigParser::addLocationProperty( std::vector<std::string> line, Location * location )
 {
-    if (line[0] == "root" && line.size() == 2)
+    if (line[0] == "root" && line.size() >= 1 && line.size() <= 2)
         location->setRoot(line);
     else if (line[0] == "autoindex" && line.size() == 2)
         location->setAutoindex(line);
-    else if (line[0] == "method")
+    else if (line[0] == "method" && line.size() >= 1)
         location->setMethods(line);
-    else if (line[0] == "index" && line.size() >= 1)
-        location->setIndex(line);
+    else if (line[0] == "index" && line.size() == 2)
+        location->setDefaultFile(line);
     else if (line[0] == "upload_folder" && line.size() == 2)
         location->setUploadFolder(line);
     else if (line[0] == "cgi" && line.size() == 3)
@@ -309,7 +307,17 @@ bool ConfigParser::addLocationProperty( std::vector<std::string> line, locationC
 /**************************************************************
 Getters
 **************************************************************/
-std::vector<serverConfig> ConfigParser::getServer()
+std::vector<Config> ConfigParser::getServer()
 {
     return this->_server;
+}
+
+Config ConfigParser::getOneServer( size_t i )
+{
+    return this->_server[i];
+}
+
+int ConfigParser::getServerNb()
+{
+    return this->_serverNb;
 }
