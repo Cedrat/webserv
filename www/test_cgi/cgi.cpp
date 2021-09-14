@@ -21,8 +21,9 @@ void CGI::processCGI()
 {
     std::string header;
 
+    const char *args[3] = {"./cgi.pl", "/test.php", NULL};
     //const char *args[3] = {"./../../../../.brew/bin/php-cgi", "/test.php", NULL};
-    const char *args[3] = {"./../../../../../../../usr/bin/php-cgi", "/test.php", NULL};
+    //const char *args[3] = {"./../../../../../../../usr/bin/php-cgi", "/test.php", NULL};
 
 /***    
 *    const char *args[3] = {"./ubuntu_cgi_tester", "/youpi.bla", NULL};
@@ -40,14 +41,20 @@ void CGI::processCGI()
     env = convertEnv();
 
     //Gestion de l'execution du cgi
-    header = execCGI(args, env);
+    if (execCGI(args, env) == -1)
+    {
+        std::cerr << "Error during CGI execution" << std::endl;
+        return ;
+    }
+
+    header = readCgiFile();
     std::cout << "Returned :\n" << std::endl;
     std::cout << header << std::endl;
 
     freeEnv(env);
 }
 
-std::string CGI::execCGI( const char ** args, char ** env )
+int CGI::execCGI( const char ** args, char ** env )
 {
     std::string header;
     pid_t       pid;
@@ -61,7 +68,7 @@ std::string CGI::execCGI( const char ** args, char ** env )
     if ((pipe(fd) < 0) || (tmp < 0))
     {
         std::cerr << "Pipe or tmp file opening failed" << std::endl;
-        exit(0);
+        return -1;
     }
 
     //Creation du child process
@@ -71,7 +78,7 @@ std::string CGI::execCGI( const char ** args, char ** env )
         std::cerr << "Error with fork()" << std::endl;
         close(fd[0]);
         close(fd[1]);
-        exit(0);
+        return -1;
     }
     else if (pid == 0)       //Child
     {
@@ -86,7 +93,7 @@ std::string CGI::execCGI( const char ** args, char ** env )
             close(fd[0]);
             close(tmp);
             remove(this->_tmpOut.c_str());
-            exit(0);
+            return -1;
         }
     }
     else  //Parent
@@ -94,13 +101,17 @@ std::string CGI::execCGI( const char ** args, char ** env )
         close(fd[0]);
         //Ecrire query dans fd[1] ici ? 
 
-        waitpid(pid, &status, 0);
+        //waitpid(pid, &status, 0);
+        waitpid(pid, &status, WNOHANG);
         if (WIFEXITED(status))
+        {
             std::cout << "\nExit status : " << WEXITSTATUS(status) << std::endl;
+            return (WEXITSTATUS(status));
+        }
+            
     }
 
-    header = readCgiFile();
-    return header;
+    return 1;
 }
 
 std::string CGI::readCgiFile()
@@ -144,18 +155,21 @@ void CGI::setEnv()
     // Requete
     this->_env["SERVER_PROTOCOL="] = "HTTP/1.1";
     this->_env["SERVER_PORT="] = "7995";           //A remplacer par server.getPort();
-    this->_env["REQUEST_METHOD="] = "GET";         //A remplacer
+    this->_env["REQUEST_METHOD="] = "GET";         //A remplacer en fonction de requete recue
     this->_env["AUTH_TYPE="] = "Basic";            //A remplacer ?
 
-    this->_env["PATH_INFO="] = "/php-cgi";         //A remplacer. Chemin vers le binaire. 
-    this->_env["PATH_TRANSLATED="] = "/php-cgi";   //A remplacer. Chemin vers le binaire.
+    //this->_env["PATH_INFO="] = "/php-cgi";         //A remplacer. Chemin vers le binaire. 
+    //this->_env["PATH_TRANSLATED="] = "/php-cgi";   //A remplacer. Chemin vers le binaire.
+    this->_env["PATH_INFO="] = "/cgi.pl";
+    this->_env["PATH_TRANSLATED="] = "/cgi.pl";
+
     this->_env["SCRIPT_FILENAME="] = "test.php";   //A remplacer. Fichier à ouvrir avec le binaire
     this->_env["SCRIPT_NAME="] = "test.php";       //Pareil que FILENAME. Facultatif ?
 
     this->_env["REQUEST_URI="] = "/php-cgi";       //A remplacer. Chemin vers le binaire + requete query. Facultatif ?
     this->_env["REMOTE_HOST="] = "";               //Nom d'hote du client. Vide si pas connu
     this->_env["REMOTE_ADDR="] = "127.0.0.1";      //IP du client
-    this->_env["QUERY_STRING="] = "";              //A remplacer
+    this->_env["QUERY_STRING="] = "";              //A remplacer en fonction du contenu recu
 
     this->_env["CONTENT_LENGTH="] = "0";           //Taille du body ?
     this->_env["CONTENT_TYPE="] = "text/plain";    //Recuperer ça dans le header de la requete ?
