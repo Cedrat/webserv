@@ -19,14 +19,19 @@ int remove_f(const char * path, const struct stat *sb, int tflag, struct FTW* ft
     return (0);
 }
 
-void delete_f(const char *path)
+int delete_f(const char *path)
 {
     struct stat sb;
 
     stat(path, &sb);
-    std::cout << "FORZA DELETE " << path << std::endl;
+    std::cout << "Path to delete " << path << std::endl; 
     if (S_ISDIR(sb.st_mode) != 1)
-        unlink(path);
+    {
+        if (unlink(path) < 0)
+            return (-1);
+    }
     else
         nftw(path, remove_f, 1024, FTW_DEPTH); 
+    
+    return (1);
 }

@@ -4,10 +4,11 @@
 #include "Config.hpp"
 #include "Location.hpp"
 
-Request::Request(fd fd_request, size_t port) : _fd(fd_request), _port(port) ,
- _request_completed(FALSE),  _error(OK), _content_length(-1), _in_progress(FALSE)
+Request::Request(fd fd_request, int host, size_t port) : _fd(fd_request), _host(host), _port(port) ,
+ _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE), 
+ _status(PARSING_REQUEST)
 {
-    resetRequest();
+
 }
 
 Request::~Request()
@@ -28,6 +29,16 @@ size_t const & Request::getPort() const
 int const & Request::getError() const
 {
     return (_error);
+}
+
+int const & Request::getHost() const
+{
+    return (_host);
+}
+
+void Request::setHost(const int host)
+{
+    _host = host;
 }
 
 void        Request::addRequest(std::string buffer)
@@ -64,6 +75,8 @@ std::string const & Request::getHostName() const
 {
     return _host_name;
 }
+
+
 int const & Request::getContentLength() const
 {
     return _content_length; 
@@ -72,6 +85,11 @@ int const & Request::getContentLength() const
 std::string const & Request::getRequest() const
 {
     return (_request);
+}
+
+int const & Request::getStatus() const
+{
+    return (_status);
 }
 
 void Request::setError(int number_error)
@@ -96,14 +114,18 @@ void Request::setContentLength(int content_length)
     _content_length = content_length;
 }
 
+void Request::setStatus(const int status)
+{
+    _status = status;
+}
 
-
-void Request::receiveData()
+//split lines pour recuperation
+void Request::receiveData(std::vector<Config> & configs)
 {
     char buffer[BUFFER_SIZE];
     std::string str_request;
     int ret;
-    
+    (void) configs; // Pour si, il y a une post methode 
     ret = read(getFd(), buffer, BUFFER_SIZE);
     if (ret < 0)
         std::cout << "read error" << std::endl;
@@ -112,14 +134,17 @@ void Request::receiveData()
     if (str_request == "\r\n" && _request == "")
         return ;
     addRequest(str_request);
-    checkSyntaxRequest(); //si erreur, arretez la requete.
-
-    std::cout << "Bytes read " << ret << std::endl;
+    checkSyntaxRequest();
     if (_request.find("\r\n\r\n") != std::string::npos && _request.find("POST") != 0)
-        _request_completed = TRUE;
+        _status = SEND_HEADER; 
     else if (_request.find("\r\n\r\n") != std::string::npos)
     {
-        
+        std::cout << "HEY POST" << std::endl;
+        process_data(*this, configs);
+        if (getError() != OK)
+        {
+
+        }
     }
 }
 
@@ -145,11 +170,11 @@ void    Request::checkSyntaxRequest()
             if (match_regex(const_cast<char *>((all_lines[i] + "\n").c_str()), motif2) >= 1)
             {
             }
-            else if (all_lines[i].find(" ") != std::string::npos)
+            else if (i == (all_lines.size()-1) && all_lines[i] == "\r")
             {
-                setError(BAD_REQUEST);
+
             }
-            else if (all_lines[i] == "")
+            else 
             {
                 setError(BAD_REQUEST);
             }
@@ -167,56 +192,105 @@ void    Request::resetRequest()
    _host_name = "";
    _content_length = -1;
    _request_completed = FALSE;
+   _status = PARSING_REQUEST;
    _response.resetByteSend();
    _response.setInProgress(FALSE);
    _response.setPathFile("");
+   _redirect_path = "";
 }
 
-void    Request::setResponseHTTP(Config config)
+void    Request::setResponseHTTPGet(Config config)
 {
     Location location = find_best_location(*this, config);
 
-    _response.setPathFile(construct_path(_path, location));
-    
-    if (check_if_file_exist(_response.getPath()) == FALSE && getError() != BAD_REQUEST && getError() == OK)
-        setError(NOT_FOUND);
-    _response.resetByteSend();
+    _response.reset();
     _response.setFdToAnswer(getFd());
-    _response.setFinished(FALSE);
-    if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
-        _response.setPageAutoIndex();
-    
-    if (getError() == OK && getMethod() == "DELETE")
-        {
-            std::cout <<  "DELETE PATH" << _response.getPath() << std::endl;
-            if (check_if_file_exist(_response.getPath().c_str()))
-            {
-                delete_f(_response.getPath().c_str());
-                setError(NO_CONTENT);
-            }
-            else 
-                setError(NOT_FOUND);
-        }
+    _response.setPathFile(construct_path(getPath(), location));
+    std::cout << "ERROR" << getPath() << std::endl;
+    if (location.getRedirect() == "" && check_if_file_exist(_response.getPath()) == FALSE)
+    {   
+        std::cout << "SET ERROR NOT FOUND " << std::endl;
+        setError(NOT_FOUND);
+        return ;
+    }
+    if (location.getRedirect() == "" && location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+    {
+        _response.setAutoIndex(TRUE);
+        _response.setPageAutoIndex(getPath(), _response.getPath());
+    }
     if (location.getRedirect() != "")
     {
         setError(MOVED_PERMANENTLY);// creer Set path redirect;
-        setPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
-    } 
-    if (getError() != OK)
-    {
-        _response.setAutoIndex(FALSE);
+        setRedirectPath(redir_path(getPath(), location.getRedirect(), location.getLocation()));
         _response.setPathFile(config.getPathError(getError()));
-    }
-    std::cout << "Final path is = " << _response.getPath() << std::endl;
+        std::cout << "AI GE TPATH " << getPath() << std::endl;
+    } 
+    
+    // if (check_if_file_exist(_response.getPath()) == FALSE && getError() != BAD_REQUEST && getError() == OK)
+    //     setError(NOT_FOUND);
+    // _response.resetByteSend();
+    // _response.setFinished(FALSE);
+    // if (location.getAutoIndex() == TRUE && is_folder(_response.getPath().c_str()))
+    //     _response.setPageAutoIndex();
+    // if (getError() != OK)
+    // {
+    //     _response.setAutoIndex(FALSE);
+    //     _response.setPathFile(config.getPathError(getError()));
+    // }
+    // std::cout << "Final path is = " << _response.getPath() << std::endl;
 }
 
+void    Request::setResponseHTTPDelete(Config config)
+{
+    Location location = find_best_location(*this, config);
+
+    _response.reset();
+    _response.setFdToAnswer(getFd());
+    _response.setPathFile(construct_path(getPath(), location));
+
+    if (check_if_file_exist(_response.getPath()) == FALSE)
+        setError(NOT_FOUND);
+    else
+    {
+        delete_f(_response.getPath().c_str());
+        setError(NO_CONTENT);
+        _response.setPathFile(config.getPathError(getError()));
+    }
+}
+
+
+void                    Request::setResponseHTTPError(Config config)
+{
+    _response.reset();
+
+    _response.setFdToAnswer(getFd());
+    _response.setPathFile(config.getPathError(getError()));
+}
+
+void                Request::setResponseHTTPPost(Config config)
+{
+   (void) config; 
+}
 ResponseHTTP const &    Request::getResponseHTTP() const
 {
     return (_response);
 }
 
+void    Request::setRedirectPath(std::string const redirect_path)
+{
+    _redirect_path = redirect_path;
+}
+
+std::string const &  Request::getRedirectPath() const
+{
+    return (_redirect_path);
+}   
 void Request::send()
 {
     std::cout << "Welcome in send" << std::endl;
-    _response.send();
+    if (_response.send() == TRUE)
+    {
+        _status = REQUEST_ENDING;
+        _response.setInProgress(FALSE);
+    }
 }

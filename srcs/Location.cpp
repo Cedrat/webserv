@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-Location::Location()
+Location::Location() : _autoindex(FALSE)
 {
     this->_root = "-1";
     this->_methods.push_back("-1");

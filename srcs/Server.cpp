@@ -63,15 +63,15 @@ void Server::createSocketsServer(void)
         {
             std::cout << _configs[i].getPort() << std::endl;
             lists_ports.push_back(_configs[i].getPort());
-            createAndAddSocketServer(_configs[i].getPort());
+            createAndAddSocketServer(_configs[i].getPort(), _configs[i].getHost());
             std::cout << "CREATE" << std::endl;
         }
     }
 }
 
-void Server::createAndAddSocketServer(size_t port)
+void Server::createAndAddSocketServer(size_t port, int host)
 {
-    Socket socket(SERVER, port);
+    Socket socket(SERVER, port, host);
 
     _poll_fds.push_back(create_a_listenable_socket(port));
     _sockets.push_back(socket);
@@ -120,35 +120,41 @@ void Server::acceptConnection(void)
         }
         else if (_poll_fds[i].revents != 0 && _sockets[i].getServerOrClient() == SERVER)
         {
-            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort());
+            createAndAddSocketClient(_poll_fds[i].fd, _sockets[i].getPort(), _sockets[i].getHost());
         }
         else if (_poll_fds[i].revents & POLLOUT && _sockets[i].getServerOrClient() == CLIENT)
         {
             _sockets[i].setTimeout(std::time(0));
             std::cout << "POLLOUT" << std::endl;
-            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == FALSE)
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_ERROR_HEADER)
             {
+                set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
                 response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
-                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(TRUE);
+                _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
             }
-            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
-                    _requests[getIndexRequest(_poll_fds[i].fd)].send();
-            if (_requests[getIndexRequest(_poll_fds[i].fd)].getResponseHTTP().getFinished() == TRUE)
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_HEADER)
             {
-                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
+                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() >= 302)
+                {
+                    set_responseHTTP_error(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
+                }
+                response_header(_requests[getIndexRequest(_poll_fds[i].fd)],_poll_fds[i].fd);
+                _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_BODY);
+            }
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_BODY)
+            {
+                _requests[getIndexRequest(_poll_fds[i].fd)].send();
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getRequestCompleted() == TRUE)
+                    _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(REQUEST_ENDING);
+            }
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == REQUEST_ENDING)
+            {
                 _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
                 std::cout << "reseted" << std::endl;
                 _poll_fds[i].events = POLLIN;
                 _poll_fds[i].revents = 0;
             }
-            // else
-            // {
-            //     _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
-            //     _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
-            //     _poll_fds[i].events = POLLIN;
-            //     _poll_fds[i].revents = 0;
-
-            // }
             std::cout << "POLLOUT ENDED" << std::endl;
         }
         else if (_poll_fds[i].revents & POLLHUP)
@@ -159,22 +165,29 @@ void Server::acceptConnection(void)
 		}
         else if (_poll_fds[i].revents & POLLIN && _sockets[i].getServerOrClient() == CLIENT)
 		{
+            std::cout << _requests[getIndexRequest(_poll_fds[i].fd)].getStatus() << std::endl;
             std::cout << "POLLIN" << std::endl;
             std::cout << "REVENTS" << _poll_fds[i].revents << std::endl;
             _sockets[i].setTimeout(std::time(0));
-            if (_requests[getIndexRequest(_poll_fds[i].fd)].getInProgress() == TRUE)
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == PARSING_REQUEST)
             {
-                _requests[getIndexRequest(_poll_fds[i].fd)].setInProgress(FALSE);
-                _requests[getIndexRequest(_poll_fds[i].fd)].resetRequest();
+                receiveData(_poll_fds[i].fd);
+                if (_requests[getIndexRequest(_poll_fds[i].fd)].getError() != OK)
+                    _requests[getIndexRequest(_poll_fds[i].fd)].setStatus(SEND_ERROR_HEADER);
             }
-            receiveData(_poll_fds[i].fd);
-            
-            // ret = read(_poll_fds[i].fd, buffer, BUFFER_SIZE);
-            // write(1, buffer, ret);
-            if (requestCompleted(_poll_fds[i].fd) == TRUE)
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == POST_REQUEST)
             {
-                process_data(_requests[getIndexRequest(_poll_fds[i].fd)], _configs);
-                std::cout << "Request finished" << std::endl;
+                //DO IT DO IT
+            }
+            else if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == POST_CGI_REQUEST)
+            {
+                //DO IT DO IT
+            }
+            if (_requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_HEADER
+                || _requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_BODY
+                || _requests[getIndexRequest(_poll_fds[i].fd)].getStatus() == SEND_ERROR_HEADER)
+            {
+                std::cout << "Receipt Data is" << std::endl;
                 _poll_fds[i].events = POLLOUT;
                 _poll_fds[i].revents = 0;
             }
@@ -182,12 +195,12 @@ void Server::acceptConnection(void)
     }
 }
 
-void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
+void Server::createAndAddSocketClient(fd new_fd_client, size_t port, int host)
 {
 		fd fd_client;
 		struct sockaddr_in their_addr;
    		socklen_t their_size = sizeof(struct sockaddr_in);
-        Socket socket(CLIENT, port);
+        Socket socket(CLIENT,  port, host);
         pollfd new_socket;
 
 
@@ -199,7 +212,7 @@ void Server::createAndAddSocketClient(fd new_fd_client, size_t port)
         new_socket.events = POLLIN;
         new_socket.revents = 0;
 
-        Request request(fd_client, port);
+        Request request(fd_client, host,  port);
         _poll_fds.push_back(new_socket);
         _requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;
@@ -211,7 +224,7 @@ void Server::receiveData(fd fd_request)
     {
         if (_requests[i].getFd() == fd_request)
         {
-            _requests[i].receiveData();
+            _requests[i].receiveData(_configs);
             std::cout << "yo" << std::endl;
             return ;
         }

@@ -23,9 +23,9 @@ void    ResponseHTTP::setPathFile(std::string path)
     _path_file = path;
 }
 
-void    ResponseHTTP::setPageAutoIndex()
+void    ResponseHTTP::setPageAutoIndex(std::string short_path, std::string long_path)
 {
-    _ai_file = create_ai_page(_path_file.c_str()); 
+    _ai_file = create_ai_page(short_path.c_str(), long_path.c_str()); 
     _ai = TRUE;
 }
 
@@ -43,9 +43,21 @@ void ResponseHTTP::setFdToAnswer(int fd_client)
 {
     _fd_to_answer= fd_client;
 }
-void ResponseHTTP::send()
+
+void ResponseHTTP::reset()
 {
-        signal(SIGPIPE, SIG_IGN);
+        _path_file = "";
+        _ai_file = "";
+        _byte_send = 0;
+        _fd_to_answer = 0;
+        _ai = FALSE;
+        _finished = FALSE;
+
+        _path_redirect = "";
+}
+bool ResponseHTTP::send()
+{
+    signal(SIGPIPE, SIG_IGN);
     if (_ai == FALSE)
     {
         std::fstream fs;
@@ -68,10 +80,12 @@ void ResponseHTTP::send()
     }
     else
     {
+        std::cout << _ai_file << std::endl;
         ::send(_fd_to_answer, _ai_file.c_str(), _ai_file.size(), 0);
         setAutoIndex(FALSE);
         _finished = TRUE;
     }
+    return (_finished);
 }
 
 bool ResponseHTTP::getFinished() const

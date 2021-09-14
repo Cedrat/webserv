@@ -23,8 +23,7 @@ std::string int_to_string(int nb)
 
 int string_to_int(std::string str)
 {
-
-    return (std::stoi(str));
+    return (atoi(str.c_str()));
 }
 
 
@@ -59,4 +58,35 @@ std::string    decoding_http_string(std::string str)
         str.replace(str.find("%20"), 3, " ", 1);
     }
     return(str);
+}
+
+std::string str_to_lower(std::string str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        str[i] = tolower(str[i]);
+    }
+    return (str);
+}
+
+void    trim(std::string & str, char trimmed_char)
+{
+    std::string::iterator it_begin = str.begin();
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (str[i] != trimmed_char)
+        {
+            break;
+        }
+        str.erase(it_begin + i);
+        i--;
+    }
+     for (size_t i = str.size() - 1; i > 0; i--)
+    {
+        if (str[i] != trimmed_char)
+        {
+            break;
+        }
+        str.erase(it_begin + i);
+    }
 }

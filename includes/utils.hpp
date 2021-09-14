@@ -33,7 +33,12 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
-
+std::string create_ai_page(const char * short_path, const char * long_path);
+void set_responseHTTP_according_to_method(Request &request, Config const & config, Location const & location);
+std::string construct_path(std::string path, Location location);
+size_t find_index_best_config(std::vector<Config> configs, std::string host_name, size_t port, int host);
+std::string str_to_lower(std::string str);
+void set_responseHTTP_error(Request &request, std::vector<Config> configs);
 void add_config(const char *path_conf);
 std::string redir_path(std::string path, std::string path_redir, std::string part_to_replace);
 bool is_folder(const char * path);
@@ -59,7 +64,7 @@ bool    check_valid_path(std::string path);
 std::string factorised_path(std::string path);
 
 void delete_and_give_response(std::string path, fd current_fd);
-void delete_f(const char *path);
+int delete_f(const char *path);
 
 std::string create_ai_page(const char * path);
 std::string create_path(Request request, Config config);
@@ -70,4 +75,5 @@ int string_to_int(std::string str);
 void create_file(std::string path_name, std::string buffer);
 
 bool check_if_method_is_authorized(Request &request, Config config);
+void    trim(std::string & str, char trimmed_char);
 #endif

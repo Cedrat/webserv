@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <string>
+#include <vector>
 
 class ResponseHTTP
 {
@@ -14,6 +15,9 @@ class ResponseHTTP
         bool            _finished; // implement response HTTP
         int             _fd_to_answer;
         bool            _ai;
+        
+        // int             _content_length;
+        // int             _request_type;
 
 
         std::string     _path_redirect;
@@ -23,17 +27,20 @@ class ResponseHTTP
         ResponseHTTP(const char *, int);
         ~ResponseHTTP();
 
-        void    send();
+        bool    send();
 
         void    resetByteSend();
-        bool    getFinished() const;
         void    setPathFile(std::string path);
         void    setFdToAnswer(int);
         void    setFinished(bool);
         void    setInProgress(bool);
-        void    setPageAutoIndex();
+        void    setPageAutoIndex(std::string path, std::string long_path);
         void    setAutoIndex(bool);
+        
+        bool    getFinished() const;
         bool    getInProgress() const;
+
+        void    reset();
 
         std::string const & getPageAutoIndex() const;
 
