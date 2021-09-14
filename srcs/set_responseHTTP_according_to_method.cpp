@@ -29,8 +29,8 @@ void set_responseHTTP_delete(Request &request, Config const & config, Location c
     request.setResponseHTTPDelete(config);
 }
 
-// void set_responseHTTP_post(Request &request, Config const & config, Location const & location)
-// {
-//     (void) location;
-//     request.setResponseHTTPPost(config);
-// }
+void set_responseHTTP_post(Request &request, Config const & config, Location const & location)
+{
+    (void) location;
+    request.setResponseHTTPPost(config);
+}

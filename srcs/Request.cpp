@@ -141,6 +141,10 @@ void Request::receiveData(std::vector<Config> & configs)
     {
         std::cout << "HEY POST" << std::endl;
         process_data(*this, configs);
+        if (getError() != OK)
+        {
+
+        }
     }
 }
 
@@ -261,7 +265,6 @@ void                    Request::setResponseHTTPError(Config config)
 
     _response.setFdToAnswer(getFd());
     _response.setPathFile(config.getPathError(getError()));
-
 }
 ResponseHTTP const &    Request::getResponseHTTP() const
 {

@@ -48,7 +48,7 @@ void process_data(Request &request, std::vector<Config> configs)
         {
             return ;
         }
-    set_responseHTTP_according_to_method(request, best_config, best_location);
+        set_responseHTTP_according_to_method(request, best_config, best_location);
     }
 }
 

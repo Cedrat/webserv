@@ -15,6 +15,9 @@ class ResponseHTTP
         bool            _finished; // implement response HTTP
         int             _fd_to_answer;
         bool            _ai;
+        
+        int             _content_length;
+        int             _request_type;
 
 
         std::string     _path_redirect;
