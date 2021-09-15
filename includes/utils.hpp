@@ -20,6 +20,9 @@
 # include <cstdlib>
 # include <vector>
 # include <arpa/inet.h>
+#include <poll.h>
+# include <fcntl.h>
+
 
 class Socket;
 class Config;
