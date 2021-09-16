@@ -101,13 +101,17 @@ void Server::acceptConnection(void)
     poll(_pollfds.data(), _pollfds.size(), -1);
     for (size_t i = 0; i < _pollfds.size(); i++)
     {
-        if (_pollfds[i].revents & POLLIN)
-        {
-            exec_pollin(_sockets[i], poll_fds[i].fd);
-        }
-        else if (_pollfds[i].revents & POLLHUP)
+        if (_pollfds[i].revents & POLLHUP)
         {
             removeClient(i);
+        }
+        else if (_pollfds[i].revents & POLLIN)
+        {
+            exec_pollin(_sockets[i], poll_fds[i].fd, _pollfds[i]);
+        }
+        else if (_pollfds[i].revents & POLLOUT)
+        {
+            exec_pollout(_sockets[i], poll_fds[i].fd, _pollfds[i]);
         }
     }
 
@@ -129,7 +133,7 @@ void Server::launchingServer(void)
  
 }
 
-void Server::exec_pollin(ASocket *socket, int new_fd_client)
+void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 {
 
     if (socket->getType() == SERVER)
@@ -139,12 +143,12 @@ void Server::exec_pollin(ASocket *socket, int new_fd_client)
         socklen_t their_size = sizeof(struct sockaddr_in);
             
         std::cout << socket->getHost() << std::endl;
-        ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost());
+        fd_client = accept(fd_request, (struct sockaddr *)&their_addr, &their_size);
+        ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, s_pollfd);
         pollfd new_poll;
 
             
         _sockets.push_back(new_socket);
-        fd_client = accept(new_fd_client, (struct sockaddr *)&their_addr, &their_size);
 
         new_poll.fd = fd_client;
         new_poll.events = POLLIN;
@@ -158,13 +162,17 @@ void Server::exec_pollin(ASocket *socket, int new_fd_client)
     else
     {
         std::cout << "I'm a client " << std::endl;
-        int ret;
-        char buffer[BUFFER_SIZE];
-
-        ret = read(new_fd_client, buffer, BUFFER_SIZE);
-        buffer[ret] = 0;
-        std::cout << buffer << std::endl;
+        socket->exec();
+        // s_pollfd.events = POLLOUT;
+        // s_pollfd.revents = 0;
     }
+}
+
+void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
+{
+    //send(fd_client, "You got a new pokemon\n", 23, 0);
+    // s_pollfd.events = POLLIN;
+    // s_pollfd.revents = 0;
 }
 
 void Server::removeClient(size_t index)
@@ -174,4 +182,3 @@ void Server::removeClient(size_t index)
     _sockets.erase(_sockets.begin() + index);
     _pollfds.erase(_pollfds.begin() + index);
 }
-

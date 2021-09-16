@@ -6,3 +6,8 @@ SocketServer::SocketServer(size_t port, int host)
 {
 
 }
+
+void SocketServer::exec()
+{
+    //WIP
+}

@@ -23,6 +23,8 @@ class ASocket
 
 		void			setTimeout(int);
 
+        virtual void exec() = 0;
+
 };
 
 #endif

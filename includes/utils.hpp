@@ -35,7 +35,8 @@ typedef int fd;
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1
-
+bool duplicata(std::string request);
+int    check_syntax_request(std::string str_request);
 std::string create_ai_page(const char * short_path, const char * long_path);
 void set_responseHTTP_according_to_method(Request &request, Config const & config, Location const & location);
 std::string construct_path(std::string path, Location location);
