@@ -3,6 +3,8 @@
 
 # include "../includes/utils.hpp"
 
+
+class AField;
 class AMethod 
 {
 	private: 

@@ -74,11 +74,15 @@ AMethod * RequestInProgress::getAnswer()
 
     
     error = checkBasicError();
+    if (error != OK)
+    {
+        path_error = "./default_error_files/default_err" + int_to_string(error) + ".html";
+        header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
 
-    path_error = "./default_error_files/default_err" + int_to_string(error) + ".html";
-    header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
+        method = "ERREUR";
+    }
+    error = checkCommonError();
 
-    method = "ERREUR";
 
     return (method_generator.generate(method, _socket_fd, path_error, header));
 }
@@ -93,4 +97,51 @@ int RequestInProgress::checkBasicError()
     if (duplicata(_str_request))
         return (BAD_REQUEST);
     return (OK);
+}
+std::string extract_method(std::string str_request);
+std::string extract_path(std::string str_request);
+std::string extract_host_name(std::string str_request);
+
+int RequestInProgress::checkCommonError()
+{
+    std::string method = extract_method(_str_request);
+    std::string path = extract_path(_str_request);
+    std::string host_name = extract_host_name(_str_request);
+
+    std::cout << "Method : " << method << "\n path : " << path << "\nhost_name :" << host_name << std::endl;
+}
+
+std::string extract_method(std::string str_request)
+{
+    std::vector<std::string> splitted_string = split_string(str_request, "\n");
+    std::vector<std::string> splitted_line = split_string(splitted_string[0], " ");
+
+    return (splitted_line[0]);
+}
+
+std::string extract_path(std::string str_request)
+{
+    std::vector<std::string> splitted_string = split_string(str_request, "\n");
+    std::vector<std::string> splitted_line = split_string(splitted_string[0], " ");
+
+    return (splitted_line[1]);
+}
+
+std::string extract_host_name(std::string str_request)
+{
+    std::vector<std::string> splitted_string = split_string(str_request, "\n");
+    std::vector<std::string> splitted_line;
+
+    for (size_t i = 0; i < splitted_string.size(); i++)
+    {
+        splitted_line = split_string(splitted_string[0], ":");
+        splitted_line[0] = str_to_lower(splitted_line[0]);
+        if (splitted_line[0] == "host")
+        {
+            trim(splitted_line[1], ' ');
+            return (splitted_line[1]);
+        }
+    }
+
+    return "";
 }

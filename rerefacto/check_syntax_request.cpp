@@ -8,7 +8,7 @@ int    check_syntax_request(std::string str_request)
     char motif_method[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/(1\\.0|1\\.1)\r\n$";
     char motif_version_not_supported[] = "^[A-Z]+ +\\/[!-~]* +HTTP\\/[23]\r\n$";
     char motif2[] = "[a-zA-z0-9]+: +.*[^ ]+ +\r\n";
-    std::cout << "_______" << str_request << "_______" << std::endl;
+    //std::cout << "_______" << str_request << "_______" << std::endl;
     all_lines = split_string(str_request, "\n");
     if (str_request != "")
     {

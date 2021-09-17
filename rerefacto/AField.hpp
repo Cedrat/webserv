@@ -43,7 +43,8 @@ class DeleteField : public AField
 
 class RedirectField : public AField
 {
-
+    private :
+        std::string _location; // Pas besoin? Si on prepare les headers a l'avance
 };
 
 class ErrorField : public AField

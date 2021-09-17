@@ -3,7 +3,7 @@
 #include "AMethod.hpp"
 
 SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> const & configs, pollfd &s_pollfd) 
-: ASocket(port, host, TIMEOUT, CLIENT) , _method(nullptr) ,_configs(configs), _s_pollfd(s_pollfd)
+: ASocket(port, host, std::time(0), CLIENT) , _method(nullptr) ,_configs(configs), _s_pollfd(s_pollfd)
 {
     _request.setFd(fd);
     _request.setConfigs(configs);

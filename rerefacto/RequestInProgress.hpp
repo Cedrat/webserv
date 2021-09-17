@@ -14,6 +14,7 @@ class RequestInProgress
         std::vector<Config> _configs;
 
         int         checkBasicError();
+        int         checkCommonError();
 
     public :
         RequestInProgress();

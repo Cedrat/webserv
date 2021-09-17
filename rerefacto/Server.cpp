@@ -98,10 +98,10 @@ void Server::acceptConnection(void)
     char buffer[BUFFER_SIZE];
     int ret = 0;
 
-    poll(_pollfds.data(), _pollfds.size(), -1);
+    poll(_pollfds.data(), _pollfds.size(), 1000);
     for (size_t i = 0; i < _pollfds.size(); i++)
     {
-        if (_pollfds[i].revents & POLLHUP)
+        if (_pollfds[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
         {
             removeClient(i);
         }
@@ -162,6 +162,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
     else
     {
         std::cout << "I'm a client " << std::endl;
+        socket->setTimeout(std::time(0));
         socket->exec();
         // s_pollfd.events = POLLOUT;
         // s_pollfd.revents = 0;
