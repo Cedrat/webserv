@@ -14,7 +14,7 @@ class SocketClient : public ASocket
         AMethod             *_method;
         RequestInProgress   _request;
         std::vector<Config> _configs;
-        pollfd              _s_pollfd;
+        pollfd              & _s_pollfd;
 
     public :
         SocketClient(size_t port, int host, int fd, std::vector<Config> const & config, pollfd &s_pollfd);

@@ -21,7 +21,10 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
                 std::cerr << _request.getRequest() << std::endl;
                 _request.reset();
                 _s_pollfd.events = POLLOUT; //you are fired when post is back.
-                _s_pollfd.revents = 0;  
+                _s_pollfd.revents = 0;
+                std::cout << "HEY POLLOUT" << std::endl;
+                std::cout << _s_pollfd.fd << std::endl; 
+                std::cout << "Event pollfd" << _s_pollfd.events << std::endl;
             }
         }
         else 

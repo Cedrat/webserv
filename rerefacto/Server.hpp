@@ -11,12 +11,12 @@ class Server
 {
     private :
         std::vector<ASocket *>      _sockets;
-        std::vector<struct pollfd>  _pollfds;
+        std::vector<struct pollfd *>  _pollfds;
         std::vector<Config>         _configs;
         bool                        _is_running;
         
         void addSocket(ASocket *socket);
-        void addPollFd(pollfd datafd);
+        void addPollFd(pollfd * datafd);
 
     public : 
         Server();
@@ -25,7 +25,7 @@ class Server
         void createSocketsServer();
         void createAndAddSocketServer(size_t port, int host);
 
-        void addNewSocket(ASocket *socket, pollfd datafd);
+        void addNewSocket(ASocket *socket, pollfd * datafd);
         void addConfig(Config config);
         void launchingServer(void);
         void acceptConnection(void);
