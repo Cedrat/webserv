@@ -10,7 +10,10 @@ class RequestInProgress
     private :
         std::string         _str_request;
         bool                _is_finished;
+        
         int                 _socket_fd;
+        int                 _host;
+        size_t              _port;
         std::vector<Config> _configs;
 
         int         checkBasicError();
@@ -20,10 +23,15 @@ class RequestInProgress
         RequestInProgress();
         ~RequestInProgress();
 
-        std::string const & getRequest() const;
-        AMethod *           getAnswer();
+        std::string const &         getRequest() const;
+        AMethod *                   getAnswer();
+        std::vector<Config> const & getConfigs() const;
+        size_t const &              getPort() const;
+        int const &                 getHost() const;
 
         void                setFd(int fd);
+        void                setHost(int host);
+        void                setPort(size_t port);
 
         void        checkFinished(); 
         

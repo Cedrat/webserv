@@ -7,6 +7,8 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
 {
     _request.setFd(fd);
     _request.setConfigs(configs);
+    _request.setHost(host);
+    _request.setPort(port);
 }
 
  void SocketClient::exec()

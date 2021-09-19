@@ -1,7 +1,7 @@
 #include "RequestInProgress.hpp"
 #include "Erreur.hpp"
 #include "define.hpp"
-#include "MethodGenerator.hpp"
+#include "Generator.hpp"
 
 RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 {
@@ -16,6 +16,16 @@ RequestInProgress::~RequestInProgress()
 void RequestInProgress::setConfigs(std::vector<Config> configs)
 {
     _configs = configs;
+}
+
+void RequestInProgress::setHost(int const host)
+{
+    _host = host;
+}
+
+void RequestInProgress::setPort(size_t const port)
+{
+    _port = port;
 }
 
 void RequestInProgress::receiveData()
@@ -52,6 +62,21 @@ void RequestInProgress::setFd(int fd)
     _socket_fd = fd;
 }
 
+std::vector<Config> const & RequestInProgress::getConfigs() const
+{
+    return (_configs);
+}
+
+int const & RequestInProgress::getHost() const
+{
+    return (_host);
+}
+
+size_t const & RequestInProgress::getPort() const
+{
+    return (_port);
+}
+
  void        RequestInProgress::checkFinished() 
 {
     if (_str_request.find("\r\n\r\n") != std::string::npos)
@@ -63,28 +88,34 @@ void RequestInProgress::reset()
     _is_finished = FALSE;
     _str_request = "";
 }
+std::string extract_method(std::string str_request);
+std::string extract_path(std::string str_request);
+std::string extract_host_name(std::string str_request);
 
 AMethod * RequestInProgress::getAnswer()
 {
     int error;
     std::string header;
-    std::string path_error;
+    std::string file_path;
     MethodGenerator method_generator;
+    FieldGenerator field_generator;
     std::string method;
 
     
     error = checkBasicError();
     if (error != OK)
     {
-        path_error = "./default_error_files/default_err" + int_to_string(error) + ".html";
-        header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
+        file_path = "./default_error_files/default_err" + int_to_string(error) + ".html";
+        header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(file_path)) + "\n\n";
 
         method = "ERREUR";
+        return (method_generator.generate(method, _socket_fd, file_path, header));
+
     }
-    error = checkCommonError();
+    method = extract_method(_str_request);
+    AField *field = field_generator.generate(method, _str_request, *this);
 
-
-    return (method_generator.generate(method, _socket_fd, path_error, header));
+    return (field->getAMethod());
 }
 
 int RequestInProgress::checkBasicError()
@@ -98,15 +129,15 @@ int RequestInProgress::checkBasicError()
         return (BAD_REQUEST);
     return (OK);
 }
-std::string extract_method(std::string str_request);
-std::string extract_path(std::string str_request);
-std::string extract_host_name(std::string str_request);
 
 int RequestInProgress::checkCommonError()
 {
+
     std::string method = extract_method(_str_request);
     std::string path = extract_path(_str_request);
     std::string host_name = extract_host_name(_str_request);
+
+    Config best_config = _configs[find_index_best_config(_configs,host_name,_host,_port)];
 
     std::cout << "Method : " << method << "\n path : " << path << "\nhost_name :" << host_name << std::endl;
 }

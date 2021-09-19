@@ -23,5 +23,4 @@ int main()
         std::cout << "Coucou " << std::endl;
     if (_deux == nullptr)
         std::cout << "Absent" << std::endl;
-    
 }

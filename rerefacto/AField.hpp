@@ -1,19 +1,43 @@
+#ifndef AFIELD_HPP
+#define AFIELD_HPP
+
 #include "../includes/utils.hpp"
-
-
+#include "RequestInProgress.hpp"
 
 class AField
 {
-    private : 
+    protected : 
+        std::string _method;
         std::string _path;
-        std::string _header;
         std::string _host_name;
+
+        std::string _final_path;
+
+        std::string _str_request;
+        
+        std::string _header;
+        
+        RequestInProgress _data_request;
+
+        int _error;
+    
+    public : 
+
+        AField(std::string str_request, RequestInProgress data_request);
+        virtual ~AField();
+        std::string const & getMethod() const;
+        std::string const & getPath() const;
+        std::string const & getHostName() const;
+        std::string const & getStrRequest() const;
+        std::string const & getHeader() const;
+
+        RequestInProgress const & getDataRequest() const;
+
+        virtual void fillField() = 0;
+
+        virtual AMethod * getAMethod() = 0;
 };
 
-class GetField : public AField
-{
-
-};
 
 class PostField : public AField
 {
@@ -51,3 +75,5 @@ class ErrorField : public AField
 {
 
 };
+
+#endif
