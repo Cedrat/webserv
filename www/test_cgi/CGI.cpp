@@ -238,11 +238,10 @@ std::map<std::string, std::string> CGI::getEnv()
 
 
 
-
-// /usr/bin/php-cgi
-
 //Get = QUERY_STRING     - 1024 characters max
 //Post = pipe un body sur stdin
+
+//Remplacer fichier par pipes ?
 
 
 int main()

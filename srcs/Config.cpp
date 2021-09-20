@@ -36,7 +36,7 @@ void Config::setHostAndPort( std::vector<std::string> line )
         {
             //Assigner la valeur avant ':' à host
             if (isIP(line[1], ':', _host) == true)
-                inet_pton(AF_INET, line[1].substr(0, separator).c_str(), &_host);
+                inet_pton(AF_INET, line[1].substr(0, separator).c_str(), &_host);  
             else
                 throw std::invalid_argument("Error : Config - Invalid host"); 
             
@@ -60,7 +60,7 @@ void Config::setOneHostOrPort( std::string line )
     else if (isPort(line) == true)
         this->_port = atoi(line.c_str());
     else
-        throw std::invalid_argument("Error : Imvalid host or port");
+        throw std::invalid_argument("Error : Invalid host or port");
 }
 
 void Config::setServerNames( std::vector<std::string> line )

@@ -23,17 +23,17 @@ pollfd create_a_listenable_socket(size_t port)
 
     fcntl(new_socket, F_SETFL, O_NONBLOCK | SO_REUSEADDR);
     if (new_socket == -1)
-        throw "Error when create socket";
+        throw std::invalid_argument("\nError when create socket");
 
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
     my_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
-        throw "Error from binding";
+        throw std::invalid_argument("\nError from binding");
 
     if (listen(new_socket, BACKLOG) == -1)
-        throw "Error from listening";
+        throw std::invalid_argument("\nError from listening");
 
     //fcntl(new_socket, F_SETFL, O_NONBLOCK);
     mypollfd.fd = new_socket;
