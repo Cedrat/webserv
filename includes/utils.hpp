@@ -31,11 +31,11 @@ class Request;
 class ResponseHTTP;
 
 typedef int fd;
-#define BUFFER_SIZE 1000000
 #define BACKLOG 10
 #define FALSE 0
 #define TRUE 1
 
+std::string create_ai_page(const char * short_path, const char * long_path);
 Location find_best_location(std::string path, Config config);
 bool check_timeout(int timeout);
 bool duplicata(std::string request);

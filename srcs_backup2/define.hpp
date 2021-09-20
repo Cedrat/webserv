@@ -9,7 +9,7 @@
 
 # define BACKLOG 10
 
-# define TIMEOUT 5
+# define TIMEOUT 60
 
 # define OK 200
 # define NO_CONTENT 204

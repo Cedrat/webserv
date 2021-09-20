@@ -1,23 +1,22 @@
 NAME = webserv
 
 PATH_SRC = ./srcs/
-SRCS =  Config.cpp                              Server.cpp                              check_if_method_is_authorized.cpp       error_tables.cpp                        main.cpp                                regexp.cpp \
-Location.cpp                            Socket.cpp                              construct_path.cpp                      find_index_best_config.cpp              path_security.cpp                       response_error_header.cpp \
-Request.cpp                             VerifyDuplicata.cpp                     create_ai.cpp                           get_file_size.cpp                       process_data.cpp                        string_manip.cpp \
-ResponseHTTP.cpp                        check_if_file_exist.cpp                 delete_f.cpp                            is_folder.cpp                           redir_path.cpp                          timeout.cpp \
-Syntax.cpp		Formatting.cpp			set_responseHTTP_error.cpp				set_responseHTTP_according_to_method.cpp
+SRCS =  AField.cpp                      ConfigParser.cpp                Location.cpp                    SocketClient.cpp                check_if_file_exist.cpp         create_ai.cpp                   get_file_size.cpp  	             regexp.cpp \
+AMethod.cpp                     Erreur.cpp                      MethodGet.cpp                   SocketServer.cpp                check_syntax_request.cpp        duplicata.cpp                   is_folder.cpp                    string_manip.cpp \
+ASocket.cpp                     FieldGet.cpp                    RequestInProgress.cpp           Syntax.cpp                      check_timeout.cpp               error_tables.cpp                main.cpp					\
+Config.cpp                      Formatting.cpp                  Server.cpp                      add_config.cpp                  construct_path.cpp              find_index_best_config.cpp      path_security.cpp		 MethodAi.cpp	
 
-PATH_CONFIG = ./config/
-CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
+#PATH_CONFIG = ./config/
+#CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
 
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
-OBJS_CONFIG = $(addprefix ${PATH_CONFIG},${CONFIG:.cpp=.o})
+OBJS_CONFIG = $(addprefix ,${CONFIG:.cpp=.o})
 DEBUG = -g3 # -fsanitize=address
 
 CXX= clang++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -Weffc++
+CFLAGS = -Wall -Wextra  -std=c++98 -Weffc++
 
 RM = rm -f
 
@@ -28,10 +27,10 @@ all : 		${NAME}
 
 
 ${NAME}:	${OBJS} ${OBJS_CONFIG}
-			$(CXX) ${CFLAGS} ${DEBUG} ${OBJS} ${OBJS_CONFIG} -o $@
+			$(CXX) ${CFLAGS} ${DEBUG} ${OBJS}  -o $@
 
 clean :		
-			${RM} ${OBJS} ${OBJS_CONFIG}
+			${RM} ${OBJS}
 
 fclean :	clean
 			${RM} ${NAME}

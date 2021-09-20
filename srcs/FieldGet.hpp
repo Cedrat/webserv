@@ -3,9 +3,13 @@
 
 #include "AField.hpp"
 #include "RequestInProgress.hpp"
-
+class AMethod;
 class FieldGet : public AField
 {
+    private :
+        AMethod *createGetMethod();
+        AMethod *createErrorMethod(Config config);
+        AMethod *createAiMethod();
 
     public : 
         FieldGet(std::string str_request, RequestInProgress data_request);

@@ -22,6 +22,7 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
                 _method = _request.getAnswer();
                 std::cerr << _request.getRequest() << std::endl;
                 _request.reset();
+                _method->init();
                 _s_pollfd.events = POLLOUT; //you are fired when post is back.
                 _s_pollfd.revents = 0;
                 std::cout << "HEY POLLOUT" << std::endl;
@@ -34,6 +35,7 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
             _method->exec();
             if (_method->getIsFinished())
             {
+                std::cerr << "fin prematurée" << std::endl;
                 _s_pollfd.events = POLLIN;
                 _s_pollfd.revents = 0;
                 delete _method;

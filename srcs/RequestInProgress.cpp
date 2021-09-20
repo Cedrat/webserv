@@ -52,7 +52,7 @@ void RequestInProgress::addToRequest(std::string str_request)
     this->_str_request += str_request;
 }
 
-bool const RequestInProgress::isFinished()
+bool RequestInProgress::isFinished()
 {
     return (this->_is_finished);
 }
@@ -128,6 +128,11 @@ int RequestInProgress::checkBasicError()
     if (duplicata(_str_request))
         return (BAD_REQUEST);
     return (OK);
+}
+
+int const & RequestInProgress::getFd() const
+{
+    return (_socket_fd);
 }
 
 int RequestInProgress::checkCommonError()

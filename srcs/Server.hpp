@@ -1,41 +1,39 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <vector>
-#include "define.hpp"
+#include "../includes/utils.hpp"
 
-class Request;
+class ASocket;
+class SocketServer;
 class Config;
-class Socket;
+
 class Server
 {
     private :
-        bool _is_running;
+        std::vector<ASocket *>      _sockets;
+        std::vector<struct pollfd *>  _pollfds;
+        std::vector<Config>         _configs;
+        bool                        _is_running;
+        
+        void addSocket(ASocket *socket);
+        void addPollFd(pollfd * datafd);
 
-        std::vector<struct pollfd> _poll_fds;
-        std::vector<Socket> _sockets;
-        std::vector<Config> _configs;
-        std::vector<Request> _requests; 
-
-    public :
-        Server(void);
+    public : 
+        Server();
         ~Server();
 
-        void    createSocketsServer(void);
-        void    createAndAddSocketServer(size_t port, int host);
-        void    createAndAddSocketClient(fd new_fd_client, size_t port, int host);
+        void createSocketsServer();
+        void createAndAddSocketServer(size_t port, int host);
 
-        void            addConfig(Config const & config);
-        Request const & getRequest(fd);
+        void addNewSocket(ASocket *socket, pollfd * datafd);
+        void addConfig(Config config);
+        void launchingServer(void);
+        void acceptConnection(void);
 
-        void    launchingServer();
-        void    acceptConnection(void);
-        void    removeSocket(size_t index);
-        void    receiveData(fd fd_request);
+        void exec_pollin(ASocket *socket, int current_fd, pollfd & s_pollfd);
+        void exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd);
 
-        bool    requestCompleted(fd);
-
-        size_t      getIndexRequest(fd) const;
+        void removeClient(size_t index);
 };
 
 #endif

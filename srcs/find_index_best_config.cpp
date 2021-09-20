@@ -31,3 +31,22 @@ size_t find_index_best_config(std::vector<Config> configs, std::string host_name
     }
     throw ("no config corresponding");
 }
+
+Location find_best_location(std::string path, Config config)
+{
+    std::vector<Location> locations = config.getLocations();
+    Location best_location;
+    size_t     nb_of_precision(0);
+    for (size_t i = 0; i < locations.size(); i++)
+   {
+       if ((path.find(locations[i].getLocation()) != std::string::npos) && nb_of_char_in_str('/', locations[i].getLocation()) > nb_of_precision)
+       {
+            best_location = locations[i];
+            nb_of_precision = nb_of_char_in_str('/', locations[i].getLocation());
+            if (locations[i].getLocation() == "/")
+                nb_of_precision = 0;
+       }
+   }
+   std::cout << "Best location is " << best_location.getLocation() << std::endl;
+   return (best_location);
+}
