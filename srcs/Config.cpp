@@ -158,7 +158,7 @@ bool Config::checkServerNames()
     {
         if (isAcceptableName(_server_names[i]) == false)
         {
-            std::cerr << "Error in server_name directive" << std::endl;
+            throw std::invalid_argument("Error in server_name directive : Invalid character.");
             return false;
         }
     }
@@ -179,7 +179,7 @@ bool Config::checkErrorPages()
 
         if (!isAcceptableURI(it->second))
         {
-            std::cerr << "Error in error_page directive : Invalid character" << std::endl;
+            throw std::invalid_argument("Error in error_page directive : Invalid character.");
             return false;
         }  
     }
@@ -190,7 +190,7 @@ bool Config::checkMaxClientBodySize()
 {
     if (_max_body_size <= 0 || _max_body_size > 1200)
     {
-        std::cerr << "Error in max_client_body_size directive" << std::endl;
+        throw std::invalid_argument("Error in max_client_body_size directive.");
         return false;
     }
     return true;

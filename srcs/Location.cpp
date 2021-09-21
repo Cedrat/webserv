@@ -172,7 +172,7 @@ bool Location::checkLocation()
     //On accepte uniquement les char alnum et le '/', le '.', le '-' et le '_'
     if (!isAcceptableURI(_location))
     {
-        std::cerr << "Error in location path : Invalid character" << std::endl;
+        throw std::invalid_argument("Error in location path : Invalid character.");
         return false;
     }
     return true;
@@ -182,7 +182,7 @@ bool Location::checkRoot()
 {
     if (!isAcceptableURI(_root))
     {
-        std::cerr << "Error in root directive : Invalid character" << std::endl;
+        throw std::invalid_argument("Error in root directive : Invalid character.");
         return false;
     }
     return true;
@@ -192,7 +192,7 @@ bool Location::checkDefaultFile()
 {
     if (!isAcceptableURI(_default_file))
     {
-        std::cerr << "Error in index directive : Invalid character" << std::endl;
+        throw std::invalid_argument("Error in index directive : Invalid character.");
         return false;
     }    
     return true;
@@ -201,7 +201,7 @@ bool Location::checkDefaultFile()
 bool Location::checkMethods()
 {
     if (_methods.size() > 3)
-        return false;
+        throw std::invalid_argument("Error in method directive : You can only call up to 3 methods.");
     
     int get = 0;
     int del = 0;
@@ -210,7 +210,10 @@ bool Location::checkMethods()
     for(size_t i = 0; i < _methods.size(); i++)
     {
         if (_methods[i] != "GET" && _methods[i] != "POST" && _methods[i] != "DELETE")
+        {
+            throw std::invalid_argument("Error in method directive : Invalid method.");
             return false;
+        }
         if (_methods[i] == "GET")
             get++;
         else if (_methods[i] == "DELETE")
@@ -219,7 +222,10 @@ bool Location::checkMethods()
             post++;
     }
     if (post > 1 || get > 1 || del > 1)
+    {
+        throw std::invalid_argument("Error in method directive : Methods can only be called once.");
         return false;
+    } 
     if (get == 0)
         _methods.push_back("GET");
     return true;
@@ -231,7 +237,7 @@ bool Location::checkUploadFolder()
         return true;
     if (!isAcceptableURI(_upload_folder))
     {
-        std::cerr << "Error in upload_folder directive : Invalid character" << std::endl;
+        throw std::invalid_argument("Error in upload_folder directive : Invalid character.");
         return false;
     }
     return true;
@@ -247,12 +253,12 @@ bool Location::checkCgi()
             return true;
         if (isExtension(it->first) == false)
         {
-            std::cerr << "Error in cgi directive : Invalid extension" << std::endl;
+            throw std::invalid_argument("Error in cgi directive : Invalid extension.");
             return false;
         }
         if (!isAcceptableURI(it->second))
         {
-            std::cerr << "Error in CGI binary name : Invalid character" << std::endl;
+            throw std::invalid_argument("Error in CGI binary name : Invalid character.");
             return false;
         } 
     }
@@ -265,7 +271,7 @@ bool Location::checkRedirect()
         return true;
     if (!isAcceptableURI(_redirect))
     {
-        std::cerr << "Error in rewrite directive : Invalid character" << std::endl;
+        throw std::invalid_argument("Error in rewrite directive : Invalid character.");
         return false;
     } 
 
