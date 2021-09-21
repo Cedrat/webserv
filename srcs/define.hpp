@@ -22,7 +22,7 @@
 
 typedef int fd;
 
-#define BUFFER_SIZE 100000
+#define BUFFER_SIZE 1000000
 
 
 # include <cstdio> //For size_t define;

@@ -30,7 +30,7 @@ void RequestInProgress::setPort(size_t const port)
 
 void RequestInProgress::receiveData()
 {
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE + 1];
     std::string str_request;
     int ret(0);
 
@@ -81,7 +81,7 @@ size_t const & RequestInProgress::getPort() const
 
  void        RequestInProgress::checkFinished() 
 {
-    if (_str_request.find("\r\n\r\n") != std::string::npos)
+    if (_str_request.find("\r\n\r\n") != std::string::npos || _str_request.size() > 10000)
         this->_is_finished = TRUE;
 }
 

@@ -66,20 +66,15 @@ bool FieldGet::isAIPath(std::string path, Location const &location)
 
 AMethod *FieldGet::getAMethod()
 {
-    std::cout << "ERROR NO " << _error << std::endl;
 	verifyMissingData();
-    std::cout << "ERROR NO " << _error << std::endl;
 	verifyData();
-    std::cout << "ERROR NO " << _error << std::endl;
 	Config config = _data_request.getConfigs()[find_index_best_config(_data_request.getConfigs(), getHostName(), _data_request.getPort(), _data_request.getHost())];
     Location location = find_best_location(getPath(), config);     
 	_final_path = construct_path(getPath(), location);
 	if (_error != OK)
     {
-        std::cout << "error" << std::endl;
 		return (createErrorMethod(config));
     }
-
 	verifyRedirect(location);
 	if (_error == MOVED_PERMANENTLY)
 		return (createRedirMethod(config, location));
@@ -87,12 +82,11 @@ AMethod *FieldGet::getAMethod()
     {
         _error = NOT_FOUND;
 	    return (createErrorMethod(config));
-    }
-	// if auto_index on and path give a folder
+    }	
     if (isAIPath(_final_path, location))
 	{
         return(createAiMethod());
-    }//return(createAIMethod);
+    }
     // if cgi
         // return cgi ?
 	return (createGetMethod());
@@ -140,7 +134,7 @@ AMethod *FieldGet::createRedirMethod(Config config, Location location)
     std::string path_error = config.getPathError(_error);
 
     std::string header = "HTTP/1.1 " + get_string_error(_error);
-    header += "\nLocation: " + redir_path(_final_path, location.getRedirect(), _path);    
+    header += "\nLocation: " + redir_path(_path, location.getRedirect(), location.getLocation());    
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
