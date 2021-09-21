@@ -148,7 +148,7 @@ bool Config::checkServerData()
         if ((this->*_checks[i])() == false)
             return false;
     }
-    debug();
+    //debug();
     return true;
 }
 

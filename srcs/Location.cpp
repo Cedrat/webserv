@@ -160,7 +160,7 @@ bool Location::checkLocationData()
         if ((this->*_checks[i])() == false)
             return false;
     }
-debug();
+//debug();
     return true;
 }
 

@@ -18,7 +18,13 @@ ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
         throw std::invalid_argument("Error : The config file path is empty");
 
     std::string file = filepath;
-    parser(file);
+    try {
+        parser(file);
+    }
+    catch(std::exception & e){
+        std::cerr << e.what() << std::endl;
+        exit(0);
+    }
 }
 
 ConfigParser::~ConfigParser() { }
@@ -49,7 +55,7 @@ void ConfigParser::parser( std::string const & file )
             return ;
         }
         if (treatServerBlock() == false)
-            return ;
+            throw std::invalid_argument("Error in config file.");
     }
 }
 
@@ -278,7 +284,7 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, Config * se
         server->setMaxClientBodySize(line);
     else
     {
-        std::cerr << "Error in config file : Wrong or missing argument in server block" << std::endl;
+        std::cerr << "Wrong or missing argument in server block" << std::endl;
         return false;
     }
     return true;
