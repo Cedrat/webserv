@@ -84,12 +84,15 @@ class AMethod
         bool _header_sent;
         bool _request_sent;
         
+        bool _isFinished();
         std::string path;
     
     public :
         virtual ~AMethod() {};
         virtual init() = 0;
         virtual exec() = 0;
+
+        bool isFinished() const;
 }
 
 class Get
@@ -134,3 +137,66 @@ class Post : public IMethod
     public :
         void exec();
 }
+
+class ASocket
+{
+    private: 
+        std::vector<Config>;   //
+        class Location; // 
+        struct &pollfd; // 
+        int    _host;   //
+        int    _port;   //
+
+    public : 
+        virtual ~ASocket() {};
+        virtual  void use() = 0;
+}
+
+class SocketServer : public ASocket
+{
+    void use() 
+    {
+        addSocketClient();
+    }
+}
+
+class SocketClient : public ASocket
+{
+    private :
+        AMethod             *_method;
+        requestInProgress   *_request;
+
+    void use()
+    {
+        if (_method == nullptr)
+        {
+            _request.receiveData();
+            if (_request.isFinished())
+            {
+                _method = _request.getField();
+                _request.reset();
+            }
+        }
+        else 
+        {
+            _method.exec()
+            if (_method.isFinished())
+            {
+                delete _method;
+                _method = nullptr;
+            }
+        }
+    }
+}
+
+class Server
+{
+    private :
+        std::vector<ASocket *> _sockets;
+        std::vector<pollfd *> _pollfd;
+
+    public :
+        exec(SocketClient);
+        exec(SocketServer);
+}
+

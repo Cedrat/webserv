@@ -20,6 +20,5 @@ class Socket
         int const &      getHost() const;
         
         void        setTimeout(int);
-
 };
 #endif

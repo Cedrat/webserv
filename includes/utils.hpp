@@ -20,6 +20,9 @@
 # include <cstdlib>
 # include <vector>
 # include <arpa/inet.h>
+#include <poll.h>
+# include <fcntl.h>
+
 
 class Socket;
 class Config;
@@ -33,6 +36,10 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+Location find_best_location(std::string path, Config config);
+bool check_timeout(int timeout);
+bool duplicata(std::string request);
+int    check_syntax_request(std::string str_request);
 std::string create_ai_page(const char * short_path, const char * long_path);
 void set_responseHTTP_according_to_method(Request &request, Config const & config, Location const & location);
 std::string construct_path(std::string path, Location location);
