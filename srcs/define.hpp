@@ -9,7 +9,7 @@
 
 # define BACKLOG 10
 
-# define TIMEOUT 60
+# define TIMEOUT 60 
 
 # define OK 200
 # define NO_CONTENT 204
@@ -19,12 +19,11 @@
 # define METHOD_NOT_ALLOWED 405
 # define NOT_SUPPORTED 505
 
-# define NO_METHOD -1
-# define GET 0
-# define DELETE 1
-# define POST 2
 
 typedef int fd;
+
+#define BUFFER_SIZE 1000000
+
 
 # include <cstdio> //For size_t define;
 

@@ -1,4 +1,5 @@
 #include "Erreur.hpp"
+#include "define.hpp"
 
 Erreur::Erreur(int fd, std::string path, std::string header) : 
 AMethod(fd, path, header)

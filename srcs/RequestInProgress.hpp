@@ -28,6 +28,7 @@ class RequestInProgress
         std::vector<Config> const & getConfigs() const;
         size_t const &              getPort() const;
         int const &                 getHost() const;
+        int const &                 getFd() const;
 
         void                setFd(int fd);
         void                setHost(int host);
@@ -35,7 +36,7 @@ class RequestInProgress
 
         void        checkFinished(); 
         
-        bool const isFinished();
+        bool isFinished();
         
         void receiveData();
         

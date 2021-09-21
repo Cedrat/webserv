@@ -83,7 +83,7 @@ std::map<int, std::string> Config::getErrorPages(void) const
 std::string Config::getPathError(int num_error) const
 {
     std::map<int, std::string>::const_iterator  it = _error_pages.find(num_error);
-    if (it == _error_pages.end())
+    if (it == _error_pages.end() || check_if_file_exist("./www" + it->second) == FALSE)
         return ("./www/default_error_files/default_err" + int_to_string(num_error) + ".html");
     return ("./www" + it->second);
 }

@@ -30,11 +30,13 @@ void RequestInProgress::setPort(size_t const port)
 
 void RequestInProgress::receiveData()
 {
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE + 1];
     std::string str_request;
     int ret(0);
 
     ret = read(_socket_fd, buffer, BUFFER_SIZE);
+    if (ret < 0)
+        ret = 0;
     buffer[ret] = 0;
     str_request = buffer;
 
@@ -52,7 +54,7 @@ void RequestInProgress::addToRequest(std::string str_request)
     this->_str_request += str_request;
 }
 
-bool const RequestInProgress::isFinished()
+bool RequestInProgress::isFinished()
 {
     return (this->_is_finished);
 }
@@ -79,7 +81,7 @@ size_t const & RequestInProgress::getPort() const
 
  void        RequestInProgress::checkFinished() 
 {
-    if (_str_request.find("\r\n\r\n") != std::string::npos)
+    if (_str_request.find("\r\n\r\n") != std::string::npos || _str_request.size() > 10000)
         this->_is_finished = TRUE;
 }
 
@@ -128,6 +130,11 @@ int RequestInProgress::checkBasicError()
     if (duplicata(_str_request))
         return (BAD_REQUEST);
     return (OK);
+}
+
+int const & RequestInProgress::getFd() const
+{
+    return (_socket_fd);
 }
 
 int RequestInProgress::checkCommonError()
