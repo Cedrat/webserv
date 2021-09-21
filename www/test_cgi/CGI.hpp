@@ -12,16 +12,23 @@
 # include <map>
 # include <string>
 
+# include "Config.hpp"
+
 class CGI
 {
+    private:
+        std::map<std::string, std::string>  _env;
+        std::string                         _tmpOut;
+
+
     public:
-        CGI();
-        CGI( CGI const & src );
-        CGI & operator=( CGI const & rhs );
+        CGI(Config config, Location location, std::string body);
+        //CGI( CGI const & src );
+        //CGI & operator=( CGI const & rhs );
         ~CGI();
 
         void        processCGI();
-        int execCGI( const char ** args, char ** env );
+        int         execCGI( const char ** args, char ** env );
         std::string readCgiFile();
 
         std::string createTmpFile();
@@ -29,12 +36,10 @@ class CGI
 
         void setEnv();
         void freeEnv( char ** env );
-        std::map<std::string, std::string> getEnv();
 
 
-    private:
-        std::map<std::string, std::string>  _env;
-        std::string                         _tmpOut;
+        std::map<std::string, std::string>  getEnv();       //A faire ?
+        std::string                         getHeader();    //A faire
 
 };
 

@@ -3,6 +3,7 @@
 #include "MethodGet.hpp"
 #include "Erreur.hpp"
 #include "MethodAi.hpp"
+#include "MethodCgi.hpp"
 
 FieldGet::FieldGet(std::string str_request, RequestInProgress data_request) : AField(str_request , data_request)
 {
@@ -87,8 +88,11 @@ AMethod *FieldGet::getAMethod()
 	{
         return(createAiMethod());
     }
-    // if cgi
-        // return cgi ?
+    std::map<std::string, std::string>::iterator it = location.getCgi().begin();
+    if (it->first != "0" && it->second != "0")
+    {
+        return(createCgiMethod(config, location));
+    }
 	return (createGetMethod());
 }
 
@@ -138,5 +142,11 @@ AMethod *FieldGet::createRedirMethod(Config config, Location location)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    return (method);
+}
+
+AMethod *FieldGet::createCgiMethod(Config config, Location location)
+{
+    AMethod *method = new MethodCgi(_data_request.getFd(), _final_path, "", config, location, ""); //fd, path to file, header, config, location, body
     return (method);
 }
