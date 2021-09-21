@@ -1,14 +1,6 @@
-<<<<<<< HEAD
-#include "Server.hpp"
-#include "Socket.hpp"
-#include "Config.hpp"
-#include "../config/ConfigParser.hpp"
-
-=======
 
 #include "ConfigParser.hpp"
 #include "Server.hpp"
->>>>>>> refacto
 
 int main()
 {
@@ -27,9 +19,6 @@ int main()
     }
 
 
-<<<<<<< HEAD
-   server.createSocketsServer();
-=======
    //Config config;
    //config = default_config();
    //server.addConfig(config);
@@ -40,6 +29,5 @@ int main()
     {
         std::cerr << e << std::endl;
     }
->>>>>>> refacto
    server.launchingServer();
 }

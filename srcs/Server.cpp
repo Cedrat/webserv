@@ -17,23 +17,14 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 
     fcntl(new_socket, F_SETFL, O_NONBLOCK);
     if (new_socket == -1)
-<<<<<<< HEAD
-        throw std::invalid_argument("\nError when create socket");
-
-=======
         throw  "Error when create socket";
     memset(&my_addr, 0, sizeof(my_addr));
->>>>>>> refacto
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
     my_addr.sin_addr.s_addr = host;
 
     if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
-<<<<<<< HEAD
         throw std::invalid_argument("\nError from binding");
-=======
-        throw strerror(errno);
->>>>>>> refacto
 
     if (listen(new_socket, BACKLOG) == -1)
         throw std::invalid_argument("\nError from listening");

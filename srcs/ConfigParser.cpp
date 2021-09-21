@@ -18,7 +18,13 @@ ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
         throw std::invalid_argument("Error : The config file path is empty");
 
     std::string file = filepath;
-    parser(file);
+    try {
+        parser(file);
+    }
+    catch(std::exception & e){
+        std::cerr << e.what() << std::endl;
+        exit(0);
+    }
 }
 
 ConfigParser::~ConfigParser() { }
@@ -45,11 +51,11 @@ void ConfigParser::parser( std::string const & file )
             || (line.size() > 3) || (line.size() == 2 && line[1] != "{"))
         {
             std::cerr << "Error in config file." << std::endl;
-            std::cerr << "Usage to start a server block is : 'Server {'" << std::endl;
+            throw std::invalid_argument("Usage to start a server block is : 'Server {'");
             return ;
         }
         if (treatServerBlock() == false)
-            return ;
+            throw std::invalid_argument("Error in config file.");
     }
 }
 
@@ -211,9 +217,15 @@ std::vector<std::string> ConfigParser::FormattingLine( std::ifstream & file )
 
     std::getline(file, line);
     //Enlever commentaires & espaces avant/après & point virgule
-    line = trimComment(line);
-    line = trimStartAndEndWhitespaces(line);
-    line = trimDotComa(line);
+    try {
+        line = trimComment(line);
+        line = trimStartAndEndWhitespaces(line);
+        line = trimDotComa(line);
+    }
+    catch(std::exception & e) {
+        std::cerr << e.what() << std::endl;
+        exit(0);
+    }
     //Decouper : 1 elements = 1 vector -> Server,{,listen,...
     if (!line.empty())
         formattedLine = splitLine(line);
@@ -272,7 +284,7 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, Config * se
         server->setMaxClientBodySize(line);
     else
     {
-        std::cerr << "Error in config file : Wrong or missing argument in server block" << std::endl;
+        std::cerr << "Wrong or missing argument in server block" << std::endl;
         return false;
     }
     return true;

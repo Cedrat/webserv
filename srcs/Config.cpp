@@ -36,13 +36,9 @@ void Config::setHostAndPort( std::vector<std::string> line )
         {
             //Assigner la valeur avant ':' à host
             if (isIP(line[1], ':', _host) == true)
-<<<<<<< HEAD
-                inet_pton(AF_INET, line[1].substr(0, separator).c_str(), &_host);  
-=======
             {
                 inet_pton(AF_INET, line[1].substr(0, separator).c_str(), &_host);
             }
->>>>>>> refacto
             else
                 throw std::invalid_argument("Error : Config - Invalid host"); 
             
