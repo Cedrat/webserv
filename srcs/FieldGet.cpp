@@ -81,8 +81,8 @@ AMethod *FieldGet::getAMethod()
     }
 
 	verifyRedirect(location);
-	// if (_error == MOVED_PERMANENTLY)
-	// 	return (createRedirMethod());
+	if (_error == MOVED_PERMANENTLY)
+		return (createRedirMethod(config, location));
 	if (check_if_file_exist(_final_path) == FALSE)
     {
         _error = NOT_FOUND;
@@ -132,5 +132,17 @@ AMethod *FieldGet::createAiMethod()
     header += "\nContent-Length: " + int_to_string(ai_file.size()) + "\n\n";
 
     AMethod *method = new MethodAi(_data_request.getFd(), ai_file, header);
+    return (method);
+}
+
+AMethod *FieldGet::createRedirMethod(Config config, Location location)
+{
+    std::string path_error = config.getPathError(_error);
+
+    std::string header = "HTTP/1.1 " + get_string_error(_error);
+    header += "\nLocation: " + redir_path(_final_path, location.getRedirect(), _path);    
+    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
+
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
     return (method);
 }

@@ -100,7 +100,7 @@ void Server::acceptConnection(void)
     int ret = 0;
 
     poll(poll_fd_copy.data(), poll_fd_copy.size(), 1000);
-    for (size_t i = 0; i < _sockets.size(); i++)
+    for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
     {
         if (poll_fd_copy[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
         {

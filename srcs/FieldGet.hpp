@@ -10,6 +10,7 @@ class FieldGet : public AField
         AMethod *createGetMethod();
         AMethod *createErrorMethod(Config config);
         AMethod *createAiMethod();
+        AMethod *createRedirMethod(Config config, Location location);
 
     public : 
         FieldGet(std::string str_request, RequestInProgress data_request);
