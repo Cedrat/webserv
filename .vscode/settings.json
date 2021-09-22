@@ -69,6 +69,12 @@
         "vector": "cpp",
         "filesystem": "cpp",
         "csignal": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "cgi_v4cpp": "cpp",
+        "*.tcc": "cpp",
+        "clocale": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp"
     }
 }

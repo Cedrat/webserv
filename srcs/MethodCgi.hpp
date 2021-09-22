@@ -5,6 +5,7 @@
 # include "../includes/utils.hpp"
 # include <map>
 # include "Config.hpp"
+# include <cstring>
 
 class MethodCgi : public AMethod
 {
@@ -12,26 +13,35 @@ class MethodCgi : public AMethod
         Config      _config;
         Location    _location;
         std::string _body;
+        std::string _method;
 
         std::map<std::string, std::string>  _env;
         std::string                         _tmpOut;
 
+        std::string _header_cgi;
+        std::string _body_cgi;
+        int         _status;
+        int         _sent;
+
     public:
-        MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body);
+        MethodCgi(int fd, std::string path, std::string header, 
+                Config config, Location location, std::string body, std::string method);
         ~MethodCgi();
 
         void init();
-        void exec(); 
-
-       /* void        processCGI();
-        int         execCGI( const char ** args, char ** env );
-        std::string readCgiFile();
-
+        void setEnv();
+        void freeEnv( char ** env );
         std::string createTmpFile();
         char **     convertEnv();
 
-        void setEnv();
-        void freeEnv( char ** env );*/
+
+        void        exec();
+        void        processCGI();
+        int         execCGI( const char ** args, char ** env );
+        void        readCgiFile();
+
+        void        extractHeader();
+        void        sendCgi();
 };
 
 #endif

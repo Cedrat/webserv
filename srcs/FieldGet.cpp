@@ -26,13 +26,13 @@ void FieldGet::fillField()
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");
-        std::cout << "Splitted request " << i << " " << splitted_request[i] << std::endl;
-        std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
+        //std::cout << "Splitted request " << i << " " << splitted_request[i] << std::endl;
+        //std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
         if (str_to_lower(splitted_line[0]) == "host")
         {
             trim(splitted_line[1], ' ');
             _host_name = splitted_line[1];
-            std::cout << "host_name in field get " << _host_name << std::endl;
+            //std::cout << "host_name in field get " << _host_name << std::endl;
         }
     } 
 }
@@ -88,8 +88,7 @@ AMethod *FieldGet::getAMethod()
 	{
         return(createAiMethod());
     }
-    std::map<std::string, std::string>::iterator it = location.getCgi().begin();
-    if (it->first != "0" && it->second != "0")
+    if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
     {
         return(createCgiMethod(config, location));
     }
@@ -147,6 +146,6 @@ AMethod *FieldGet::createRedirMethod(Config config, Location location)
 
 AMethod *FieldGet::createCgiMethod(Config config, Location location)
 {
-    AMethod *method = new MethodCgi(_data_request.getFd(), _final_path, "", config, location, ""); //fd, path to file, header, config, location, body
+    AMethod *method = new MethodCgi(_data_request.getFd(), _final_path, "", config, location, "", _method); //fd, path to file, header, config, location, body
     return (method);
 }

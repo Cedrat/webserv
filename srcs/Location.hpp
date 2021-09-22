@@ -56,6 +56,8 @@ class Location
         std::vector<std::string>   getMethods() const;
         std::string                getDefaultFile() const;
         std::map<std::string, std::string> getCgi() const;
+        std::string                getCgiBinary() const;
+        std::string                getCgiExtension() const;
         std::string                getRedirect() const;
 
         void                        debug();

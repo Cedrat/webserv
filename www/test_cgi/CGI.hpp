@@ -12,7 +12,6 @@
 # include <map>
 # include <string>
 
-# include "Config.hpp"
 
 class CGI
 {
@@ -22,7 +21,7 @@ class CGI
 
 
     public:
-        CGI(Config config, Location location, std::string body);
+        CGI();
         //CGI( CGI const & src );
         //CGI & operator=( CGI const & rhs );
         ~CGI();

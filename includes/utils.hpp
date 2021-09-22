@@ -22,6 +22,10 @@
 # include <arpa/inet.h>
 #include <poll.h>
 # include <fcntl.h>
+# include <signal.h>
+# include <cstdio>
+# include <string.h>
+# include <sys/wait.h>
 
 
 class Socket;
@@ -35,6 +39,7 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+bool isCgiPath(std::string path, std::string extension);
 std::string create_ai_page(const char * short_path, const char * long_path);
 Location find_best_location(std::string path, Config config);
 bool check_timeout(int timeout);

@@ -27,6 +27,8 @@ class Config
         std::vector<std::string>    _server_names;
         std::map<int, std::string>  _error_pages;
 
+        std::string                 _ip;
+
 
     public :
         Config(void);
@@ -56,6 +58,7 @@ class Config
         //Recuperation des valeurs
         size_t                      getPort() const;
         int                         getHost() const;
+        std::string                 getIP() const;
         std::vector<std::string>    getServerNames() const;
         int                         getMaxBodySize() const;
         std::map<int, std::string>  getErrorPages() const;

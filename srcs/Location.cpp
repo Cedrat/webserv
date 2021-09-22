@@ -324,6 +324,18 @@ std::map<std::string, std::string> Location::getCgi() const
     return this->_cgi;
 }
 
+std::string Location::getCgiBinary() const
+{
+     std::map<std::string, std::string>::const_iterator it = _cgi.begin();
+    return it->second;
+}
+
+std::string Location::getCgiExtension() const
+{
+    std::map<std::string, std::string>::const_iterator it = _cgi.begin();
+    return it->first;
+}
+
 std::string Location::getRedirect() const
 {
     return this->_redirect;
