@@ -1,5 +1,6 @@
 #include "AField.hpp"
 #include "RequestInProgress.hpp"
+#include "Location.hpp"
 
 AField::AField(std::string str_request, RequestInProgress data_request) : _str_request(str_request), _data_request(data_request) , _error(OK)
 {
@@ -38,4 +39,9 @@ std::string const &AField::getHeader() const
 RequestInProgress const & AField::getDataRequest() const
 {
     return (_data_request);
+}
+
+bool    AField::methodNotAuthorized(Location const & location) 
+{
+    return (!location.checkIfMethodIsPresent(_method));
 }

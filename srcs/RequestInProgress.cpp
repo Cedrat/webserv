@@ -102,12 +102,11 @@ AMethod * RequestInProgress::getAnswer()
     MethodGenerator method_generator;
     FieldGenerator field_generator;
     std::string method;
-
     
     error = checkBasicError();
     if (error != OK)
     {
-        file_path = "./default_error_files/default_err" + int_to_string(error) + ".html";
+        file_path = "./srcs/default_error_files/default_err" + int_to_string(error) + ".html";
         header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(file_path)) + "\n\n";
 
         method = "ERREUR";

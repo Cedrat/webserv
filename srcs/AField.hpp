@@ -33,6 +33,8 @@ class AField
 
         RequestInProgress const & getDataRequest() const;
 
+        bool methodNotAuthorized(Location const & location);
+
         virtual void fillField() = 0;
 
         virtual AMethod * getAMethod() = 0;
