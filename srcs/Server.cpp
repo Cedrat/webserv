@@ -157,7 +157,6 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 
         //Request request(fd_client, socket->getHost(),  socket->getPort());
         _pollfds.push_back(new_poll);
-        std::cout << "capacity : " << _sockets.capacity() << " size : " << _sockets.size() << " max_size: " << _sockets.max_size() << std::endl;
         //_requests.push_back(request);
         std::cout << "New client connected : " << fd_client << std::endl;
     }

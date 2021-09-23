@@ -96,7 +96,9 @@ AMethod *FieldGet::createGetMethod()
 {	
 	std::string header;
 
-	header = "HTTP/1.1 200 OK\nContent-Length: " + int_to_string(get_file_size(_final_path)) + "\n\n";
+	header = "HTTP/1.1 200 OK\nContent-Length: " + int_to_string(get_file_size(_final_path)) + "\n";
+    header +=  date_string() + "\n\n";
+    
 	std::cout << header << std::endl;
 	std::cout << "final path " << _final_path << std::endl;
 
@@ -110,7 +112,8 @@ AMethod *FieldGet::createErrorMethod(Config config)
     std::string path_error = config.getPathError(_error);
     
     header = "HTTP/1.1 " + get_string_error(_error);
-    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
+    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    header +=  date_string() + "\n\n";
 
     std::cout << "ERROR HEADER : " << header << std::endl;
 
@@ -123,7 +126,8 @@ AMethod *FieldGet::createAiMethod()
     std::string ai_file = create_ai_page(_path.c_str(),_final_path.c_str());
 
     std::string header = "HTTP/1.1 " + get_string_error(_error);
-    header += "\nContent-Length: " + int_to_string(ai_file.size()) + "\n\n";
+    header += "\nContent-Length: " + int_to_string(ai_file.size()) + "\n";
+    header +=  date_string() + "\n\n";
 
     AMethod *method = new MethodAi(_data_request.getFd(), ai_file, header);
     return (method);
@@ -135,7 +139,8 @@ AMethod *FieldGet::createRedirMethod(Config config, Location location)
 
     std::string header = "HTTP/1.1 " + get_string_error(_error);
     header += "\nLocation: " + redir_path(_path, location.getRedirect(), location.getLocation());    
-    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n\n";
+    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    header +=  date_string() + "\n\n";
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
     return (method);

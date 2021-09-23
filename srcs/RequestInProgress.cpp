@@ -114,6 +114,7 @@ AMethod * RequestInProgress::getAnswer()
 
     }
     method = extract_method(_str_request);
+    //std::cout << "WHAT IS THE METHOD MAN ? " << method << std::endl;
     AField *field = field_generator.generate(method, _str_request, *this);
 
     return (field->getAMethod());

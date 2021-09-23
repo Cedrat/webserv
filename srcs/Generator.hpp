@@ -6,6 +6,7 @@
 #include "RequestInProgress.hpp"
 #include "FieldGet.hpp"
 #include "FieldDelete.hpp"
+#include "FieldPost.hpp"
 
 class AMethod;
 class AField;
@@ -25,6 +26,8 @@ class FieldGenerator
         {
             if (method == "GET")
                 return (new FieldGet(str_request, data_request));
+            else if (method == "POST")
+                return (new FieldPost(str_request, data_request));
             else if (method == "DELETE")
                 return (new FieldDelete(str_request, data_request));
             throw ("bad method");
