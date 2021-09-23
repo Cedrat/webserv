@@ -20,15 +20,12 @@ void MethodCgi::init()
 
 void MethodCgi::exec()
 {
-    int     status;
-
     if (getHeaderSent() == FALSE)
     {
-        waitpid(-1, &status, WNOHANG);
-        //Option 2 : _tmpOut != "" -> READ || _tmpOut == "" -> SEND
-        if (WEXITSTATUS(status) == 0)
-        {
+        if (this->_tmpOut != "")
             readCgiFile();
+        if (this->_tmpOut == "")
+        {
             send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
             setHeaderSent(TRUE);
             std::cerr << "CGI header sent" << std::endl;
@@ -133,19 +130,18 @@ void MethodCgi::readCgiFile()
         memset(buffer, 0, 50);
     }
 
+    close(fd);
+
     if (ret < 0)
     {
         std::cerr << "Error reading tmp" << std::endl;
-        close(fd);
         exit(0);
     }
-    /*if (ret == 0 && _body_cgi.size() == 0)
+    if (ret == 0 && _body_cgi.size() == 0)
     {
-        close(fd);
         return;
-    }*/
+    }
 
-    close(fd);
     remove(this->_tmpOut.c_str());
     _tmpOut = "";
 
