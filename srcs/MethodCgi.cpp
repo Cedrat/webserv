@@ -108,8 +108,6 @@ int MethodCgi::execCGI( const char ** args, char ** env )
     else  //Parent
     {
         close(fd[0]);
-
-        //waitpid(pid, &status, 0);
     }
     return 1;
 }
@@ -136,6 +134,7 @@ void MethodCgi::readCgiFile()
     if (ret < 0)
     {
         std::cerr << "Error reading tmp" << std::endl;
+        close(fd);
         exit(0);
     }
     if (ret == 0 && _body_cgi.size() == 0)
@@ -143,7 +142,6 @@ void MethodCgi::readCgiFile()
         close(fd);
         return;
     }
-
 
     close(fd);
     remove(this->_tmpOut.c_str());
