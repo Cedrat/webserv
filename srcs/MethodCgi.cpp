@@ -21,7 +21,7 @@ void MethodCgi::init()
 void MethodCgi::exec()
 {
     if (getHeaderSent() == FALSE)
-    {
+    {           //Tester avec waitpid & wifexited aussi
         if (this->_tmpOut != "")
             readCgiFile();
         if (this->_tmpOut == "")
