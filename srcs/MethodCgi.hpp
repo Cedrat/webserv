@@ -20,7 +20,6 @@ class MethodCgi : public AMethod
 
         std::string _header_cgi;
         std::string _body_cgi;
-        int         _status;
         int         _sent;
 
     public:
@@ -30,18 +29,19 @@ class MethodCgi : public AMethod
 
         void init();
         void setEnv();
-        void freeEnv( char ** env );
-        std::string createTmpFile();
+
         char **     convertEnv();
-
-
+        void        freeEnv( char ** env );
+        std::string createTmpFile();
+        
         void        exec();
         void        processCGI();
         int         execCGI( const char ** args, char ** env );
         void        readCgiFile();
-
         void        extractHeader();
-        void        sendCgi();
+        void        adaptHeader();
+        void        sendBody();
+        
 };
 
 #endif

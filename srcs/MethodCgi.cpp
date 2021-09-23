@@ -1,12 +1,9 @@
 #include "MethodCgi.hpp"
 
 MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method) 
-    : AMethod(fd, path, header), _config(config), _location(location), _body(body), _method(method)
+    : AMethod(fd, path, header), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
 {
-    _header_cgi = "";
-    _body_cgi = "";
-    _status = 0;
-    _sent = 0;
+    _tmpOut = "";
 }
 
 MethodCgi::~MethodCgi()
@@ -18,28 +15,27 @@ void MethodCgi::init()
 {
     this->_tmpOut = createTmpFile();
     setEnv();
+    processCGI();
 }
 
 void MethodCgi::exec()
 {
-    processCGI();
-    //sendCgi();
-    send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
-    setIsFinished(TRUE);
-
-
-    /*if (getHeaderSent() == FALSE)
+    if (getHeaderSent() == FALSE)
     {
-        send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
-        setHeaderSent(TRUE);
-        std::cerr << "Header sent" << std::endl;
+        if (this->_tmpOut != "")
+            readCgiFile();
+        if (this->_tmpOut == "")
+        {
+            send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
+            setHeaderSent(TRUE);
+            std::cerr << "CGI header sent" << std::endl;
+        }
     }
     else
     {
-        std::cout << "body sent" << std::endl;
         sendBody();
-        //setIsFinished(TRUE);
-    }*/
+        std::cout << "CGI body sent" << std::endl;
+    }
 }
 
 
@@ -50,8 +46,7 @@ Main CGI process
 void MethodCgi::processCGI()
 {
     std::string binary_path = construct_path(_location.getCgiBinary(), _location);
-    const char *args[3] = {binary_path.c_str(), 
-                            this->getPath().c_str(), NULL};
+    const char *args[3] = {binary_path.c_str(), this->getPath().c_str(), NULL};
 
     //Transformer les variables d'env en char**
     char **env;
@@ -64,8 +59,6 @@ void MethodCgi::processCGI()
         return ;
     }
     freeEnv(env);
-    readCgiFile();
-    extractHeader();
 }
 
 int MethodCgi::execCGI( const char ** args, char ** env )
@@ -77,7 +70,6 @@ int MethodCgi::execCGI( const char ** args, char ** env )
                     O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
                     S_IRUSR | S_IWUSR);
 
-
     //Creation des pipes
     if ((pipe(fd) < 0) || (tmp < 0))
     {
@@ -87,7 +79,7 @@ int MethodCgi::execCGI( const char ** args, char ** env )
 
     //Ecriture du body dans le cas de POST
     write(fd[0], _body.c_str(), _body.size());
-    //lseek(fd[0], 0, SEEK_SET);
+    lseek(fd[0], 0, SEEK_SET);
 
     //Creation du child process
     pid = fork();
@@ -117,9 +109,7 @@ int MethodCgi::execCGI( const char ** args, char ** env )
     {
         close(fd[0]);
 
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status))
-            return (WEXITSTATUS(status));  
+        //waitpid(pid, &status, 0);
     }
     return 1;
 }
@@ -132,6 +122,7 @@ void MethodCgi::readCgiFile()
     int fd = open(this->_tmpOut.c_str(), O_RDONLY);
     if (fd < 0)
     {
+        //std::cout << strerror(errno) << std::endl;
         std::cerr << "Error opening tmp" << std::endl;
         exit(0);
     }
@@ -141,13 +132,24 @@ void MethodCgi::readCgiFile()
         _body_cgi += buffer;
         memset(buffer, 0, 50);
     }
+
     if (ret < 0)
     {
         std::cerr << "Error reading tmp" << std::endl;
         exit(0);
     }
+    if (ret == 0 && _body_cgi.size() == 0)
+    {
+        close(fd);
+        return;
+    }
+
+
     close(fd);
     remove(this->_tmpOut.c_str());
+    _tmpOut = "";
+
+    extractHeader();
 }
 
 
@@ -227,47 +229,47 @@ char ** MethodCgi::convertEnv()
 void MethodCgi::extractHeader()
 {
     size_t  end_header;
-std::cout << "Trying to find end of header : " << _body_cgi.find("\r\n\r\n") << std::endl;
+
     if((end_header = _body_cgi.find("\r\n\r\n")) != std::string::npos)
     {
         _header_cgi = _body_cgi.substr(0, end_header + 4);
         _body_cgi = _body_cgi.substr(end_header + 4);
-        //Verification + preparation ?
     }
+    adaptHeader();
+}
+
+void MethodCgi::adaptHeader()
+{
+    std::string new_header;
+
+    new_header = "HTTP/1.1 200 OK\n";
+    new_header += "Content-Length: " + int_to_string(_body_cgi.size()) + "\n";
+    new_header += _header_cgi;
+    _header_cgi = new_header;
 }
 
 
 
-
-/*
-void    MethodCgi::sendCgi()
+void MethodCgi::sendBody()
 {
-    size_t ret;
+    //signal(SIGPIPE, SIG_IGN);
 
-    if (_status == 0)   //Extraction header
+    char                buffer[BUFFER_SIZE + 1];
+    int                 ret = 0;
+    std::stringstream   ss;
+
+    ss.write(_body_cgi.c_str(), _body_cgi.size());
+
+    ss.seekg(_sent);
+    ss.read(buffer, BUFFER_SIZE);
+    buffer[ss.gcount()] = '\0'; 
+    std::cout << "how much read? " << ss.gcount() << std::endl;
+
+    ret = ::send(getFd(), buffer, ss.gcount(), 0);
+    _sent += ret;
+    if (ret == ss.gcount() && ss.eof())
     {
-        extractHeader();
-        _status = 1;
+        setIsFinished(TRUE);
     }
-    else if (_status == 1)  //Envoi header
-    {
-        if(_header_cgi.size())
-        {
-            if ((ret = write(getFd(), _header_cgi.c_str(), _header_cgi.size())) < 0)
-                throw("Lost client ?");
-            _header_cgi = _header_cgi.substr(ret);
-            if (_body_cgi.empty())
-                _status = 2;
-        }
-    }
-    else if (_status == 2)  //Envoi body
-    {
-        if(_body_cgi.size())
-        {
-            if ((ret = write(getFd(), _body_cgi.c_str(), _body_cgi.size())) < 0)
-                throw("Lost client ?");
-            _body_cgi = _body_cgi.substr(ret);
-            _sent += ret;
-        }
-    }
-}*/
+    std::cout << ret << "BYTE SEND" << std::endl;
+}
