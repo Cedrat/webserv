@@ -9,6 +9,8 @@ class FieldPost : public AField
     private: 
         std::string _transfert_encoding;
         std::string _content_length;
+
+        AMethod *createErrorMethod(Config config);
     
 public :
         FieldPost(std::string str_request, RequestInProgress data_request);
@@ -24,6 +26,7 @@ public :
         AMethod *getAMethod();
 
         void verifyMissingData();
+        void verifyData();
 
 };
 

@@ -46,34 +46,75 @@ void FieldPost::fillField()
         std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
         if (str_to_lower(splitted_line[0]) == "host")
         {
-            trim(splitted_line[1], ' ');
+            trim_field(splitted_line[1]);
             _host_name = splitted_line[1];
             std::cout << "Post host name : " << _host_name << std::endl;
         }
         else if (str_to_lower(splitted_line[0]) == "content-length")
         {
-            trim(splitted_line[1], ' ');
+            trim_field(splitted_line[1]);
             _content_length = splitted_line[1];
             std::cout << "Post content length : " << _content_length << std::endl;
         }
          else if (str_to_lower(splitted_line[0]) == "transfer-encoding")
         {
-            trim(splitted_line[1], ' ');
-            _host_name = atoi(splitted_line[1].c_str());
+            trim_field(splitted_line[1]);
+            _transfert_encoding = splitted_line[1].c_str();
             std::cout << "Post transfer-encoding : " << _transfert_encoding << std::endl;
         }
     } 
 } 
 
-void FieldPost::verifyMissingData()
-{
-    std::cout << "host_name : " << _host_name << std::endl;
-    if (_host_name == "")
-        _error = BAD_REQUEST;
-}
 
 
 AMethod *FieldPost::getAMethod() 
 {
-    return (new Erreur(_data_request.getFd(), _path, _header));
+    verifyMissingData();
+    verifyData();
+    Config config = _data_request.getConfigs()[find_index_best_config(_data_request.getConfigs(), getHostName(), _data_request.getPort(), _data_request.getHost())];
+    Location location = find_best_location(getPath(), config);
+    if (_error != OK)
+    {
+        return (createErrorMethod(config));
+    }
+    verifyRedirect(location);
+    if (_error == MOVED_PERMANENTLY)
+    {
+        return (createRedirMethod(config, location));
+    }
+
+}
+
+void FieldPost::verifyMissingData()
+{
+    std::cout << "host_name : " << _host_name << std::endl;
+    if (_host_name == "")
+        _error = BAD_REQUEST; 
+}
+
+void FieldPost::verifyData()
+{
+    if (_content_length.empty())
+    {
+        if (_transfert_encoding.find("chunked") == std::string::npos)
+            _error = BAD_REQUEST;
+    }
+    if (str_is_not_number(_content_length))
+    {
+        _error = BAD_REQUEST;
+    }
+}
+AMethod *FieldPost::createErrorMethod(Config config)
+{
+    std::string header;
+    std::string path_error = config.getPathError(_error);
+    
+    header = "HTTP/1.1 " + get_string_error(_error);
+    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    header +=  date_string() + "\n\n";
+
+    std::cout << "ERROR HEADER : " << header << std::endl;
+
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    return (method);
 }

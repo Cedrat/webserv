@@ -35,6 +35,8 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+void trim_field(std::string &str_to_trim);
+bool        str_is_not_number(std::string);
 std::string date_string();
 std::string create_ai_page(const char * short_path, const char * long_path);
 Location find_best_location(std::string path, Config config);

@@ -20,6 +20,9 @@ class AField
         RequestInProgress _data_request;
 
         int _error;
+
+        void verifyRedirect(Location const &location);
+        AMethod * createRedirMethod(Config config, Location location);
     
     public : 
 
