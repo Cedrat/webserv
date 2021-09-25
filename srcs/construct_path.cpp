@@ -23,6 +23,13 @@ std::string construct_path(std::string path, Location location)
     return (path);
 }
 
+std::string construct_path_post(std::string path, Location location)
+{
+    path = create_alias(path, location);
+
+    return (path);
+}
+
 std::string create_alias(std::string path, Location location)
 {
     std::string alias = location.getRoot();

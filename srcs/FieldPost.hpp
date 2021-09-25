@@ -11,6 +11,8 @@ class FieldPost : public AField
         std::string _content_length;
 
         AMethod *createErrorMethod(Config config);
+        std::string createPathUploadFolder(std::string upload_folder);
+        void     checkValidPath();
     
 public :
         FieldPost(std::string str_request, RequestInProgress data_request);

@@ -73,6 +73,12 @@ AMethod *FieldPost::getAMethod()
     verifyData();
     Config config = _data_request.getConfigs()[find_index_best_config(_data_request.getConfigs(), getHostName(), _data_request.getPort(), _data_request.getHost())];
     Location location = find_best_location(getPath(), config);
+    _final_path = construct_path_post(getPath(), location);
+    if (location.getUploadFolder().empty() == FALSE)
+    {
+        _final_path = createPathUploadFolder(location.getUploadFolder());
+    }
+    checkValidPath();
     if (_error != OK)
     {
         return (createErrorMethod(config));
@@ -82,7 +88,6 @@ AMethod *FieldPost::getAMethod()
     {
         return (createRedirMethod(config, location));
     }
-
 }
 
 void FieldPost::verifyMissingData()
@@ -117,4 +122,29 @@ AMethod *FieldPost::createErrorMethod(Config config)
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
     return (method);
+}
+
+void FieldPost::checkValidPath()
+{
+    if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
+    {
+        std::cout << "first" << std::endl;
+        _error = BAD_REQUEST;
+    }
+    if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
+    {
+        std::cout << "second" << std::endl;
+        _error = BAD_REQUEST;
+    }   
+
+}
+
+std::string FieldPost::createPathUploadFolder(std::string upload_folder)
+{
+    std::vector<std::string> splitted_path = split_string(_final_path, "/");
+    std::string temp_path;
+
+    temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
+    std::cout << "FINAL PATH : " << temp_path << std::endl;
+    return (temp_path);
 }

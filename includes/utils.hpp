@@ -35,6 +35,9 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+
+std::string remove_chars_after_the_last_token(std::string str, char token);
+std::string construct_path_post(std::string path, Location location);
 void trim_field(std::string &str_to_trim);
 bool        str_is_not_number(std::string);
 std::string date_string();
