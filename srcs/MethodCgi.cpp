@@ -23,7 +23,7 @@ void MethodCgi::exec()
     if (getHeaderSent() == FALSE)
     {
         if (this->_tmpOut != "")
-            readCgiFile();
+            readCgiFile();  //Implementer systeme de read non bloquant
         if (this->_tmpOut == "")
         {
             send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
@@ -177,10 +177,9 @@ void MethodCgi::setEnv()
     this->_env["REQUEST_URI="] = construct_path(_location.getCgiBinary(), _location);
     this->_env["REMOTE_HOST="] = "";               //Nom d'hote du client. Vide si pas connu
     this->_env["REMOTE_ADDR="] = "127.0.0.1";      //IP du client
-    this->_env["QUERY_STRING="] = "";              //A remplacer en fonction du contenu recu
+    this->_env["QUERY_STRING="] = extractQuery(getPath());   //A remplacer par getQuery si changement ?           //A remplacer en fonction du contenu recu
 
     this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
-    this->_env["CONTENT_TYPE="] = "text/plain"; //Dans header ?
 }
 
 
@@ -222,7 +221,18 @@ char ** MethodCgi::convertEnv()
     return new_env;
 }
 
-void MethodCgi::extractHeader()
+std::string    MethodCgi::extractQuery( std::string path )
+{
+    //Chercher '?' et extraire ce qu'il y a après
+    size_t  start;
+    if ((start = path.find_first_of('?')) != std::string::npos)
+        path = path.substr(start + 1, path.size());
+    else
+        path = "";
+    return path;
+}
+
+void    MethodCgi::extractHeader()
 {
     size_t  end_header;
 

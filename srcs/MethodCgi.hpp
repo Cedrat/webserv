@@ -33,6 +33,7 @@ class MethodCgi : public AMethod
         char **     convertEnv();
         void        freeEnv( char ** env );
         std::string createTmpFile();
+        std::string extractQuery( std::string path );
         
         void        exec();
         void        processCGI();
