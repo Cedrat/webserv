@@ -16,7 +16,7 @@ class FieldPost : public AField
         void    checkBodySize(Config const & config);    
     
 public :
-        FieldPost(std::string str_request, RequestInProgress data_request);
+        FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd);
         ~FieldPost();
 
         void setContentLength(std::string const & length);

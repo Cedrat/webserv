@@ -4,7 +4,7 @@
 #include "Erreur.hpp"
 #include "MethodAi.hpp"
 
-FieldGet::FieldGet(std::string str_request, RequestInProgress data_request) : AField(str_request , data_request)
+FieldGet::FieldGet(std::string str_request, RequestInProgress data_request, pollfd &s_pollfd) : AField(str_request , data_request, s_pollfd)
 {
     std::cout << "Created" << std::endl;
     fillField();
@@ -22,6 +22,7 @@ void FieldGet::fillField()
 
     _method = split_string(splitted_request[0], " ")[0];
     _path   = split_string(splitted_request[0], " ")[1];
+    decompose_path(_path, _query);
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");
@@ -102,7 +103,7 @@ AMethod *FieldGet::createGetMethod()
 	std::cout << header << std::endl;
 	std::cout << "final path " << _final_path << std::endl;
 
-	AMethod * method = new MethodGet(_data_request.getFd(), _final_path, header);
+	AMethod * method = new MethodGet(_data_request.getFd(), _final_path, header, *this);
 	return(method);
 }
 
@@ -117,7 +118,7 @@ AMethod *FieldGet::createErrorMethod(Config config)
 
     std::cout << "ERROR HEADER : " << header << std::endl;
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 
@@ -129,6 +130,6 @@ AMethod *FieldGet::createAiMethod()
     header += "\nContent-Length: " + int_to_string(ai_file.size()) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new MethodAi(_data_request.getFd(), ai_file, header);
+    AMethod *method = new MethodAi(_data_request.getFd(), ai_file, header,  *this);
     return (method);
 }

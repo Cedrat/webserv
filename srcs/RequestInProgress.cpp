@@ -94,12 +94,11 @@ std::string extract_method(std::string str_request);
 std::string extract_path(std::string str_request);
 std::string extract_host_name(std::string str_request);
 
-AMethod * RequestInProgress::getAnswer()
+AMethod * RequestInProgress::getAnswer(pollfd &s_pollfd)
 {
     int error;
     std::string header;
     std::string file_path;
-    MethodGenerator method_generator;
     FieldGenerator field_generator;
     std::string method;
     
@@ -110,12 +109,11 @@ AMethod * RequestInProgress::getAnswer()
         header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(file_path)) + "\n\n";
 
         method = "ERREUR";
-        return (method_generator.generate(method, _socket_fd, file_path, header));
-
+        return (new Erreur(_socket_fd, file_path, header,  * new FieldGet(_str_request, *this, s_pollfd)));
     }
     method = extract_method(_str_request);
     //std::cout << "WHAT IS THE METHOD MAN ? " << method << std::endl;
-    AField *field = field_generator.generate(method, _str_request, *this);
+    AField *field = field_generator.generate(method, _str_request, *this, s_pollfd);
 
     return (field->getAMethod());
 }

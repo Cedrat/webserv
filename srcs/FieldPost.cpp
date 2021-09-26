@@ -2,7 +2,7 @@
 #include "FieldPost.hpp"
 #include "Erreur.hpp"
  
-FieldPost::FieldPost(std::string str_request, RequestInProgress data_request) : AField(str_request, data_request)
+FieldPost::FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request, data_request, s_pollfd)
 {
     fillField();
 }
@@ -129,7 +129,7 @@ AMethod *FieldPost::createErrorMethod(Config config)
 
     std::cout << "ERROR HEADER : " << header << std::endl;
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 

@@ -13,7 +13,7 @@ class FieldDelete : public AField
         void     delFile();
 
     public : 
-        FieldDelete(std::string str_request, RequestInProgress data_request);
+        FieldDelete(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd);
         ~FieldDelete();
 
         void        fillField();

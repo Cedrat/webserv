@@ -24,7 +24,7 @@ class RequestInProgress
         ~RequestInProgress();
 
         std::string const &         getRequest() const;
-        AMethod *                   getAnswer();
+        AMethod *                   getAnswer(pollfd &s_pollfd);
         std::vector<Config> const & getConfigs() const;
         size_t const &              getPort() const;
         int const &                 getHost() const;

@@ -13,7 +13,7 @@ class MethodGet : public AMethod
     int _byte_send;
 
     public :
-        MethodGet(int fd, std::string path, std::string header);
+        MethodGet(int fd, std::string path, std::string header, AField & field);
         ~MethodGet();
 
         void init();

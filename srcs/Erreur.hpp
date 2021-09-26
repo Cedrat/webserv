@@ -10,7 +10,8 @@ class Erreur : public AMethod
         void sendBody();
 
     public :
-        Erreur(int fd, std::string path, std::string header);
+        Erreur(int fd, std::string path, std::string header, pollfd &s_pollfd);
+        Erreur(int fd, std::string path, std::string header, AField &fields);
         ~Erreur();
         void init();
         void exec();

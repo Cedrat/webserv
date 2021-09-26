@@ -3,7 +3,7 @@
 #include "Location.hpp"
 #include "Erreur.hpp"
 
-AField::AField(std::string str_request, RequestInProgress data_request) : _str_request(str_request), _data_request(data_request) , _error(OK)
+AField::AField(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : _str_request(str_request), _data_request(data_request) , _pollfd(s_pollfd), _error(OK)
 {
 }
 
@@ -62,6 +62,18 @@ AMethod *AField::createRedirMethod(Config config, Location location)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 };
+
+void AField::setPollout()
+{
+   _pollfd.events = POLLOUT;
+   _pollfd.revents = 0; 
+}
+
+void AField::setPollin()
+{
+   _pollfd.events = POLLIN;
+   _pollfd.revents = 0; 
+}

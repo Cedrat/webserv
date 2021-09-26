@@ -1,6 +1,7 @@
 #include "MethodAi.hpp"
+#include "AField.hpp"
 
-MethodAi::MethodAi(int fd, std::string ai_file, std::string header) : AMethod(fd, "", header) , _ai_file(ai_file)
+MethodAi::MethodAi(int fd, std::string ai_file, std::string header, AField &field) : AMethod(fd, "", header, field) , _ai_file(ai_file)
 {
 
 }
@@ -12,7 +13,7 @@ MethodAi::~MethodAi()
 
 void MethodAi::init()
 {
-    
+   _fields.setPollout(); 
 }
 
 void MethodAi::exec()

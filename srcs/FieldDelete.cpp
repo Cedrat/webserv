@@ -4,7 +4,7 @@
 #include "Erreur.hpp"
 #include "MethodAi.hpp"
 
-FieldDelete::FieldDelete(std::string str_request, RequestInProgress data_request) : AField(str_request , data_request)
+FieldDelete::FieldDelete(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request , data_request, s_pollfd)
 {
     std::cout << "Created" << std::endl;
     fillField();
@@ -103,7 +103,7 @@ AMethod *FieldDelete::createErrorMethod(Config config)
 
     std::cout << "ERROR HEADER : " << header << std::endl;
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this);
     return (method);
 }
 
@@ -116,7 +116,7 @@ AMethod *FieldDelete::createRedirMethod(Config config, Location location)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 

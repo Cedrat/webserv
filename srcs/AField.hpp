@@ -12,12 +12,15 @@ class AField
         std::string _host_name;
 
         std::string _final_path;
+        std::string _query;
 
         std::string _str_request;
         
         std::string _header;
         
         RequestInProgress _data_request;
+
+        pollfd & _pollfd;
 
         int _error;
 
@@ -26,15 +29,19 @@ class AField
     
     public : 
 
-        AField(std::string str_request, RequestInProgress data_request);
+        AField(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd);
         virtual ~AField();
         std::string const & getMethod() const;
         std::string const & getPath() const;
         std::string const & getHostName() const;
         std::string const & getStrRequest() const;
         std::string const & getHeader() const;
+        std::string const & getQuery() const;
 
         RequestInProgress const & getDataRequest() const;
+
+        void setPollout();
+        void setPollin();
 
         bool methodNotAuthorized(Location const & location);
 
