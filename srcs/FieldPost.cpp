@@ -73,6 +73,10 @@ AMethod *FieldPost::getAMethod()
     verifyData();
     Config config = _data_request.getConfigs()[find_index_best_config(_data_request.getConfigs(), getHostName(), _data_request.getPort(), _data_request.getHost())];
     Location location = find_best_location(getPath(), config);
+    if (_error != OK)
+    {
+        return (createErrorMethod(config));
+    }
     _final_path = construct_path_post(getPath(), location);
     if (location.getUploadFolder().empty() == FALSE)
     {
@@ -87,6 +91,11 @@ AMethod *FieldPost::getAMethod()
     if (_error == MOVED_PERMANENTLY)
     {
         return (createRedirMethod(config, location));
+    }
+    checkBodySize(config);
+     if (_error != OK)
+    {
+        return (createErrorMethod(config));
     }
 }
 
@@ -147,4 +156,10 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
     std::cout << "FINAL PATH : " << temp_path << std::endl;
     return (temp_path);
+}
+
+void FieldPost::checkBodySize(Config const &config)
+{
+    if (atoi(_content_length.c_str()) > config.getMaxBodySize())
+        _error = ENTITY_TOO_LARGE;
 }
