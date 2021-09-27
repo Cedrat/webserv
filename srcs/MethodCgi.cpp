@@ -122,12 +122,12 @@ void MethodCgi::readCgiFile()
     FILE* f = fopen(this->_tmpOut.c_str(), "r");
 
     fseek(f, _readed, SEEK_SET);
-    ret = fread(buffer, 1, 10, f);
+    ret = fread(buffer, 1, BUFFER_CGI, f);
     _readed += ret;
     _body_cgi += buffer;
     fclose(f);
 
-    if (ret > 0)
+    if (ret == BUFFER_CGI)
     {
         return ;
     }

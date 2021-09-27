@@ -7,6 +7,8 @@
 # include "Config.hpp"
 # include <cstring>
 
+# define BUFFER_CGI 20
+
 class MethodCgi : public AMethod
 {
     private:
