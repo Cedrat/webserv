@@ -48,6 +48,7 @@ class MethodCgi : public AMethod
         void        extractHeader();
         void        adaptHeader();
         void        sendBody();
+        void        setErrorResponse();
         
 };
 

@@ -1,5 +1,6 @@
 #include "MethodCgi.hpp"
 #include "AField.hpp"
+#include "define.hpp"
 
 MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field) 
     : AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
@@ -18,10 +19,9 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
     _fields.setPollout();
-    this->_tmpOut = createTmpFile();
+    this->_tmpOut = createTmpFile();    //Securite pour cas ou creation echoue
     setEnv();
     processCGI();
-    
 }
 
 void MethodCgi::exec()
@@ -31,7 +31,7 @@ void MethodCgi::exec()
         if (waitpid(_pid, NULL, WNOHANG) > 0)
             _pid_status = TRUE;
         if (_pid_status == TRUE && _read_status == FALSE)
-            readCgiFile();  //Implementer systeme de read non bloquant
+            readCgiFile();
         else if (_pid_status == TRUE && _read_status == TRUE)
         {
             send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
@@ -63,8 +63,8 @@ void MethodCgi::processCGI()
     //Gestion de l'execution du cgi
     if (execCGI(args, env) == -1)
     {
-        std::cerr << "Error during CGI execution" << std::endl;
-        return ;
+            sleep(10);
+        throw ("Error during CGI execution");
     }
     freeEnv(env);
 }
@@ -108,7 +108,7 @@ int MethodCgi::execCGI( const char ** args, char ** env )
             close(fd[0]);
             close(tmp);
             remove(this->_tmpOut.c_str());
-            return -1;
+            exit(-1);
         }
     }
     else  //Parent
@@ -123,6 +123,12 @@ void MethodCgi::readCgiFile()
     int ret;
     char buffer[50 + 1] = {0};
     FILE* f = fopen(this->_tmpOut.c_str(), "r");
+
+    if (f == NULL)
+    {
+        setErrorResponse();
+        return ;
+    }
 
     fseek(f, _readed, SEEK_SET);
     ret = fread(buffer, 1, BUFFER_CGI, f);
@@ -246,6 +252,22 @@ void MethodCgi::adaptHeader()
     _header_cgi = new_header;
 }
 
+void    MethodCgi::setErrorResponse()
+{
+    std::string path_error = _config.getPathError(BAD_REQUEST);
+
+    _header_cgi = "HTTP/1.1 " + get_string_error(BAD_REQUEST);
+    _header_cgi += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    _header_cgi += date_string() + " \n\n";
+
+    std::fstream fs;
+    std::stringstream buffer;
+
+    fs.open(path_error.c_str(),  std::fstream::in); 
+    buffer << fs.rdbuf();
+    _body_cgi = buffer.str();
+    _read_status = TRUE;
+}
 
 
 void MethodCgi::sendBody()
