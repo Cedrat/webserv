@@ -1,7 +1,9 @@
 #ifndef FORMATTING_HPP
 # define FORMATTING_HPP
 
-# include "fonction.hpp"
+
+# include <string>
+# include <vector>
 
 std::string trimComment( std::string line );
 std::string trimStartAndEndWhitespaces( std::string line );

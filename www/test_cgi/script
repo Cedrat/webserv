@@ -22,7 +22,7 @@ export AUTH_TYPE=Basic
 #PATH_TRANSLATED & SCRIPT_FILENAME are required for PHP !
 
 
-export REMOTE_HOST=                 # Le nom d'hôte du client. Vide si pas connu
+#export REMOTE_HOST=                 # Le nom d'hôte du client. Vide si pas connu
 export REMOTE_ADDR=127.0.0.1        # IP du client
 
 export CONTENT_LENGTH=0             # Longueur du contenu envoyé par le client
@@ -31,9 +31,9 @@ export CONTENT_TYPE=text/plain      # Le type de contenu attaché à la requête
 export QUERY_STRING=
 
 #CLIENT#
-export HTTP_ACCEPT=text/*           # Les types de données MIME que le client accepte de recevoir
-export HTTP_USER_AGENT=Mozilla/91.0.1 # Navigateur utilisé par le client
-export HTTP_HOST=localhost          # = server_name | Pas nécessaire !
+#export HTTP_ACCEPT=text/*           # Les types de données MIME que le client accepte de recevoir
+#export HTTP_USER_AGENT=Mozilla/91.0.1 # Navigateur utilisé par le client
+#export HTTP_HOST=localhost          # = server_name | Pas nécessaire !
 
 
 #./cgi_tester youpi.bla

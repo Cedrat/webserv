@@ -1,26 +1,25 @@
 #ifndef SOCKETCLIENT_HPP
-# define SOCKETCLIENT_HPP
+#define SOCKETCLIENT_HPP
 
-# include <string>
-# include <vector>
+#include "../includes/utils.hpp"
+#include "ASocket.hpp"
+#include "RequestInProgress.hpp"
+#include <vector>
+#include "Config.hpp"
 
-# include "../includes/fonction.hpp"
-
-class SocketClient
+class AMethod;
+class SocketClient : public ASocket
 {
-	public : 
-		SocketClient(void);
-		~SocketClient();
-		void addSocketClient(fd sockfd);
+    private : 
+        AMethod             *_method;
+        RequestInProgress   _request;
+        std::vector<Config> _configs;
+        pollfd              & _s_pollfd;
 
-		fd 		&operator[](size_t idx);
-		const	fd &operator[](size_t idx) const;
-		void	closeAndRemoveSocket(size_t idx);
+    public :
+        SocketClient(size_t port, int host, int fd, std::vector<Config> const & config, pollfd &s_pollfd);
 
-
-	private : 
-		size_t			_nb_sockets;
-		std::vector<fd> _array_of_socket;
+        void exec();
 };
 
 #endif

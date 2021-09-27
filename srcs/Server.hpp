@@ -1,75 +1,39 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/06/18 15:43:38 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/26 21:48:17 by lnoaille         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SERVER_HPP
-# define SERVER_HPP
+#define SERVER_HPP
 
-# include "../includes/fonction.hpp"
-# include "Socket.hpp"
-# include "PollSocket.hpp"
+#include "../includes/utils.hpp"
 
-# define NB_CLIENT_MAX 1000
-# define SOCKET_SERVER 0
-# define SOCKET_CLIENT 1
-
-class FdInformation
-{
-  public :
-    FdInformation() {};
-    ~FdInformation() {};
-    void setTypeOfSocket(bool type_of_socket) {_type_of_socket = type_of_socket;}; 
-    bool getTypeOfSocket() const { return (_type_of_socket);};
-  private : 
-    bool _type_of_socket;
-
-
-
-}; //Possibilité de rajouter un buffer chacun et des fonctions avec.
+class ASocket;
+class SocketServer;
+class Config;
 
 class Server
 {
-  public:
-    Server( std::vector<int> ports, int host );
-    Server( Server const & src );
-    Server & operator=( Server const & rhs );
-    ~Server();
+    private :
+        std::vector<ASocket *>      _sockets;
+        std::vector<struct pollfd *>  _pollfds;
+        std::vector<Config>         _configs;
+        bool                        _is_running;
+        
+        void addSocket(ASocket *socket);
+        void addPollFd(pollfd * datafd);
 
-    void  acceptConnections();
-    void  init();
-    void  run();
-    void  addClient( int new_fd );
-    void  receiveData( int i );
+    public : 
+        Server();
+        ~Server();
 
-    //Getters
-    fd*         getSockets() const;
-    int         getSocketsNb() const;
-    int         getHost() const;
-    int         getStatus() const;
-    pollfd      getPollFd( int i ) const;
-    std::vector<int>  getPorts() const;
+        void createSocketsServer();
+        void createAndAddSocketServer(size_t port, int host);
 
-  private:
-    Server();
+        void addNewSocket(ASocket *socket, pollfd * datafd);
+        void addConfig(Config config);
+        void launchingServer(void);
+        void acceptConnection(void);
 
-    fd*     _socket;
-    int     _host;
-    int     _running;
-    int     _nfds;
-    std::vector<int>    _port;
+        void exec_pollin(ASocket *socket, int current_fd, pollfd & s_pollfd);
+        void exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd);
 
-    PollSocket        _p1;
-    std::vector<struct pollfd>  _fds;
-    std::vector<FdInformation>  _fd_info;  
-
+        void removeClient(size_t index);
 };
 
 #endif

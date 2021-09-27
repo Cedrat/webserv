@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Syntax.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchampda <dchampda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/07/26 15:09:26 by dchampda          #+#    #+#             */
-/*   Updated: 2021/07/26 15:09:28 by dchampda         ###   ########.fr       */
+/*   Updated: 2021/09/07 16:44:40 by lnoaille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SYNTAX_HPP
 # define SYNTAX_HPP
 
-# include "fonction.hpp"
+#include <string>
 
     bool isIP( std::string line, char c, int host );
     bool isPort( std::string line );

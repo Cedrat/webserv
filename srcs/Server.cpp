@@ -1,233 +1,192 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lnoaille <lnoaille@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/06/18 15:43:42 by dchampda          #+#    #+#             */
-/*   Updated: 2021/06/27 17:42:54 by lnoaille         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
+#include <poll.h>
+#include <vector>
+#include "Config.hpp"
+#include "../includes/utils.hpp"
+#include "../srcs/search_in_vector.hpp"
+#include "ASocket.hpp"
+#include "SocketServer.hpp"
+#include "SocketClient.hpp"
+#include "copy_value_of_pointer_vector.hpp"
 
-Server::Server( std::vector<int> ports, int host ) : _port(ports), _host(host),
-   _running(true), _nfds(0)
+pollfd * create_a_listenable_socket(size_t port, int host)
 {
-  init();
-  run();
+   struct sockaddr_in   my_addr;
+   struct pollfd *mypollfd = new  pollfd; //think to delete
+   fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    fcntl(new_socket, F_SETFL, O_NONBLOCK);
+    if (new_socket == -1)
+        throw  "Error when create socket";
+    memset(&my_addr, 0, sizeof(my_addr));
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(port);
+    my_addr.sin_addr.s_addr = host;
+
+    if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
+        throw std::invalid_argument("\nError from binding");
+
+    if (listen(new_socket, BACKLOG) == -1)
+        throw std::invalid_argument("\nError from listening");
+
+    //fcntl(new_socket, F_SETFL, O_NONBLOCK);
+    mypollfd->fd = new_socket;
+    mypollfd->events = POLLIN;
+    mypollfd->revents = 0;
+
+    return (mypollfd);
 }
 
-Server::Server( Server const & src )
+
+Server::Server() : _is_running(FALSE)
 {
-  if (this != &src)
-    *this = src;
+
+}
+Server::~Server()
+{}
+
+
+void    Server::addSocket(ASocket * socket)
+{
+    _sockets.push_back(socket);
 }
 
-Server & Server::operator=( Server const & rhs )
+void Server::addPollFd(pollfd * datafd)
 {
-  this->_socket = rhs.getSockets();
-  this->_port = rhs.getPorts();
-  this->_host = rhs.getHost();
-  this->_running = rhs.getStatus();
-  for (int i = 0; i < 1000; i++)
-    this->_fds[i] = rhs.getPollFd(i);
-  return (*this);
+    _pollfds.push_back(datafd);
 }
 
-Server::~Server() {}
-
-
-
-/**********************************
-Fonctions membres - Initialisation
-***********************************/
-void Server::init()
+void    Server::addNewSocket(ASocket *socket, pollfd * datafd)
 {
-    //Ajout des hosts & init du set de fds
-    Socket s1;
-    FdInformation socket_server;
+    addSocket(socket);
+    addPollFd(datafd);
+}
 
-    socket_server.setTypeOfSocket(SOCKET_SERVER);
-    for (size_t i = 0; i < _port.size(); i++)
+void Server::addConfig(Config config)
+{
+    _configs.push_back(config);
+}
+
+void Server::createAndAddSocketServer(size_t port, int host)
+{
+    ASocket *socket = new SocketServer(port, host);
+
+    _pollfds.push_back(create_a_listenable_socket(port, host));
+    _sockets.push_back(socket);
+}
+
+void Server::createSocketsServer(void) 
+{
+    std::vector<std::string> lists_hosts_ports;
+    std::string actual_host;
+
+    for (size_t i = 0; i < _configs.size(); i++)
     {
-      s1.addSocketsListening(_port[i], _host);
-      _fd_info.push_back(socket_server);
-    }
-    _socket = s1.listSockets();
-    _nfds = getSocketsNb();
-}
-
-/**********************************
-Fonctions membres - Boucle serveur
-**********************************/
-void Server::run()
-{
-  _p1.init(_socket, _nfds, POLLIN);
-  //Loop waiting for incoming connects or for incoming data
-  //on any of the connected sockets
-  while (this->_running == true)
-  {
-    try
-    {
-      _fds = _p1.AvailableSockets();
-      acceptConnections();
-    }
-    catch (char const * &e) 
-    {
-      std::cout << e << std::endl;
-      this->_running = false;
-    }
-  }
-  _p1.closeAllSockets();
-}
-
-void Server::acceptConnections()
-{
-  int current_size = _nfds;
-  int new_fd = 0;
-
-  for (int i = 0; i < current_size; i++)
-  {
-    if (this->_fds[i].revents == 0)
-      continue;
-    if (_fd_info[i].getTypeOfSocket() == SOCKET_SERVER)
-    {
-
-        if (this->_nfds < NB_CLIENT_MAX)
-          new_fd = accept(this->_socket[i], NULL, NULL);
-        else
+        actual_host = int_to_string(_configs[i].getHost()) + ":" +  int_to_string(_configs[i].getPort());
+        if (search_in_vector(lists_hosts_ports, actual_host) == FALSE)
         {
-          std::cerr << "Max number of clients reached" << std::endl;
-          break;
+            lists_hosts_ports.push_back(actual_host);
+            createAndAddSocketServer(_configs[i].getPort(), _configs[i].getHost());
+            std::cout << "CREATE " << actual_host << std::endl;
         }
-        if (new_fd < 0)
-        {
-          std::cerr << strerror(errno) << std::endl;
-          std::cerr << "accept() failed" << std::endl;
-          this->_running = false;
-          break;
-        }
-        if (send(new_fd, "Hello !\n", strlen("Hello !\n"), 0) != strlen("Hello !\n"))
-          std::cerr << "Error sending greeting message" << std::endl;
-        std::cout << "Greeting message sent successfully !" << std::endl;
-        
-        addClient(new_fd);
-        break;
     }
-    else if (this->_fds[i].fd > 0)
-    {
-      if (this->_running == true)
-        receiveData(i);
-    }
-  }
-}
-static bool is_close(int bytes_read)
-{
-  if (bytes_read == 0) //POLLHUP aussi mais doute ? Empeche certaines choses.
-  {
-    std::cerr << "Connection closed" << std::endl;
-    return (true);
-  }
-  return (false);
 }
 
-static void recv_error_management(int bytes_read)
+void Server::acceptConnection(void)
 {
-  if (bytes_read < 0)
-  {
-    std::cerr << "recv() failed" << std::endl;
-  }
-}
-void Server::receiveData( int i )
-{
-  int bytes_read;
-  char  buffer[1000];
-  bool  close_conn = false;
-
-
-    //Receive data until the client close his connection or an error occurs
-    std::cout << "Receive data from " << this->_fds[i].fd << std::endl; 
-      bytes_read = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+    std::vector<pollfd> poll_fd_copy = copy_value_of_pointer_vector(_pollfds);
     
-    close_conn = is_close(bytes_read);
-    std::cout << bytes_read << " bytes received\n" << std::endl;
-    if (bytes_read < 0)
+    char buffer[BUFFER_SIZE];
+    int ret = 0;
+
+    poll(poll_fd_copy.data(), poll_fd_copy.size(), 1000);
+    for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
     {
-      if (_fds[i].revents & POLLERR)
-      {
-        std::cerr << "recv() failed " << std::endl;
-        close_conn = true;
-      }
+        if (poll_fd_copy[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
+        {
+            removeClient(i);
+        }
+        else if (poll_fd_copy[i].revents & POLLIN)
+        {
+            exec_pollin(_sockets[i], poll_fd_copy[i].fd, poll_fd_copy[i]);
+        }
+        else if (poll_fd_copy[i].revents & POLLOUT)
+        {
+            exec_pollout(_sockets[i], poll_fd_copy[i].fd, poll_fd_copy[i]);
+        }
     }
-    //Data was received
-   //
-      int len = bytes_read;
-      //Echo the data back to the client
-      bytes_read = send(this->_fds[i].fd, buffer, len, 0);
-      if (bytes_read < 0 && _fds[i].revents & POLLHUP)
-      {
-        std::cerr << "send() failed" << std::endl;
-        close_conn = true;
-      }
-
-  if (close_conn == true)
-  {
-    _p1.closeOneSocket(_fds[i]);
-    _fd_info.pop_back();
-  }
 
 }
-
-/*******************************
-Fonctions membres - Utilitaires
-*******************************/
-
-void Server::addClient( int new_fd )
+void Server::launchingServer(void)
 {
-  FdInformation socket_client; 
-
-  socket_client.setTypeOfSocket(SOCKET_CLIENT);
-  _p1.addClient(new_fd);
-  _fd_info.push_back(socket_client);
-  this->_nfds++;
+    _is_running = TRUE;
+	while (_is_running)
+	{
+		try
+		{
+			acceptConnection();
+		}
+		catch (char const* str)
+		{
+			std::cout << "ERROR CATCH" << str << std::endl;
+		}
+	} 
+ 
 }
 
-
-/***************************
-Fonctions membres - Getters
-***************************/
-fd* Server::getSockets() const
+void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 {
-  return (this->_socket);
+
+    if (socket->getType() == SERVER)
+    {
+        fd fd_client;
+        struct sockaddr_in their_addr;
+        socklen_t their_size = sizeof(struct sockaddr_in);
+            
+        std::cout << socket->getHost() << std::endl;
+        fd_client = accept(fd_request, (struct sockaddr *)&their_addr, &their_size);
+        
+        pollfd *new_poll = new pollfd;
+        new_poll->fd = fd_client;
+        new_poll->events = POLLIN;
+        new_poll->revents = 0;
+        
+        ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
+        _sockets.push_back(new_socket);
+
+
+        //Request request(fd_client, socket->getHost(),  socket->getPort());
+        _pollfds.push_back(new_poll);
+        std::cout << "capacity : " << _sockets.capacity() << " size : " << _sockets.size() << " max_size: " << _sockets.max_size() << std::endl;
+        //_requests.push_back(request);
+        std::cout << "New client connected : " << fd_client << std::endl;
+    }
+    else
+    {
+        std::cout << "I'm a client " << std::endl;
+        std::cout << "Event " << s_pollfd.events << std::endl;
+        socket->setTimeout(std::time(0));
+        socket->exec();
+        // s_pollfd.events = POLLOUT;
+        // s_pollfd.revents = 0;
+    }
 }
 
-int Server::getSocketsNb() const
+void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
 {
-  int i = 0;
-
-  while (_socket[i] != ENDOFARRAY)
-    i++;
-  return (i);
+    std::cout << "POLLOUT " << std::endl;
+    socket->setTimeout(std::time(0));
+    socket->exec();
+    //send(fd_client, "You got a new pokemon\n", 23, 0);
+    // s_pollfd.events = POLLIN;
+    // s_pollfd.revents = 0;
 }
 
-std::vector<int> Server::getPorts() const
+void Server::removeClient(size_t index)
 {
-  return (this->_port);
-}
-
-int Server::getHost() const
-{
-  return (this->_host);
-}
-
-int Server::getStatus() const
-{
-  return (this->_running);
-}
-
-pollfd  Server::getPollFd( int i ) const
-{
-  return (this->_fds[i]);
+    std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
+    close(_pollfds[index]->fd);
+    delete _pollfds[index];
+    _sockets.erase(_sockets.begin() + index);
+    _pollfds.erase(_pollfds.begin() + index);
 }

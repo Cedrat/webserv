@@ -1,39 +1,45 @@
+#include "define.hpp"
 #include "SocketClient.hpp"
+#include "AMethod.hpp"
 
-SocketClient::SocketClient(void) : _nb_sockets(0)
+SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> const & configs, pollfd &s_pollfd) 
+: ASocket(port, host, std::time(0), CLIENT) , _method(NULL) ,_configs(configs), _s_pollfd(s_pollfd)
 {
-
+    _request.setFd(fd);
+    _request.setConfigs(configs);
+    _request.setHost(host);
+    _request.setPort(port);
 }
 
-
-SocketClient::~SocketClient()
-{
-
-}
-
-void SocketClient::addSocketClient(fd sockfd)
-{
-	_array_of_socket.push_back(sockfd);
-	_nb_sockets++;
-}
-
-void SocketClient::closeAndRemoveSocket(size_t idx)
-{
-	close(_array_of_socket[idx]);
-	
-	std::vector<fd>::iterator it_start;
-	it_start = _array_of_socket.begin();
-	it_start += idx;
-	_array_of_socket.erase(it_start);
-	_nb_sockets--;
-}
-
-fd & SocketClient::operator[](size_t idx)
-{
-	return (_array_of_socket[idx]);
-}
-
-const fd& SocketClient::operator[](size_t idx) const
-{
-	return (_array_of_socket[idx]);
-}
+ void SocketClient::exec()
+    {
+        if (_method == NULL)
+        {
+            _request.receiveData();
+            _request.checkFinished();
+            if (_request.isFinished())
+            {
+                _method = _request.getAnswer();
+                std::cerr << _request.getRequest() << std::endl;
+                _request.reset();
+                _method->init();
+                _s_pollfd.events = POLLOUT; //you are fired when post is back.
+                _s_pollfd.revents = 0;
+                std::cout << "HEY POLLOUT" << std::endl;
+                std::cout << _s_pollfd.fd << std::endl; 
+                std::cout << "Event pollfd" << _s_pollfd.events << std::endl;
+            }
+        }
+        else 
+        {
+            _method->exec();
+            if (_method->getIsFinished())
+            {
+                std::cerr << "fin prematurée" << std::endl;
+                _s_pollfd.events = POLLIN;
+                _s_pollfd.revents = 0;
+                delete _method;
+                _method = NULL;
+            }
+        }
+    }
