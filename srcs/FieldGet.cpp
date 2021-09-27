@@ -23,7 +23,8 @@ void FieldGet::fillField()
 
     _method = split_string(splitted_request[0], " ")[0];
     _path   = split_string(splitted_request[0], " ")[1];
-    decompose_path(_path, _query);
+    if (_path.empty()==FALSE)
+        decompose_path(_path, _query);
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");

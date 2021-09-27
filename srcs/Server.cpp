@@ -108,7 +108,13 @@ void Server::acceptConnection(void)
         }
         else if (poll_fd_copy[i].revents & POLLIN)
         {
-            exec_pollin(_sockets[i], poll_fd_copy[i].fd, poll_fd_copy[i]);
+            try {
+                exec_pollin(_sockets[i], poll_fd_copy[i].fd, *_pollfds[i]);
+            }
+            catch (const char *msg)
+            {
+                removeClient(i);
+            }
         }
         else if (poll_fd_copy[i].revents & POLLOUT)
         {

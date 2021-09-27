@@ -35,6 +35,10 @@ void RequestInProgress::receiveData()
     int ret(0);
 
     ret = read(_socket_fd, buffer, BUFFER_SIZE);
+    if (ret == 0)
+    {
+        throw ("socket closed");
+    }
     if (ret < 0)
         ret = 0;
     buffer[ret] = 0;
