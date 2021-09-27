@@ -9,4 +9,5 @@ void decompose_path(std::string &path, std::string &query)
         path =  splitted_path[0];
         query = splitted_path[1];
     }
+    trim(path, '?');
 }
