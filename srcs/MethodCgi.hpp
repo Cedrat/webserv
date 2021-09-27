@@ -21,6 +21,8 @@ class MethodCgi : public AMethod
         std::string _header_cgi;
         std::string _body_cgi;
         int         _sent;
+        pid_t       _pid;
+        bool        _read_status;
 
     public:
         MethodCgi(int fd, std::string path, std::string header, 
@@ -33,7 +35,6 @@ class MethodCgi : public AMethod
         char **     convertEnv();
         void        freeEnv( char ** env );
         std::string createTmpFile();
-        std::string extractQuery( std::string path );
         
         void        exec();
         void        processCGI();

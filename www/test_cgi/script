@@ -48,11 +48,11 @@ export QUERY_STRING=
 
 
 #TEST PHP#
-export PATH_INFO=/php-cgi
-export PATH_TRANSLATED=/php-cgi
+export PATH_INFO=/test.php
+export PATH_TRANSLATED=/test.php
 export SCRIPT_FILENAME=test.php
 export SCRIPT_NAME=test.php
-export REQUEST_URI=/php-cgi
+export REQUEST_URI=/test.php
 
 
 php-cgi
