@@ -1,8 +1,9 @@
 #include "MethodGet.hpp"
 #include "define.hpp"
+#include "AField.hpp"
 
 
-MethodGet::MethodGet(int fd, std::string path, std::string header) : AMethod(fd, path, header)
+MethodGet::MethodGet(int fd, std::string path, std::string header, AField  &data_field) : AMethod(fd, path, header, data_field)
 {
 
 }
@@ -21,6 +22,7 @@ MethodGet::~MethodGet()
 
 void MethodGet::init()
 {
+   _fields.setPollout(); 
    _byte_send = 0; 
 }
 

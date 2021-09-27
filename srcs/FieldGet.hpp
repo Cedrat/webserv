@@ -10,11 +10,11 @@ class FieldGet : public AField
         AMethod *createGetMethod();
         AMethod *createErrorMethod(Config config);
         AMethod *createAiMethod();
-        AMethod *createRedirMethod(Config config, Location location);
+        //AMethod *createRedirMethod(Config config, Location location);
         AMethod *createCgiMethod(Config config, Location location);
 
     public : 
-        FieldGet(std::string str_request, RequestInProgress data_request);
+        FieldGet(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd);
         ~FieldGet();
 
         void        fillField();
@@ -23,8 +23,7 @@ class FieldGet : public AField
 		void		verifyRedirect(Location const &);
         
         //void        verifyAI(Location const &);
-        bool        isAIPath(std::string path, Location const &location);
-         
+        bool        isAIPath(std::string path, Location const &location); 
         AMethod *	getAMethod();
 };
 

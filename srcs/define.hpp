@@ -17,6 +17,7 @@
 # define BAD_REQUEST 400
 # define NOT_FOUND 404
 # define METHOD_NOT_ALLOWED 405
+# define ENTITY_TOO_LARGE 413
 # define NOT_SUPPORTED 505
 
 

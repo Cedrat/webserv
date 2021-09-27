@@ -12,6 +12,7 @@ std::map<int, std::string> error_table()
     error_list[400] = "400 Bad Request";
     error_list[404] = "404 Not Found";
     error_list[405] = "405 Method Not Allowed";
+    error_list[413] = "413 Request Entity Too Large";
     error_list[414] = "URI Too Long";
     error_list[418] = "418 I'm a teapot";
     error_list[501] = "501 Not Implemented";

@@ -31,7 +31,7 @@ class MethodCgi : public AMethod
 
     public:
         MethodCgi(int fd, std::string path, std::string header, 
-                Config config, Location location, std::string body, std::string method);
+                Config config, Location location, std::string body, std::string method, AField & field);
         ~MethodCgi();
 
         void init();

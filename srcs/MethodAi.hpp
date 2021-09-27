@@ -11,7 +11,7 @@ class MethodAi : public AMethod
         void sendBody();
     
     public :
-       MethodAi(int fd, std::string ai_file, std::string header);
+       MethodAi(int fd, std::string ai_file, std::string header, AField &field);
        ~MethodAi();
 
        void init();

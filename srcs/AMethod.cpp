@@ -1,8 +1,9 @@
 #include "AMethod.hpp"
 
-AMethod::AMethod(int fd, std::string path, std::string header)
+
+AMethod::AMethod(int fd, std::string path, std::string header, AField &field)
     : _fd(fd), _header_sent(FALSE), _request_sent(FALSE), _is_finished(FALSE),
-    _path(path), _header(header)
+    _path(path), _header(header), _fields(field)
 {
 
 }

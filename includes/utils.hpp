@@ -40,6 +40,12 @@ typedef int fd;
 #define TRUE 1
 
 bool isCgiPath(std::string path, std::string extension);
+void decompose_path(std::string &path, std::string &query);
+std::string remove_chars_after_the_last_token(std::string str, char token);
+std::string construct_path_post(std::string path, Location location);
+void trim_field(std::string &str_to_trim);
+bool        str_is_not_number(std::string);
+std::string date_string();
 std::string create_ai_page(const char * short_path, const char * long_path);
 Location find_best_location(std::string path, Config config);
 bool check_timeout(int timeout);

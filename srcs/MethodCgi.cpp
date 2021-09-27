@@ -1,7 +1,8 @@
 #include "MethodCgi.hpp"
+#include "AField.hpp"
 
-MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method) 
-    : AMethod(fd, path, header), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
+MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field) 
+    : AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
 {
     _tmpOut = "";
     _read_status = FALSE;
@@ -16,9 +17,11 @@ MethodCgi::~MethodCgi()
 
 void MethodCgi::init()
 {
+    _fields.setPollout();
     this->_tmpOut = createTmpFile();
     setEnv();
     processCGI();
+    
 }
 
 void MethodCgi::exec()
@@ -134,13 +137,18 @@ void MethodCgi::readCgiFile()
     if (ret < 0)
     {
         std::cerr << "Error reading tmp" << std::endl;
-        exit(0);
+        if (_tmpOut != "")
+        {
+            remove(this->_tmpOut.c_str());
+            _tmpOut = "";
+        }
     }
-    
-    _read_status = TRUE;
-    remove(this->_tmpOut.c_str());
-    _tmpOut = "";
-
+    else
+    {
+        _read_status = TRUE;
+        remove(this->_tmpOut.c_str());
+        _tmpOut = "";
+    }
     extractHeader();
 }
 

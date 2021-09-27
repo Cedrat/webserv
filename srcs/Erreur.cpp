@@ -1,8 +1,9 @@
 #include "Erreur.hpp"
 #include "define.hpp"
+#include "AField.hpp"
 
-Erreur::Erreur(int fd, std::string path, std::string header) : 
-AMethod(fd, path, header)
+Erreur::Erreur(int fd, std::string path, std::string header, AField &field) : 
+AMethod(fd, path, header, field)
 {
 
 }
@@ -13,7 +14,7 @@ Erreur::~Erreur()
 }
 void Erreur::init() 
 {
-    // pas d'inspiration;
+    _fields.setPollout();
 }
 
 void Erreur::exec()
