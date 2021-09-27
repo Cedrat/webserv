@@ -22,7 +22,10 @@ class MethodCgi : public AMethod
         std::string _body_cgi;
         int         _sent;
         pid_t       _pid;
+        
         bool        _read_status;
+        bool        _pid_status;
+        size_t      _readed;
 
     public:
         MethodCgi(int fd, std::string path, std::string header, 

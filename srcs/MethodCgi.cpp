@@ -5,6 +5,8 @@ MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config
 {
     _tmpOut = "";
     _read_status = FALSE;
+    _pid_status = FALSE;
+    _readed = 0;
 }
 
 MethodCgi::~MethodCgi()
@@ -24,15 +26,14 @@ void MethodCgi::exec()
     if (getHeaderSent() == FALSE)
     {
         if (waitpid(_pid, NULL, WNOHANG) > 0)
+            _pid_status = TRUE;
+        if (_pid_status == TRUE && _read_status == FALSE)
+            readCgiFile();  //Implementer systeme de read non bloquant
+        else if (_pid_status == TRUE && _read_status == TRUE)
         {
-            if (_read_status == FALSE)
-                readCgiFile();  //Implementer systeme de read non bloquant
-            else
-            {
-                send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
-                setHeaderSent(TRUE);
-                std::cerr << "CGI header sent" << std::endl;
-            }
+            send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
+            setHeaderSent(TRUE);
+            std::cerr << "CGI header sent" << std::endl;
         }
     }
     else
@@ -118,33 +119,25 @@ void MethodCgi::readCgiFile()
 {
     int ret;
     char buffer[50 + 1] = {0};
+    FILE* f = fopen(this->_tmpOut.c_str(), "r");
 
-    int fd = open(this->_tmpOut.c_str(), O_RDONLY);
-    if (fd < 0)
+    fseek(f, _readed, SEEK_SET);
+    ret = fread(buffer, 1, 10, f);
+    _readed += ret;
+    _body_cgi += buffer;
+    fclose(f);
+
+    if (ret > 0)
     {
-        //std::cout << strerror(errno) << std::endl;
-        std::cerr << "Error opening tmp" << std::endl;
-        exit(0);
+        return ;
     }
-
-    while ((ret = read(fd, buffer, 50)) > 0)    //REMPLACER PAR UN IF
-    {
-        _body_cgi += buffer;
-        memset(buffer, 0, 50);
-    }
-
-    close(fd);
-
     if (ret < 0)
     {
         std::cerr << "Error reading tmp" << std::endl;
         exit(0);
     }
-    /*if (ret == 0) // || ret == 1 ?
-    {
-        _read_status = TRUE;
-    }*/
-
+    
+    _read_status = TRUE;
     remove(this->_tmpOut.c_str());
     _tmpOut = "";
 

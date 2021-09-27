@@ -146,6 +146,8 @@ AMethod *FieldGet::createRedirMethod(Config config, Location location)
 
 AMethod *FieldGet::createCgiMethod(Config config, Location location)
 {
+    //std::cout << _method << std::endl;
+
     AMethod *method = new MethodCgi(_data_request.getFd(), _final_path, "", config, location, "", _method); //fd, path to file, header, config, location, body
     return (method);
 }
