@@ -6,7 +6,7 @@
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
 AMethod(fd, path, request_received, field)
 {
-
+    std::cout << "Welcome to MethodPost" << std::endl;
 }
 
 
@@ -38,7 +38,7 @@ std::string MethodPost::extractBodyRequest()
 {
     std::string copy_request = _header;
 
-    copy_request.erase(_header.find("\r\n\r\n"));
+    copy_request.erase(0, _header.find("\r\n\r\n"));
     
     return (copy_request);
 }

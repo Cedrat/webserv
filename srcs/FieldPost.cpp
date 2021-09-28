@@ -13,7 +13,7 @@ FieldPost::~FieldPost()
 
 }
 
-std::string const & FieldPost::getTransfertEncoding()
+std::string const & FieldPost::getTransfertEncoding() const
 {
     return (_transfert_encoding);
 }
@@ -142,9 +142,11 @@ void FieldPost::checkValidPath()
         std::cout << "first" << std::endl;
         _error = BAD_REQUEST;
     }
+    std::cout << "Final path is << " << _final_path << std::endl;
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
-        std::cout << "second" << std::endl;
+        std::cout << "second " << _final_path <<  std::endl;
+        std::cout << check_if_file_exist("./upload") << std::endl;
         _error = BAD_REQUEST;
     }   
 
