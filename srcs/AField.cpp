@@ -37,6 +37,11 @@ std::string const &AField::getHeader() const
     return (_header);
 }
 
+std::string const &AField::getQuery() const
+{
+    return (_query);
+}
+
 RequestInProgress const & AField::getDataRequest() const
 {
     return (_data_request);

@@ -13,7 +13,7 @@ FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_n
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 OBJS_CONFIG = $(addprefix ,${CONFIG:.cpp=.o})
-DEBUG = -g3  -fsanitize=address -fsanitize=undefined
+DEBUG = -g3  #-fsanitize=address -fsanitize=undefined
 
 CXX= clang++
 
