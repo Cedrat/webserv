@@ -37,6 +37,7 @@ class AField
         std::string const & getStrRequest() const;
         std::string const & getHeader() const;
         std::string const & getQuery() const;
+        std::string const & getTransfertEncoding() const;
 
         RequestInProgress const & getDataRequest() const;
 
@@ -51,26 +52,6 @@ class AField
 };
 
 
-class PostField : public AField
-{
-    private: 
-        std::string _transfert_encoding;
-        int         _content_length;
-    
-    public : 
-        std::string const & getTransfertEncoding(){
-            return (_transfert_encoding);
-        }
-        void setTransfertEncoding(std::string const transfert_encoding){
-            _transfert_encoding = transfert_encoding;
-        }
-        int const & getContentLength(){
-            return (_content_length);
-        }
-        void setContentLength(int const length){
-            _content_length = length;
-        }
-};
 
 class DeleteField : public AField
 {

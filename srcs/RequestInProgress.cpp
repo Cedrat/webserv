@@ -2,6 +2,7 @@
 #include "Erreur.hpp"
 #include "define.hpp"
 #include "Generator.hpp"
+#include "EOFException.hpp"
 
 RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 {
@@ -37,7 +38,7 @@ void RequestInProgress::receiveData()
     ret = read(_socket_fd, buffer, BUFFER_SIZE);
     if (ret == 0)
     {
-        throw ("socket closed");
+        throw EOFException();
     }
     if (ret < 0)
         ret = 0;

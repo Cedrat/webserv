@@ -8,6 +8,7 @@
 #include "SocketServer.hpp"
 #include "SocketClient.hpp"
 #include "copy_value_of_pointer_vector.hpp"
+#include "EOFException.hpp"
 
 pollfd * create_a_listenable_socket(size_t port, int host)
 {
@@ -111,7 +112,7 @@ void Server::acceptConnection(void)
             try {
                 exec_pollin(_sockets[i], poll_fd_copy[i].fd, *_pollfds[i]);
             }
-            catch (const char *msg)
+            catch (EOFException const &e)
             {
                 removeClient(i);
             }
@@ -180,7 +181,6 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
 {
     std::cout << "POLLOUT " << std::endl;
-    socket->setTimeout(std::time(0));
     socket->exec();
     //send(fd_client, "You got a new pokemon\n", 23, 0);
     // s_pollfd.events = POLLIN;

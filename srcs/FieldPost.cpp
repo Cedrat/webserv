@@ -1,6 +1,7 @@
 #include "../includes/utils.hpp"
 #include "FieldPost.hpp"
 #include "Erreur.hpp"
+#include "MethodPost.hpp"
  
 FieldPost::FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request, data_request, s_pollfd)
 {
@@ -97,6 +98,7 @@ AMethod *FieldPost::getAMethod()
     {
         return (createErrorMethod(config));
     }
+    return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this));
 }
 
 void FieldPost::verifyMissingData()

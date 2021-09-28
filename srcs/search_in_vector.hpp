@@ -1,3 +1,6 @@
+#ifndef SEARCH_IN_VECTOR_HPP
+# define SEARCH_IN_VECTOR_HPP
+
 #include <vector>
 #include "define.hpp"
 
@@ -11,3 +14,5 @@ bool search_in_vector(std::vector<T> vector, T const & value_to_found)
     }
     return (FALSE);
 }
+
+#endif
