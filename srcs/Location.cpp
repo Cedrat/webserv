@@ -2,13 +2,13 @@
 
 Location::Location() : _autoindex(FALSE)
 {
-    this->_root = "-1";
-    this->_methods.push_back("-1");
-    this->_set_autoindex = false;
-    this->_default_file = "-1";
-    this->_upload_folder = "-1";
+    this->_root = UNSET;
+    this->_methods.push_back(UNSET);
+    this->_default_file = UNSET;
+    this->_upload_folder = UNSET;
+    this->_redirect = UNSET;
+    this->_set_autoindex = FALSE;
     this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
-    this->_redirect = "-1";
 }
 
 Location::~Location() { }
@@ -27,7 +27,7 @@ void Location::setLocationDirective( std::vector<std::string> line )
 
 void Location::setRoot( std::vector<std::string> line )
 {
-    if (_root == "-1")
+    if (_root == UNSET)
     {
         if (line.size() == 1)
         {
@@ -58,7 +58,7 @@ void Location::setAutoindex( std::vector<std::string> line )
 
 void Location::setMethods( std::vector<std::string> line )
 {
-    if (_methods[0] == "-1")
+    if (_methods[0] == UNSET)
     {
         if (line.size() == 1)
         {
@@ -75,7 +75,7 @@ void Location::setMethods( std::vector<std::string> line )
 
 void Location::setDefaultFile( std::vector<std::string> line )
 {
-    if (_default_file == "-1")
+    if (_default_file == UNSET)
     {
         _default_file=line[1];
     }
@@ -85,7 +85,7 @@ void Location::setDefaultFile( std::vector<std::string> line )
 
 void Location::setUploadFolder( std::vector<std::string> line )
 {
-    if (_upload_folder == "-1")
+    if (_upload_folder == UNSET)
         _upload_folder = line[1];
     else
         throw std::invalid_argument("Error : location block can't contain more than one upload_folder directive");
@@ -112,7 +112,7 @@ void Location::setCgi( std::vector<std::string> line )
 
 void Location::setRedirect( std::vector<std::string> line )
 {
-    if (_redirect == "-1")
+    if (_redirect == UNSET)
         _redirect = line[1];
     else
         throw std::invalid_argument("Error : location block can't contain more than one rewrite directive");
@@ -120,14 +120,14 @@ void Location::setRedirect( std::vector<std::string> line )
 
 void Location::setUncalledDirectives()
 {
-    if (_root == "-1") //Recuperer root du serveur si pas de root dans location
+    if (_root == UNSET) //Recuperer root du serveur si pas de root dans location
         _root = "";
-    if (_methods[0] == "-1")
+    if (_methods[0] == UNSET)
         _methods[0] = "GET";
-    if (_default_file == "-1")
+    if (_default_file == UNSET)
         _default_file = "";
         else
-    if (_upload_folder == "-1")
+    if (_upload_folder == UNSET)
     {
         for (size_t i = 0; i < _methods.size(); i++)
         {
@@ -135,7 +135,7 @@ void Location::setUncalledDirectives()
                 throw std::invalid_argument("Error : You must specify an upload directory if you use the POST method");
         }  
     }
-    if (_redirect == "-1")
+    if (_redirect == UNSET)
         _redirect = "";
     //upload_folder reste = "-1" si pas de methode POST
     //redirect reste = "-1" si pas specifie
@@ -152,10 +152,10 @@ bool Location::checkLocationData()
 {
     setUncalledDirectives();
 
-    checks _checks[7] = {&Location::checkLocation, &Location::checkRoot, 
+    checks _checks[CHECK_LOCATION_NB] = {&Location::checkLocation, &Location::checkRoot, 
             &Location::checkDefaultFile, &Location::checkMethods, &Location::checkUploadFolder, 
             &Location::checkCgi, &Location::checkRedirect};
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < CHECK_LOCATION_NB; i++)
     {
         if ((this->*_checks[i])() == false)
             return false;
@@ -233,7 +233,7 @@ bool Location::checkMethods()
 
 bool Location::checkUploadFolder()
 {
-    if (_upload_folder == "-1")
+    if (_upload_folder == UNSET)
         return true;
     if (!isAcceptableURI(_upload_folder))
     {
@@ -267,7 +267,7 @@ bool Location::checkCgi()
 
 bool Location::checkRedirect()
 {
-    if (_redirect == "-1")
+    if (_redirect == UNSET)
         return true;
     if (!isAcceptableURI(_redirect))
     {

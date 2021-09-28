@@ -10,6 +10,8 @@
 # include "../includes/utils.hpp"
 # include "../includes/Formatting.hpp"
 
+# define CHECK_SERVER_NB 3
+
 class Location;
 class Config
 {

@@ -250,9 +250,9 @@ Gestion des keywords
 **************************************************************/
 bool ConfigParser::isServerProperty( std::string line )
 {
-    std::string serverProperties[4] = {"listen", "server_name", "error_page", "client_max_body_size"};
+    std::string serverProperties[SERVER_DIRECTIVE_NB] = {"listen", "server_name", "error_page", "client_max_body_size"};
     
-    for(unsigned long i = 0; i < 4; i++)
+    for(unsigned long i = 0; i < SERVER_DIRECTIVE_NB; i++)
     {
         if (line == serverProperties[i])
             return true;
@@ -262,9 +262,9 @@ bool ConfigParser::isServerProperty( std::string line )
 
 bool ConfigParser::isLocationProperty( std::string line )
 {
-    std::string locationProperties[7] = {"root", "method", "autoindex", "index", "upload_folder", "cgi", "rewrite"};
+    std::string locationProperties[LOCATION_DIRECTIVE_NB] = {"root", "method", "autoindex", "index", "upload_folder", "cgi", "rewrite"};
    
-    for(unsigned long i = 0; i < 7; i++)
+    for(unsigned long i = 0; i < LOCATION_DIRECTIVE_NB; i++)
     {
         if (line == locationProperties[i])
             return true;

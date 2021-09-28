@@ -151,8 +151,8 @@ bool Config::checkServerData()
 {
     setUncalledDirectives();
 
-    checks _checks[3] = {&Config::checkServerNames, &Config::checkErrorPages, &Config::checkMaxClientBodySize};
-    for (int i = 0; i < 3; i++)
+    checks _checks[CHECK_SERVER_NB] = {&Config::checkServerNames, &Config::checkErrorPages, &Config::checkMaxClientBodySize};
+    for (int i = 0; i < CHECK_SERVER_NB; i++)
     {
         if ((this->*_checks[i])() == false)
             return false;
