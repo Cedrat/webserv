@@ -23,7 +23,7 @@ public :
         void setTransfertEncoding(std::string const transfert_encoding);
   
         std::string const & getContentLength();
-        std::string const & getTransfertEncoding();
+        std::string const & getTransfertEncoding() const;
 
         void fillField();
         AMethod *getAMethod();

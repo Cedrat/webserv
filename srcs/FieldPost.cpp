@@ -1,6 +1,7 @@
 #include "../includes/utils.hpp"
 #include "FieldPost.hpp"
 #include "Erreur.hpp"
+#include "MethodPost.hpp"
  
 FieldPost::FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request, data_request, s_pollfd)
 {
@@ -12,7 +13,7 @@ FieldPost::~FieldPost()
 
 }
 
-std::string const & FieldPost::getTransfertEncoding()
+std::string const & FieldPost::getTransfertEncoding() const
 {
     return (_transfert_encoding);
 }
@@ -97,6 +98,7 @@ AMethod *FieldPost::getAMethod()
     {
         return (createErrorMethod(config));
     }
+    return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this));
 }
 
 void FieldPost::verifyMissingData()
@@ -140,9 +142,11 @@ void FieldPost::checkValidPath()
         std::cout << "first" << std::endl;
         _error = BAD_REQUEST;
     }
+    std::cout << "Final path is << " << _final_path << std::endl;
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
-        std::cout << "second" << std::endl;
+        std::cout << "second " << _final_path <<  std::endl;
+        std::cout << check_if_file_exist("./upload") << std::endl;
         _error = BAD_REQUEST;
     }   
 

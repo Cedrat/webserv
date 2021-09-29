@@ -6,7 +6,8 @@ AMethod.cpp                     Erreur.cpp                      MethodGet.cpp   
 ASocket.cpp                     FieldGet.cpp                    RequestInProgress.cpp           Syntax.cpp                      check_timeout.cpp               error_tables.cpp                main.cpp					\
 Config.cpp                      Formatting.cpp                  Server.cpp                      add_config.cpp                  construct_path.cpp              find_index_best_config.cpp      path_security.cpp		 MethodAi.cpp redir_path.cpp \
 isCgiPath.cpp MethodCgi.cpp \
-FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_not_number.cpp				trim_fields.cpp 				remove_chars_after_the_last_token.cpp decompose_path.cpp
+FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_not_number.cpp				trim_fields.cpp 				remove_chars_after_the_last_token.cpp decompose_path.cpp \
+MethodPost.cpp					extract_header_request.cpp
 #PATH_CONFIG = ./config/
 #CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
 

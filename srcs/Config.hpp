@@ -11,6 +11,7 @@
 # include "../includes/Formatting.hpp"
 
 # define CHECK_SERVER_NB 3
+# define LIMIT_MAX_BODY_SIZE 1000000
 
 class Location;
 class Config

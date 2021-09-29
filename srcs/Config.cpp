@@ -197,7 +197,7 @@ bool Config::checkErrorPages()
 
 bool Config::checkMaxClientBodySize()
 {
-    if (_max_body_size <= 0 || _max_body_size > 1200)
+    if (_max_body_size <= 0 || _max_body_size > LIMIT_MAX_BODY_SIZE)
     {
         throw std::invalid_argument("Error in max_client_body_size directive.");
         return false;

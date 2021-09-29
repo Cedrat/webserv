@@ -185,7 +185,7 @@ bool serverConfig::checkErrorPages()
 
 bool serverConfig::checkMaxClientBodySize()
 {
-    if (_max_body_size <= 0 || _max_body_size > 1200)
+    if (_max_body_size <= 0 || _max_body_size > 10000000)
     {
         std::cerr << "Error in max_client_body_size directive" << std::endl;
         return false;

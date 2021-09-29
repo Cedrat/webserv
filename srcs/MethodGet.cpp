@@ -14,12 +14,6 @@ MethodGet::~MethodGet()
 }
 
 
-
-
-
-
-
-
 void MethodGet::init()
 {
    _fields.setPollout(); 

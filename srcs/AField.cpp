@@ -41,6 +41,12 @@ std::string const &AField::getQuery() const
 {
     return (_query);
 }
+  
+std::string const &AField::getTransfertEncoding() const
+{
+    std::cout << "bad call to getTransfertEncoding" << std::endl;
+    throw "bad bad bad";
+}
 
 RequestInProgress const & AField::getDataRequest() const
 {
