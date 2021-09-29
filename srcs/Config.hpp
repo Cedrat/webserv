@@ -10,6 +10,8 @@
 # include "../includes/utils.hpp"
 # include "../includes/Formatting.hpp"
 
+# define LIMIT_MAX_BODY_SIZE 1000000
+
 class Location;
 class Config
 {

@@ -39,6 +39,7 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+std::string extract_header_request(std::string request);
 bool isCgiPath(std::string path, std::string extension);
 void decompose_path(std::string &path, std::string &query);
 std::string remove_chars_after_the_last_token(std::string str, char token);

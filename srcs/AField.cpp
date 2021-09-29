@@ -37,6 +37,12 @@ std::string const &AField::getHeader() const
     return (_header);
 }
 
+std::string const &AField::getTransfertEncoding() const
+{
+    std::cout << "bad call to getTransfertEncoding" << std::endl;
+    throw "bad bad bad";
+}
+
 RequestInProgress const & AField::getDataRequest() const
 {
     return (_data_request);

@@ -21,9 +21,12 @@ void FieldGet::fillField()
     std::vector<std::string> splitted_request = split_string(_str_request, "\n");
     std::vector<std::string> splitted_line;
 
+    splitted_line = split_string(splitted_request[0], " ");
     _method = split_string(splitted_request[0], " ")[0];
-    _path   = split_string(splitted_request[0], " ")[1];
-    decompose_path(_path, _query);
+    if (splitted_line.size() > 1)
+        _path   = split_string(splitted_request[0], " ")[1];
+    if (_path.empty()==FALSE)
+        decompose_path(_path, _query);
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");

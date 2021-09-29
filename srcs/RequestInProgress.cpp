@@ -2,6 +2,7 @@
 #include "Erreur.hpp"
 #include "define.hpp"
 #include "Generator.hpp"
+#include "EOFException.hpp"
 
 RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 {
@@ -35,6 +36,10 @@ void RequestInProgress::receiveData()
     int ret(0);
 
     ret = read(_socket_fd, buffer, BUFFER_SIZE);
+    if (ret == 0)
+    {
+        throw EOFException();
+    }
     if (ret < 0)
         ret = 0;
     buffer[ret] = 0;
@@ -81,7 +86,7 @@ size_t const & RequestInProgress::getPort() const
 
  void        RequestInProgress::checkFinished() 
 {
-    if (_str_request.find("\r\n\r\n") != std::string::npos || _str_request.size() > 10000)
+    if (_str_request.find("\r\n\r\n") != std::string::npos || _str_request.size() > MAX_REQUEST_SIZE)
         this->_is_finished = TRUE;
 }
 
@@ -122,10 +127,12 @@ int RequestInProgress::checkBasicError()
 {
     int ret_error;
 
-    ret_error = check_syntax_request(_str_request);
+    std::string header_request = extract_header_request(_str_request);
+    std::cout << "Header request is : " << header_request << std::endl;
+    ret_error = check_syntax_request(header_request);
     if (ret_error != OK)
         return (ret_error);
-    if (duplicata(_str_request))
+    if (duplicata(header_request))
         return (BAD_REQUEST);
     return (OK);
 }
