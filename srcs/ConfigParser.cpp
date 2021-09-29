@@ -48,7 +48,7 @@ void ConfigParser::parser( std::string const & file )
         if (line.empty())
             continue;
         if ((line.size() == 1 && line[0] != "server{")
-            || (line.size() > 3) || (line.size() == 2 && line[1] != "{"))
+            || (line.size() > 3) || (line.size() == 2 && (line[0] != "server" || line[1] != "{")))
         {
             std::cerr << "Error in config file." << std::endl;
             throw std::invalid_argument("Usage to start a server block is : 'Server {'");
@@ -78,7 +78,7 @@ void ConfigParser::openConfigFile( std::string const & file )
 **************************************************************/
 bool ConfigParser::treatServerBlock()
 {
-    Config                server;
+    Config                      server;
     std::vector<std::string>    line;
     bool                        closingBrace = false;
 
@@ -141,9 +141,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
     }
 
     if (closingBrace == false)
-    {
         throw std::invalid_argument("Can't create the server : Error in the location block of the config file");
-    }
     return true;
 }
 

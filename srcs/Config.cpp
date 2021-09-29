@@ -41,12 +41,12 @@ void Config::setHostAndPort( std::vector<std::string> line )
                 inet_pton(AF_INET, _ip.c_str(), &_host);
             }
             else
-                throw std::invalid_argument("Error : Config - Invalid host"); 
+                throw std::invalid_argument("Error : Config - Invalid host");
             
             //Assigner la valeur après ':' à port
-            std::string  str = line[1].substr(separator + 1, (separator - line[1].size())); 
+            std::string  str = line[1].substr(separator + 1, (separator - line[1].size()));
             if (str == "" || isPort(static_cast<std::string>(str)) == false)
-                throw std::invalid_argument("Error : Config - Invalid port"); 
+                throw std::invalid_argument("Error : Config - Invalid port");
             this->_port = atoi(str.c_str());
         }
     }

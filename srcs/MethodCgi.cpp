@@ -5,7 +5,7 @@
 MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field) 
     : AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
 {
-    _tmpOut = "";
+    _tmp_out = "";
     _read_ended = FALSE;
     _pid_ended = FALSE;
     _readed = 0;
@@ -19,7 +19,7 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
     _fields.setPollout();
-    this->_tmpOut = createTmpFile();
+    this->_tmp_out = createTmpFile();
     setEnv();
     processCGI();
 }
@@ -68,7 +68,7 @@ void MethodCgi::processCGI()
 void MethodCgi::execCGI( const char ** args, char ** env )
 {
     int     fd[2];
-    int     tmp = open(this->_tmpOut.c_str(), 
+    int     tmp = open(this->_tmp_out.c_str(), 
                     O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
                     S_IRUSR | S_IWUSR);
 
@@ -87,7 +87,7 @@ void MethodCgi::execCGI( const char ** args, char ** env )
     if (_pid == -1)     //Error
     {
         std::cerr << "Error with fork()" << std::endl;
-        remove(this->_tmpOut.c_str());
+        remove(this->_tmp_out.c_str());
         return ;
     }
     else if (_pid == 0)       //Child
@@ -101,7 +101,7 @@ void MethodCgi::execCGI( const char ** args, char ** env )
             std::cerr << "Execve failed" << std::endl;
             close(fd[0]);
             close(tmp);
-            remove(this->_tmpOut.c_str());
+            remove(this->_tmp_out.c_str());
             exit(-1);
         }
     }
@@ -114,7 +114,7 @@ void MethodCgi::execCGI( const char ** args, char ** env )
 
 void MethodCgi::readCgiFile()
 {
-    FILE* f = fopen(this->_tmpOut.c_str(), "r");
+    FILE* f = fopen(this->_tmp_out.c_str(), "r");
     if (f == NULL)
     {
         setErrorResponse();
@@ -132,10 +132,11 @@ void MethodCgi::readCgiFile()
     if (ferror(f))
     {
         std::cerr << "Error reading tmp" << std::endl;
-        if (_tmpOut != "")
+        if (_tmp_out != "")
         {
             fclose(f);
-            remove(this->_tmpOut.c_str());
+            remove(this->_tmp_out.c_str());
+            this->_tmp_out = "";
             setErrorResponse();
             return ;
         }
@@ -143,7 +144,8 @@ void MethodCgi::readCgiFile()
     else if (feof(f))
     {
         _read_ended = TRUE;
-        remove(this->_tmpOut.c_str());
+        remove(this->_tmp_out.c_str());
+        this->_tmp_out = "";
     }
     fclose(f);
     if (ret == BUFFER_CGI)  //Lecture pas finie

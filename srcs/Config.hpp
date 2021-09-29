@@ -28,7 +28,6 @@ class Config
         int                         _max_body_size;
         std::vector<std::string>    _server_names;
         std::map<int, std::string>  _error_pages;
-
         std::string                 _ip;
 
 

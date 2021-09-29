@@ -18,7 +18,7 @@ class MethodCgi : public AMethod
         std::string _method;
 
         std::map<std::string, std::string>  _env;
-        std::string                         _tmpOut;
+        std::string                         _tmp_out;
 
         std::string _header_cgi;
         std::string _body_cgi;
