@@ -10,6 +10,7 @@
 # include "../includes/utils.hpp"
 # include "../includes/Formatting.hpp"
 
+# define CHECK_SERVER_NB 3
 # define LIMIT_MAX_BODY_SIZE 1000000
 
 class Location;
@@ -28,7 +29,6 @@ class Config
         int                         _max_body_size;
         std::vector<std::string>    _server_names;
         std::map<int, std::string>  _error_pages;
-
         std::string                 _ip;
 
 

@@ -7,7 +7,7 @@
 # include "Config.hpp"
 # include <cstring>
 
-# define BUFFER_CGI 20
+# define BUFFER_CGI 50
 
 class MethodCgi : public AMethod
 {
@@ -18,15 +18,15 @@ class MethodCgi : public AMethod
         std::string _method;
 
         std::map<std::string, std::string>  _env;
-        std::string                         _tmpOut;
+        std::string                         _tmp_out;
 
         std::string _header_cgi;
         std::string _body_cgi;
         int         _sent;
         pid_t       _pid;
         
-        bool        _read_status;
-        bool        _pid_status;
+        bool        _read_ended;
+        bool        _pid_ended;
         size_t      _readed;
 
     public:
@@ -43,11 +43,12 @@ class MethodCgi : public AMethod
         
         void        exec();
         void        processCGI();
-        int         execCGI( const char ** args, char ** env );
+        void        execCGI( const char ** args, char ** env );
         void        readCgiFile();
         void        extractHeader();
         void        adaptHeader();
         void        sendBody();
+        void        setErrorResponse();
         
 };
 

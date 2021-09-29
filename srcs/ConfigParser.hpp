@@ -24,6 +24,10 @@
 # include "../srcs/Config.hpp"
 # include "../includes/Formatting.hpp"
 
+# define SERVER_DIRECTIVE_NB 4
+# define LOCATION_DIRECTIVE_NB 7
+
+
 
 class ConfigParser
 {

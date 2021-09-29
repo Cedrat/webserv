@@ -37,6 +37,11 @@ std::string const &AField::getHeader() const
     return (_header);
 }
 
+std::string const &AField::getQuery() const
+{
+    return (_query);
+}
+  
 std::string const &AField::getTransfertEncoding() const
 {
     std::cout << "bad call to getTransfertEncoding" << std::endl;

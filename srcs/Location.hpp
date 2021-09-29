@@ -7,6 +7,9 @@
 #include "../includes/utils.hpp"
 # include "../includes/Syntax.hpp"
 
+# define UNSET "-1"
+# define CHECK_LOCATION_NB 7
+
 class Location
 {
     typedef bool(Location::*checks)();

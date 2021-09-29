@@ -48,7 +48,7 @@ void ConfigParser::parser( std::string const & file )
         if (line.empty())
             continue;
         if ((line.size() == 1 && line[0] != "server{")
-            || (line.size() > 3) || (line.size() == 2 && line[1] != "{"))
+            || (line.size() > 3) || (line.size() == 2 && (line[0] != "server" || line[1] != "{")))
         {
             std::cerr << "Error in config file." << std::endl;
             throw std::invalid_argument("Usage to start a server block is : 'Server {'");
@@ -78,7 +78,7 @@ void ConfigParser::openConfigFile( std::string const & file )
 **************************************************************/
 bool ConfigParser::treatServerBlock()
 {
-    Config                server;
+    Config                      server;
     std::vector<std::string>    line;
     bool                        closingBrace = false;
 
@@ -141,9 +141,7 @@ bool ConfigParser::treatLocationBlock( std::vector<std::string> line )
     }
 
     if (closingBrace == false)
-    {
         throw std::invalid_argument("Can't create the server : Error in the location block of the config file");
-    }
     return true;
 }
 
@@ -250,9 +248,9 @@ Gestion des keywords
 **************************************************************/
 bool ConfigParser::isServerProperty( std::string line )
 {
-    std::string serverProperties[4] = {"listen", "server_name", "error_page", "client_max_body_size"};
+    std::string serverProperties[SERVER_DIRECTIVE_NB] = {"listen", "server_name", "error_page", "client_max_body_size"};
     
-    for(unsigned long i = 0; i < 4; i++)
+    for(unsigned long i = 0; i < SERVER_DIRECTIVE_NB; i++)
     {
         if (line == serverProperties[i])
             return true;
@@ -262,9 +260,9 @@ bool ConfigParser::isServerProperty( std::string line )
 
 bool ConfigParser::isLocationProperty( std::string line )
 {
-    std::string locationProperties[7] = {"root", "method", "autoindex", "index", "upload_folder", "cgi", "rewrite"};
+    std::string locationProperties[LOCATION_DIRECTIVE_NB] = {"root", "method", "autoindex", "index", "upload_folder", "cgi", "rewrite"};
    
-    for(unsigned long i = 0; i < 7; i++)
+    for(unsigned long i = 0; i < LOCATION_DIRECTIVE_NB; i++)
     {
         if (line == locationProperties[i])
             return true;

@@ -1,12 +1,13 @@
 #include "MethodCgi.hpp"
 #include "AField.hpp"
+#include "define.hpp"
 
 MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field) 
     : AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
 {
-    _tmpOut = "";
-    _read_status = FALSE;
-    _pid_status = FALSE;
+    _tmp_out = "";
+    _read_ended = FALSE;
+    _pid_ended = FALSE;
     _readed = 0;
 }
 
@@ -18,10 +19,9 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
     _fields.setPollout();
-    this->_tmpOut = createTmpFile();
+    this->_tmp_out = createTmpFile();
     setEnv();
     processCGI();
-    
 }
 
 void MethodCgi::exec()
@@ -29,10 +29,10 @@ void MethodCgi::exec()
     if (getHeaderSent() == FALSE)
     {
         if (waitpid(_pid, NULL, WNOHANG) > 0)
-            _pid_status = TRUE;
-        if (_pid_status == TRUE && _read_status == FALSE)
-            readCgiFile();  //Implementer systeme de read non bloquant
-        else if (_pid_status == TRUE && _read_status == TRUE)
+            _pid_ended = TRUE;      //CGI process terminé
+        if (_pid_ended == TRUE && _read_ended == FALSE)
+            readCgiFile();          //read non bloquant
+        else if (_pid_ended == TRUE && _read_ended == TRUE)
         {
             send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
             setHeaderSent(TRUE);
@@ -53,26 +53,22 @@ Main CGI process
 **************************************************************/
 void MethodCgi::processCGI()
 {
-    std::string binary_path = construct_path(_location.getCgiBinary(), _location);
-    const char *args[3] = {binary_path.c_str(), this->getPath().c_str(), NULL};
+    std::string     binary_path = construct_path(_location.getCgiBinary(), _location);
+    const char      *args[3] = {binary_path.c_str(), this->getPath().c_str(), NULL};
 
     //Transformer les variables d'env en char**
     char **env;
     env = convertEnv();
 
     //Gestion de l'execution du cgi
-    if (execCGI(args, env) == -1)
-    {
-        std::cerr << "Error during CGI execution" << std::endl;
-        return ;
-    }
+    execCGI(args, env);
     freeEnv(env);
 }
 
-int MethodCgi::execCGI( const char ** args, char ** env )
+void MethodCgi::execCGI( const char ** args, char ** env )
 {
     int     fd[2];
-    int     tmp = open(this->_tmpOut.c_str(), 
+    int     tmp = open(this->_tmp_out.c_str(), 
                     O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
                     S_IRUSR | S_IWUSR);
 
@@ -80,21 +76,19 @@ int MethodCgi::execCGI( const char ** args, char ** env )
     if ((pipe(fd) < 0) || (tmp < 0))
     {
         std::cerr << "Pipe or tmp file opening failed" << std::endl;
-        return -1;
+        return ;
     }
 
     //Ecriture du body dans le cas de POST
     write(fd[0], _body.c_str(), _body.size());
     lseek(fd[0], 0, SEEK_SET);
 
-    //Creation du child process
     _pid = fork();
-    if (_pid == -1)          //Erreur
+    if (_pid == -1)     //Error
     {
         std::cerr << "Error with fork()" << std::endl;
-        close(fd[0]);
-        close(fd[1]);
-        return -1;
+        remove(this->_tmp_out.c_str());
+        return ;
     }
     else if (_pid == 0)       //Child
     {
@@ -107,49 +101,56 @@ int MethodCgi::execCGI( const char ** args, char ** env )
             std::cerr << "Execve failed" << std::endl;
             close(fd[0]);
             close(tmp);
-            remove(this->_tmpOut.c_str());
-            return -1;
+            remove(this->_tmp_out.c_str());
+            exit(-1);
         }
     }
     else  //Parent
     {
         close(fd[0]);
+        close(tmp);
     }
-    return 1;
 }
 
 void MethodCgi::readCgiFile()
 {
-    int ret;
-    char buffer[50 + 1] = {0};
-    FILE* f = fopen(this->_tmpOut.c_str(), "r");
-
-    fseek(f, _readed, SEEK_SET);
-    ret = fread(buffer, 1, BUFFER_CGI, f);
-    _readed += ret;
-    _body_cgi += buffer;
-    fclose(f);
-
-    if (ret == BUFFER_CGI)
+    FILE* f = fopen(this->_tmp_out.c_str(), "r");
+    if (f == NULL)
     {
+        setErrorResponse();
         return ;
     }
-    if (ret < 0)
+
+    size_t  ret;
+    char    buffer[BUFFER_CGI + 1] = {0};
+
+    fseek(f, _readed, SEEK_SET);
+    ret = fread(buffer, sizeof(*buffer), BUFFER_CGI, f);
+    _readed += ret;
+    _body_cgi += buffer;
+
+    if (ferror(f))
     {
         std::cerr << "Error reading tmp" << std::endl;
-        if (_tmpOut != "")
+        if (_tmp_out != "")
         {
-            remove(this->_tmpOut.c_str());
-            _tmpOut = "";
+            fclose(f);
+            remove(this->_tmp_out.c_str());
+            this->_tmp_out = "";
+            setErrorResponse();
+            return ;
         }
     }
-    else
+    else if (feof(f))
     {
-        _read_status = TRUE;
-        remove(this->_tmpOut.c_str());
-        _tmpOut = "";
+        _read_ended = TRUE;
+        remove(this->_tmp_out.c_str());
+        this->_tmp_out = "";
     }
-    extractHeader();
+    fclose(f);
+    if (ret == BUFFER_CGI)  //Lecture pas finie
+        return ;
+    extractHeader();  //Recup et completion du header
 }
 
 
@@ -171,17 +172,13 @@ void MethodCgi::setEnv()
     this->_env["REQUEST_METHOD="] = this->_method;
 
         //Fichier à ouvrir avec le binaire 
-    this->_env["PATH_INFO="] = this->getPath();         //A verifier
-    this->_env["PATH_TRANSLATED="] = this->getPath();   //path sans la partie www/
-    //this->_env["SCRIPT_NAME="] = this->getPath();       //juste fin du chemin vers fichier ?
+    this->_env["PATH_INFO="] = this->getPath();     //A verifier
+    this->_env["PATH_TRANSLATED="] = this->getPath();   //path sans la partie www/, juste fin du chemin vers fichier ?
+    this->_env["QUERY_STRING="] = _fields.getQuery();
 
-    this->_env["QUERY_STRING="] = "";   //A remplacer par getQuery
-    this->_env["REQUEST_URI="] = this->getPath();   //Chemin vers le fichier + requete query. Facultatif ?
+    this->_env["REQUEST_URI="] = this->getPath() + _fields.getQuery();   //Chemin vers le fichier + requete query. Facultatif ?
 
-
-    this->_env["REMOTE_HOST="] = "";               //Nom d'hote du client. Vide si pas connu
-    this->_env["REMOTE_ADDR="] = "127.0.0.1";      //IP du client
-
+    this->_env["REMOTE_HOST="] = _fields.getHostName();
     this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
 }
 
@@ -224,6 +221,11 @@ char ** MethodCgi::convertEnv()
     return new_env;
 }
 
+
+
+/**************************************************************
+Headers
+**************************************************************/
 void    MethodCgi::extractHeader()
 {
     size_t  end_header;
@@ -248,6 +250,31 @@ void MethodCgi::adaptHeader()
 
 
 
+/**************************************************************
+Error management
+**************************************************************/
+void    MethodCgi::setErrorResponse()
+{
+    std::string path_error = _config.getPathError(BAD_REQUEST);
+
+    _header_cgi = "HTTP/1.1 " + get_string_error(BAD_REQUEST);
+    _header_cgi += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    _header_cgi += date_string() + " \n\n";
+
+    std::fstream fs;
+    std::stringstream buffer;
+
+    fs.open(path_error.c_str(),  std::fstream::in); 
+    buffer << fs.rdbuf();
+    _body_cgi = buffer.str();
+    _read_ended = TRUE;
+    fs.close();
+}
+
+
+/**************************************************************
+Body
+**************************************************************/
 void MethodCgi::sendBody()
 {
     //signal(SIGPIPE, SIG_IGN);
