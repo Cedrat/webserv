@@ -1,6 +1,6 @@
 #include "VerifyDuplicata.hpp"
 
-VerifyDuplicata::VerifyDuplicata(std::string request) : _nb_host(0), _nb_content_length(0)
+VerifyDuplicata::VerifyDuplicata(std::string request) : _nb_host(0), _nb_str_content_length(0)
 {
     std::vector<std::string> lines;
 
@@ -14,7 +14,7 @@ VerifyDuplicata::VerifyDuplicata(std::string request) : _nb_host(0), _nb_content
         }
         else if (lines[i].find("Content-Length") == 0)
         {
-            _nb_content_length++;
+            _nb_str_content_length++;
         }
     }
 }
@@ -31,11 +31,11 @@ int const & VerifyDuplicata::getNbHost() const
 
 int const & VerifyDuplicata::getNbContentLength() const
 {
-    return (_nb_content_length);
+    return (_nb_str_content_length);
 }
 bool VerifyDuplicata::isDuplicata() const
 {
-    if (_nb_host > 1 || _nb_content_length > 1)
+    if (_nb_host > 1 || _nb_str_content_length > 1)
         return (TRUE);
     return (FALSE);
 }

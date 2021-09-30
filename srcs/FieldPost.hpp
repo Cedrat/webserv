@@ -8,7 +8,8 @@ class FieldPost : public AField
 {
     private: 
         std::string _transfert_encoding;
-        std::string _content_length;
+        std::string _str_content_length;
+        int         _content_length;
 
         AMethod *createErrorMethod(Config config);
         std::string createPathUploadFolder(std::string upload_folder);
@@ -22,7 +23,8 @@ public :
         void setContentLength(std::string const & length);
         void setTransfertEncoding(std::string const transfert_encoding);
   
-        std::string const & getContentLength();
+        std::string const & getStrContentLength() const;
+        int const & getContentLength() const ;
         std::string const & getTransfertEncoding() const;
 
         void fillField();

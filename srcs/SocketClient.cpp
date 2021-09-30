@@ -30,6 +30,7 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
         }
         else 
         {
+            std::cout << "POST EXEC" << std::endl;
             _method->exec();
             if (_method->getIsFinished())
             {

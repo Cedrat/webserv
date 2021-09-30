@@ -166,12 +166,12 @@ void    Socket::receiveData(fd fd_to_read)
     std::cout << "Bytes read " << bytes_read << " Header completed  " <<_requests[getIndexRequest(fd_to_read)].getHeaderCompleted() << " Method " << _requests[getIndexRequest(fd_to_read)].getMethod() << std:: endl;
     if (bytes_read > 0 && _requests[getIndexRequest(fd_to_read)].getHeaderCompleted() == TRUE  && _requests[getIndexRequest(fd_to_read)].getMethod() == "POST")
     {
-        std::cout << "CONTENT LENGTH" << _requests[getIndexRequest(fd_to_read)].getContentLength() << std::endl;
-        if ((_requests[getIndexRequest(fd_to_read)].getContentLength() - (int)str_request.size()) > 0)
+        std::cout << "CONTENT LENGTH" << _requests[getIndexRequest(fd_to_read)].getStrContentLength() << std::endl;
+        if ((_requests[getIndexRequest(fd_to_read)].getStrContentLength() - (int)str_request.size()) > 0)
         {
             create_file(create_path(_requests[getIndexRequest(fd_to_read)],getConfigByFd(fd_to_read)), str_request);
-            _requests[getIndexRequest(fd_to_read)].setContentLength(_requests[getIndexRequest(fd_to_read)].getContentLength() - (int)str_request.size());
-            std::cout << _requests[getIndexRequest(fd_to_read)].getContentLength() << "str" << str_request.size() << std::endl;
+            _requests[getIndexRequest(fd_to_read)].setContentLength(_requests[getIndexRequest(fd_to_read)].getStrContentLength() - (int)str_request.size());
+            std::cout << _requests[getIndexRequest(fd_to_read)].getStrContentLength() << "str" << str_request.size() << std::endl;
         }
         else
         {

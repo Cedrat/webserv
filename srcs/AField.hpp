@@ -38,6 +38,8 @@ class AField
         std::string const & getHeader() const;
         std::string const & getQuery() const;
         virtual std::string const & getTransfertEncoding() const;
+        virtual std::string const & getStrContentLength() const;
+        virtual int const & getContentLength() const;
 
         RequestInProgress const & getDataRequest() const;
 
