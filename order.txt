@@ -4,3 +4,9 @@ total=6.75
 size=medium
 Mushrooms
 ---------------------------------------
+name=
+phone=
+total=6.75
+size=medium
+Mushrooms
+---------------------------------------

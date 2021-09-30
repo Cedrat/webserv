@@ -151,6 +151,7 @@ function confirm_order(){
   }
  fwrite($orderFile,"---------------------------------------\n");
  fclose($orderFile);
+ unlink("order3.txt");
  
  print <<<TOP
  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -175,6 +176,7 @@ TOP;
  for a total of <b>\$$total</b>.
    </body>
   </html>
+
 BOTTOM;
 }
 
