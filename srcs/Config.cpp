@@ -40,105 +40,105 @@ void Config::setHostAndPort( std::vector<std::string> line )
                 _ip = line[1].substr(0, separator).c_str();
                 inet_pton(AF_INET, _ip.c_str(), &_host);
             }
-            else
-                throw std::invalid_argument("Error : Config - Invalid host");
-            
-            //Assigner la valeur après ':' à port
-            std::string  str = line[1].substr(separator + 1, (separator - line[1].size()));
-            if (str == "" || isPort(static_cast<std::string>(str)) == false)
-                throw std::invalid_argument("Error : Config - Invalid port");
-            this->_port = atoi(str.c_str());
-        }
-    }
-    else
-        throw std::invalid_argument("Error : Config file can't contain more than one listen directive"); 
+			else
+ 				throw std::invalid_argument("Error : Config - Invalid host");
+
+			//Assigner la valeur après ':' à port
+			std::string  str = line[1].substr(separator + 1, (separator - line[1].size()));
+			if (str == "" || isPort(static_cast<std::string>(str)) == false)
+				throw std::invalid_argument("Error : Config - Invalid port");
+			this->_port = atoi(str.c_str());
+		}
+	}
+	else
+		throw std::invalid_argument("Error : Config file can't contain more than one listen directive"); 
 }
 
 void Config::setOneHostOrPort( std::string line )
 {
-    if (line == "localhost")
-    {
-        _ip = line;
-        inet_pton(AF_INET, "127.0.0.1", &_host);
-    }   
-    else if (isIP(line, '\0', _host) == true)
-    {
-        inet_pton(AF_INET, line.c_str(), &_host);
-        _ip = line;
-    }  
-    else if (isPort(line) == true)
-        this->_port = atoi(line.c_str());
-    else
-        throw std::invalid_argument("Error : Invalid host or port");
+	if (line == "localhost")
+	{
+		_ip = line;
+		inet_pton(AF_INET, "127.0.0.1", &_host);
+	}   
+	else if (isIP(line, '\0', _host) == true)
+	{
+		inet_pton(AF_INET, line.c_str(), &_host);
+		_ip = line;
+	}  
+	else if (isPort(line) == true)
+		this->_port = atoi(line.c_str());
+	else
+		throw std::invalid_argument("Error : Invalid host or port");
 }
 
 void Config::setServerNames( std::vector<std::string> line )
 {
-    if (_server_names[0] == "-1")
-    {
-        _server_names.clear();
-        if (line.size() == 1)
-        {
-            _server_names[0] = "\"\"";
-            return ;
-        }
-        for (size_t i = 1; i < line.size(); i++)
-            this->_server_names.push_back(line[i]);
-    }
-    else
-        throw std::invalid_argument("Error : Config file can't contain more than one server_name directive");
+	if (_server_names[0] == "-1")
+	{
+		_server_names.clear();
+		if (line.size() == 1)
+		{
+			_server_names[0] = "\"\"";
+			return ;
+		}
+		for (size_t i = 1; i < line.size(); i++)
+			this->_server_names.push_back(line[i]);
+	}
+	else
+		throw std::invalid_argument("Error : Config file can't contain more than one server_name directive");
 }
 
 void Config::setErrorPages( std::vector<std::string> line )
 {
-    int error;
-    std::string path;
-    std::map<int, std::string>::iterator it = _error_pages.begin();
+	int error;
+	std::string path;
+	std::map<int, std::string>::iterator it = _error_pages.begin();
 
-    if (it->first == 0 && it->second == "0")
-        _error_pages.clear();
+	if (it->first == 0 && it->second == "0")
+		_error_pages.clear();
 
-    error = atoi(line[1].c_str());
-    path = line[2];
+	error = atoi(line[1].c_str());
+	path = line[2];
 
-    _error_pages.insert(std::pair<int, std::string>(error, path));
+	_error_pages.insert(std::pair<int, std::string>(error, path));
 }
 
 void Config::setMaxClientBodySize( std::vector<std::string> line )
 {
-    if (_max_body_size == -1)
-    {
-        if (line.size() == 1)
-        {
-            _max_body_size = 1000;
-            return ;
-        }
-        this->_max_body_size = atoi(line[1].c_str());
-    }
-    else
-        throw std::invalid_argument("Error : Config file can't contain more than one client_max_body_size directive");
+	if (_max_body_size == -1)
+	{
+		if (line.size() == 1)
+		{
+			_max_body_size = 1000;
+			return ;
+		}
+		this->_max_body_size = atoi(line[1].c_str());
+	}
+	else
+		throw std::invalid_argument("Error : Config file can't contain more than one client_max_body_size directive");
 }
 
 void Config::setUncalledDirectives()
 {
-    if (_port == 0)
-        _port = 80;
-    if (_host == -1)
-        inet_pton(AF_INET, "0.0.0.1", &_host);
-    if (_max_body_size == -1)
-        _max_body_size = 1000;
-    if (_server_names[0] == "-1")
-        _server_names[0] = "\"\"";
+	if (_port == 0)
+		_port = 80;
+	if (_host == -1)
+		inet_pton(AF_INET, "0.0.0.1", &_host);
+	if (_max_body_size == -1)
+		_max_body_size = 1000;
+	if (_server_names[0] == "-1")
+		_server_names[0] = "\"\"";
 }
 
 void Config::setPrincipalServer( bool value )
 {
-    this->_principal_server = value;
+	this->_principal_server = value;
 }
 
 void Config::setServerOrClient(bool server_or_client)
 {
-    _server_or_client = server_or_client;
+	_server_or_client = server_or_client;
 }
 
 

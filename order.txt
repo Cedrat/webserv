@@ -1,0 +1,6 @@
+name=12
+phone=12
+total=6.75
+size=medium
+Mushrooms
+---------------------------------------
