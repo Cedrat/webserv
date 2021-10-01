@@ -6,7 +6,7 @@
 
 
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0)
 {
     std::cout << "Welcome to MethodPost" << std::endl;
 }
@@ -64,6 +64,7 @@ void MethodPost::exec()
     {
         if (getHeaderSent() == FALSE)
     {
+        setHeader();
         sendHeader();
         setHeaderSent(TRUE);
         std::cerr << "Header sent" << std::endl;
@@ -91,9 +92,11 @@ void MethodPost::receiveData()
     int ret;
     
     ret = read(_fd, buffer, BUFFER_SIZE);
-    buffer[ret] = 0;
-    _body_received += buffer;
+    buffer[ret + 1] = 0;
+    _body_received.append(buffer, ret);
 
+    std::cout << "size_Body "<<  _body_received.size() << "ret = " << ret << std::endl;
+     
     std::cout << "_body_received :\n" << _body_received << std::endl;
 
     // check length body_received and content-Length
@@ -106,9 +109,9 @@ void MethodPost::writeFile()
 {
     std::fstream file;
 
-    file.open(_path.c_str(), std::fstream::out | std::fstream::binary);
+    file.open(_path.c_str(), std::fstream::out | std::fstream::binary | std::fstream::app);
 
-    file << _body_received;
+    file.write(_body_received.c_str(),_body_received.size());
 
     file.close();
 }
@@ -148,4 +151,17 @@ void MethodPost::sendBody()
     }
     std::cout << ret << "BYTE SEND" << std::endl;
     fs.close();
+}
+
+void MethodPost::setHeader()
+{
+
+   std::vector<Config> configs = _fields.getDataRequest().getConfigs();
+   Config best_config = configs[find_index_best_config(configs, _fields.getHostName(), _fields.getDataRequest().getPort(), _fields.getDataRequest().getHost())];
+
+   std::string path_error = best_config.getPathError(NO_CONTENT);
+    
+    _header = "HTTP/1.1 " + get_string_error(NO_CONTENT);
+    _header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    _header +=  date_string() + "\n\n"; 
 }
