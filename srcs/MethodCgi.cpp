@@ -304,3 +304,16 @@ void MethodCgi::sendBody()
 	}
 	std::cout << ret << "BYTE SEND" << std::endl;
 }
+
+
+
+/* TO DO :
+
+Check les leaks apres la verif de la config (et check si leak en cas d'erreur dans la conf)
+Check les leaks apres initiliasation du serveur ratee
+	-> EX : Si un serveur ne peut pas s'initialiser (port deja bind par ex)
+
+Gerer catch des signaux pouur quitter proprement le programme
+	-> A faire pus tard
+
+*/

@@ -50,8 +50,7 @@ void ConfigParser::parser( std::string const & file )
         if ((line.size() == 1 && line[0] != "server{")
             || (line.size() > 3) || (line.size() == 2 && (line[0] != "server" || line[1] != "{")))
         {
-            std::cerr << "Error in config file." << std::endl;
-            throw std::invalid_argument("Usage to start a server block is : 'Server {'");
+            throw std::invalid_argument("Error in config file.\nUsage to start a server block is : 'Server {'");
             return ;
         }
         if (treatServerBlock() == false)
