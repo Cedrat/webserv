@@ -2,13 +2,13 @@
 
 Config::Config() 
 {
-    this->_host = -1;
-    this->_port = 0;
-    this->_max_body_size = -1;
-    this->_server_names.push_back("-1");
-    this->_error_pages.insert(std::pair<int, std::string>(0, "0"));
-    this->_principal_server = true;
-    this->_server_or_client = SERVER;
+	this->_host = -1;
+	this->_port = 0;
+	this->_max_body_size = -1;
+	this->_server_names.push_back("-1");
+	this->_error_pages.insert(std::pair<int, std::string>(0, "0"));
+	this->_principal_server = true;
+	this->_server_or_client = SERVER;
 }
 
 Config::~Config() { }
@@ -23,23 +23,23 @@ Config - setting
 **************************************************************/
 void Config::setHostAndPort( std::vector<std::string> line )
 {
-    if (_port == 0 && _host == -1)
-    {
-        if (line.size() == 1)
-            return ;
+	if (_port == 0 && _host == -1)
+	{
+		if (line.size() == 1)
+			return ;
 
-        //Chercher ':' && gestion si absent
-        size_t separator = line[1].find(":");
-        if (separator == std::string::npos)
-            setOneHostOrPort(static_cast<std::string>(line[1]));
-        else
-        {
-            //Assigner la valeur avant ':' à host
-            if (isIP(line[1], ':', _host) == true)
-            {
-                _ip = line[1].substr(0, separator).c_str();
-                inet_pton(AF_INET, _ip.c_str(), &_host);
-            }
+		//Chercher ':' && gestion si absent
+		size_t separator = line[1].find(":");
+		if (separator == std::string::npos)
+			setOneHostOrPort(static_cast<std::string>(line[1]));
+		else
+		{
+			//Assigner la valeur avant ':' à host
+			if (isIP(line[1], ':', _host) == true)
+			{
+				_ip = line[1].substr(0, separator).c_str();
+				inet_pton(AF_INET, _ip.c_str(), &_host);
+			}
 			else
  				throw std::invalid_argument("Error : Config - Invalid host");
 
@@ -149,100 +149,100 @@ Config - checking
 *************************************************************/
 bool Config::checkServerData()
 {
-    setUncalledDirectives();
+	setUncalledDirectives();
 
-    checks _checks[CHECK_SERVER_NB] = {&Config::checkServerNames, &Config::checkErrorPages, &Config::checkMaxClientBodySize};
-    for (int i = 0; i < CHECK_SERVER_NB; i++)
-    {
-        if ((this->*_checks[i])() == false)
-            return false;
-    }
-    //debug();
-    return true;
+	checks _checks[CHECK_SERVER_NB] = {&Config::checkServerNames, &Config::checkErrorPages, &Config::checkMaxClientBodySize};
+	for (int i = 0; i < CHECK_SERVER_NB; i++)
+	{
+		if ((this->*_checks[i])() == false)
+			return false;
+	}
+	//debug();
+	return true;
 }
 
 bool Config::checkServerNames()
 {
-    for (size_t i = 0; i < _server_names.size(); i++)
-    {
-        if (isAcceptableName(_server_names[i]) == false)
-        {
-            throw std::invalid_argument("Error in server_name directive : Invalid character.");
-            return false;
-        }
-    }
-    return true;
+	for (size_t i = 0; i < _server_names.size(); i++)
+	{
+		if (isAcceptableName(_server_names[i]) == false)
+		{
+			throw std::invalid_argument("Error in server_name directive : Invalid character.");
+			return false;
+		}
+	}
+	return true;
 }
 
 bool Config::checkErrorPages()
 {
-    std::map<int, std::string>::iterator it = _error_pages.begin();
+	std::map<int, std::string>::iterator it = _error_pages.begin();
 
-    if (it->first == 0 && it->second == "0")
-        return true;
+	if (it->first == 0 && it->second == "0")
+		return true;
 
-    for ( ; it != _error_pages.end(); it++)
-    {
-        if (it->first < 300 || it->first > 599)
-            return false;
+	for ( ; it != _error_pages.end(); it++)
+	{
+		if (it->first < 300 || it->first > 599)
+			return false;
 
-        if (!isAcceptableURI(it->second))
-        {
-            throw std::invalid_argument("Error in error_page directive : Invalid character.");
-            return false;
-        }  
-    }
-    return true;
+		if (!isAcceptableURI(it->second))
+		{
+			throw std::invalid_argument("Error in error_page directive : Invalid character.");
+			return false;
+		}  
+	}
+	return true;
 }
 
 bool Config::checkMaxClientBodySize()
 {
-    if (_max_body_size <= 0 || _max_body_size > LIMIT_MAX_BODY_SIZE)
-    {
-        throw std::invalid_argument("Error in max_client_body_size directive.");
-        return false;
-    }
-    return true;
+	if (_max_body_size <= 0 || _max_body_size > LIMIT_MAX_BODY_SIZE)
+	{
+		throw std::invalid_argument("Error in max_client_body_size directive.");
+		return false;
+	}
+	return true;
 }
 
 bool Config::isEqual(const Config & rhs)
 {
-    if (_port == rhs.getPort() && _host == rhs.getHost())
-    {
-        std::vector<std::string> names = rhs.getServerNames();
-        std::vector<std::string>::iterator it = _server_names.begin();
-        for (std::vector<std::string>::iterator ite = _server_names.end(); it != ite; it++)
-        {
-            std::vector<std::string>::iterator rit = names.begin();
-            for (std::vector<std::string>::iterator rite = names.end(); rit != rite; rit++)
-            {
-                if (*it == *rit)
-                    return true;
-            }
-        }
-    }
-    return false;
+	if (_port == rhs.getPort() && _host == rhs.getHost())
+	{
+		std::vector<std::string> names = rhs.getServerNames();
+		std::vector<std::string>::iterator it = _server_names.begin();
+		for (std::vector<std::string>::iterator ite = _server_names.end(); it != ite; it++)
+		{
+			std::vector<std::string>::iterator rit = names.begin();
+			for (std::vector<std::string>::iterator rite = names.end(); rit != rite; rit++)
+			{
+				if (*it == *rit)
+					return true;
+			}
+		}
+	}
+	return false;
 }
 
 //Duplicata de isEqual mais legetement different. A vor lequel garder ?
 bool    Config::checkIfHostNameIsPresent(std::string host_name) const
 {
    std::vector<std::string> host_names;
-     
-     host_names = getServerNames();
+	 
+	 host_names = getServerNames();
 
-    std::vector<std::string>::iterator it_begin = host_names.begin();
-    std::vector<std::string>::iterator it_end = host_names.end();
+	std::vector<std::string>::iterator it_begin = host_names.begin();
+	std::vector<std::string>::iterator it_end = host_names.end();
 
 
-    for (int i = 0; it_begin != it_end; i++, it_begin++)
-    {
-        if (host_names[i] == host_name)
-            return (TRUE);
-    }
-    if (host_name == ("127.0.0.1:" + int_to_string(getPort())) || host_name == ("localhost:" + int_to_string(getPort())))
-        return (TRUE);
-    return (FALSE); 
+	for (int i = 0; it_begin != it_end; i++, it_begin++)
+	{
+		if (host_names[i] == host_name)
+			return (TRUE);
+	}
+	if (host_name == ("127.0.0.1:" + int_to_string(getPort())) || host_name == ("localhost:" + int_to_string(getPort())))
+		return (TRUE);
+	return (FALSE); 
 }
 
 
@@ -252,67 +252,67 @@ Getters
 ***********************************************************/
 size_t Config::getPort() const
 {
-    return this->_port;
+	return this->_port;
 }
 
 int Config::getHost() const
 {
-    return this->_host;
+	return this->_host;
 }
 
 std::string Config::getIP() const
 {
-    return this->_ip;
+	return this->_ip;
 }
 
 std::vector<std::string> Config::getServerNames() const
 {
-    return this->_server_names;
+	return this->_server_names;
 }
 
 int Config::getMaxBodySize() const
 {
-    return this->_max_body_size;
+	return this->_max_body_size;
 }
 
 std::map<int, std::string> Config::getErrorPages() const
 {
-    return this->_error_pages;
+	return this->_error_pages;
 }
 
 std::vector<Location> Config::getLocations() const
 {
-    return this->_locations;
+	return this->_locations;
 }
 
 Location Config::getOneLocation( size_t id ) const
 {
-    if (_locations.size() < id)
-        throw std::out_of_range("Error : Out of array location request");
-    return this->_locations[id];
+	if (_locations.size() < id)
+		throw std::out_of_range("Error : Out of array location request");
+	return this->_locations[id];
 }
 
 void Config::setLocation( std::vector<Location> location )
 {
-    _locations = location;
+	_locations = location;
 }
 
 bool Config::IsServerOrClient() const
 {
-    return (_server_or_client);
+	return (_server_or_client);
 }
 
 bool Config::IsPrincipalServer() const
 {
-    return (_principal_server);
+	return (_principal_server);
 }
 
 std::string Config::getPathError(int num_error) const
 {
-    std::map<int, std::string>::const_iterator  it = _error_pages.find(num_error);
-    if (it == _error_pages.end() || check_if_file_exist("./www" + it->second) == FALSE)
-        return ("./srcs/default_error_files/default_err" + int_to_string(num_error) + ".html");
-    return ("./www"+ it->second);
+	std::map<int, std::string>::const_iterator  it = _error_pages.find(num_error);
+	if (it == _error_pages.end() || check_if_file_exist("./www" + it->second) == FALSE)
+		return ("./srcs/default_error_files/default_err" + int_to_string(num_error) + ".html");
+	return ("./www"+ it->second);
 }
 
 
@@ -328,20 +328,20 @@ std::string Config::getPathError(int num_error) const
 
 void Config::debug()
 {
-    std::cout << "*** Debug server ***" << std::endl;
-    std::cout << "Is default server ? " << IsPrincipalServer() << std::endl;
-    std::cout << "Is server or client ? " << IsServerOrClient() << std::endl;
-    std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
-    if (_server_names.size() == 0)
-        std::cout << "server_name 0 - " <<  _server_names[0] << std::endl;
-    else
-    {
-        for (size_t i = 0; i < _server_names.size(); i++)
-            std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
-    }
-    std::cout << "max_body_size - " << _max_body_size << std::endl;
-    std::map<int, std::string>::iterator it;
-    for (it = _error_pages.begin(); it != _error_pages.end(); it++)
-        std::cout << "error_page - " << it->first << " " << it->second << std::endl;
-    std::cout << "*** End ***\n" << std::endl;
+	std::cout << "*** Debug server ***" << std::endl;
+	std::cout << "Is default server ? " << IsPrincipalServer() << std::endl;
+	std::cout << "Is server or client ? " << IsServerOrClient() << std::endl;
+	std::cout << "Host : " << getHost() << "   Port : " << getPort() << std::endl;
+	if (_server_names.size() == 0)
+		std::cout << "server_name 0 - " <<  _server_names[0] << std::endl;
+	else
+	{
+		for (size_t i = 0; i < _server_names.size(); i++)
+			std::cout << "server_name " << i << " - " <<  _server_names[i] << std::endl;
+	}
+	std::cout << "max_body_size - " << _max_body_size << std::endl;
+	std::map<int, std::string>::iterator it;
+	for (it = _error_pages.begin(); it != _error_pages.end(); it++)
+		std::cout << "error_page - " << it->first << " " << it->second << std::endl;
+	std::cout << "*** End ***\n" << std::endl;
 }

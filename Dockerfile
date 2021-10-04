@@ -16,6 +16,3 @@ RUN mkdir /srcs/
 COPY . /srcs/
 
 CMD bash srcs/Docker_launch.sh
-
-
-	
