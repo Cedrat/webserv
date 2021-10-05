@@ -7,14 +7,14 @@ ASocket.cpp                     FieldGet.cpp                    RequestInProgres
 Config.cpp                      Formatting.cpp                  Server.cpp                      add_config.cpp                  construct_path.cpp              find_index_best_config.cpp      path_security.cpp		 MethodAi.cpp redir_path.cpp \
 isCgiPath.cpp MethodCgi.cpp \
 FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_not_number.cpp				trim_fields.cpp 				remove_chars_after_the_last_token.cpp decompose_path.cpp \
-MethodPost.cpp					extract_header_request.cpp
+MethodPost.cpp					extract_header_request.cpp		ChunkedRequest.cpp				atoi_hexa.cpp
 #PATH_CONFIG = ./config/
 #CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
 
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 OBJS_CONFIG = $(addprefix ,${CONFIG:.cpp=.o})
-DEBUG = -g  #-fsanitize=address -fsanitize=undefined
+DEBUG = -g  -fsanitize=address -fsanitize=undefined
 
 CXX= clang++
 

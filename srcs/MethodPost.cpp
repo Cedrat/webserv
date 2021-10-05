@@ -3,10 +3,11 @@
 #include "AField.hpp"
 #include "FieldPost.hpp"
 #include "../includes/utils.hpp"
+#include "ChunkedRequest.hpp"
 
 
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT)
 {
     std::cout << "Welcome to MethodPost" << std::endl;
 }
@@ -20,13 +21,26 @@ MethodPost::~MethodPost()
 void MethodPost::init()
 {
     _fields.setPollin();
+    _body_received = extractBodyRequest();
     if (_fields.getTransfertEncoding() == "chunked")
     {
-        //do something
+        Info data;
+        setChunkedRequest(new ChunkedRequest);
+        _chunked_request->addData(_body_received);
+        std::cout << "Body_received" << _body_received << std::endl;
+        data = _chunked_request->processData();
+        writeProcessedDataChunked();
+        _body_received = "";
+        if (data == all_data_read)
+            _file_received = TRUE;
+        else if (data == incorrect_data)
+        {
+            _file_received = TRUE;
+            _error = BAD_REQUEST;
+        }
     }
     else
     {
-        _body_received = extractBodyRequest();
         writePreparation();
         writeFile();
         _body_received = "";
@@ -49,15 +63,33 @@ void MethodPost::exec()
     if (_file_received == FALSE)
     {
         receiveData();
-        writePreparation();
-        writeFile();
-        _body_received = "";
-        if (_byte_received >= _fields.getContentLength())
+        if (_fields.getTransfertEncoding() == "chunked")
         {
-            _fields.setPollin();
-            std::cout << "File received entirely" << std::endl;
-            _file_received = TRUE;
-            _fields.setPollout();
+            Info data;
+            _chunked_request->addData(_body_received);
+            data = _chunked_request->processData();
+            writeProcessedDataChunked();
+            _body_received = "";
+            if (data == all_data_read)
+                _file_received = TRUE;
+             else if (data == incorrect_data)
+            {
+                _file_received = TRUE;
+                _error = BAD_REQUEST;
+            }
+        }
+        else
+        {
+            writePreparation();
+            writeFile();
+            _body_received = "";
+            if (_byte_received >= _fields.getContentLength())
+            {
+                _fields.setPollin();
+                std::cout << "File received entirely" << std::endl;
+                _file_received = TRUE;
+                _fields.setPollout();
+            }
         }
     }
     else
@@ -116,6 +148,15 @@ void MethodPost::writeFile()
     file.close();
 }
 
+void MethodPost::writeProcessedDataChunked()
+{
+    int fd = open(getPath().c_str(),  O_APPEND| O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+
+    _chunked_request->writeProcessedData(fd);
+
+    close(fd); 
+}
+
 void MethodPost::writePreparation()
 {
     _byte_received += _body_received.size();
@@ -159,9 +200,15 @@ void MethodPost::setHeader()
    std::vector<Config> configs = _fields.getDataRequest().getConfigs();
    Config best_config = configs[find_index_best_config(configs, _fields.getHostName(), _fields.getDataRequest().getPort(), _fields.getDataRequest().getHost())];
 
-   std::string path_error = best_config.getPathError(NO_CONTENT);
+   std::string path_error = best_config.getPathError(_error);
     
-    _header = "HTTP/1.1 " + get_string_error(NO_CONTENT);
+    _header = "HTTP/1.1 " + get_string_error(_error);
     _header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
-    _header +=  date_string() + "\n\n"; 
+    _header +=  date_string() + "\n\n";
+    setPath(path_error); 
+}
+
+void MethodPost::setChunkedRequest(ChunkedRequest *chunked_request)
+{
+    _chunked_request = chunked_request;
 }

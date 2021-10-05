@@ -22,7 +22,7 @@ class ChunkedRequest
         ChunkedRequest();
         ~ChunkedRequest();
         void addData(std::string data);
-        void processData();
+        Info processData();
         void writeProcessedData(int fd);
 };
 

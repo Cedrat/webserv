@@ -3,7 +3,7 @@
 
 
 #include "AMethod.hpp"
-
+class ChunkedRequest;
 class MethodPost: public AMethod
 {
     private :
@@ -11,6 +11,9 @@ class MethodPost: public AMethod
         int         _byte_received;
         bool        _file_received;
         int         _byte_send;
+        int         _error;
+
+        ChunkedRequest *_chunked_request;
 
         std::string extractBodyRequest();
         void        receiveData();
@@ -20,6 +23,8 @@ class MethodPost: public AMethod
         void        setHeader();
         void        sendHeader();
         void        sendBody();
+        void        setChunkedRequest(ChunkedRequest *);
+        void        writeProcessedDataChunked();
 
     public :
         MethodPost(int fd, std::string path, std::string request_received, AField &field);
