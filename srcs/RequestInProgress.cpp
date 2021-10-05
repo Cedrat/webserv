@@ -191,3 +191,29 @@ std::string extract_host_name(std::string str_request)
 
     return "";
 }
+
+void RequestInProgress::setPollFds(std::vector <pollfd *> * pollfds)
+{
+    _pollfds = pollfds;
+}
+
+void RequestInProgress::addPollFd(pollfd * s_pollfd)
+{
+    _pollfds->push_back(s_pollfd);
+}
+
+void RequestInProgress::removePollFd(pollfd * s_pollfd)
+{
+    std::vector<pollfd *>::iterator it_begin = _pollfds->begin();
+
+    int fd_to_remove = s_pollfd->fd;
+
+    for (int i = 0; i < _pollfds->size(); i++)
+    {
+        if (fd_to_remove == (*_pollfds)[i]->fd)
+        {
+            _pollfds->erase(it_begin + i);
+            break;
+        }
+    }
+}

@@ -17,7 +17,8 @@ MethodGet::~MethodGet()
 void MethodGet::init()
 {
    _fields.setPollout(); 
-   _byte_send = 0; 
+   _byte_send = 0;
+   _s_pollfd = NULL;
 }
 
 void MethodGet::exec()
@@ -26,9 +27,9 @@ void MethodGet::exec()
     {
         sendHeader();
         setHeaderSent(TRUE);
-        std::cerr << "Header sent" << std::endl;
+        openFd();
     }
-    else
+    else if (_s_pollfd->revents)
     {
         std::cout << "body sent" << std::endl;
         sendBody();
@@ -41,24 +42,41 @@ void MethodGet::sendHeader()
    send(getFd(), getHeader().c_str(), getHeader().size(), 0); 
 }
 
+void MethodGet::openFd()
+{
+   int fd_to_read = open(getPath().c_str(), O_RDONLY, S_IRUSR);
+
+   _s_pollfd = new pollfd;
+   _s_pollfd->fd = fd_to_read;
+   _s_pollfd->events = POLLOUT + POLLIN;
+   _s_pollfd->revents = 0;
+
+   _fields.addPollFd(_s_pollfd);
+}
+
 void MethodGet::sendBody()
 {
     signal(SIGPIPE, SIG_IGN);
-    std::fstream fs;
+
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
-    std::cout << "PATH : " << getPath() << std::endl; 
-    fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
-    fs.seekg(_byte_send);
-    fs.read(buffer, BUFFER_SIZE);
-    buffer[fs.gcount()] = '\0'; 
-    std::cout << "how much read? " << fs.gcount() << std::endl;
-    ret = ::send(getFd(), buffer, fs.gcount(), 0);
-    _byte_send += ret;
-    if (ret == fs.gcount() && fs.eof())
+    ret = read(_s_pollfd->fd, buffer, BUFFER_SIZE);
+    buffer[ret] = '\0'; 
+
+    int ret_send;
+    ret_send = ::send(getFd(), buffer, ret, 0);
+
+    _byte_send += ret_send;
+    if (ret != ret_send)
+    {
+        lseek(_s_pollfd->fd, _byte_send, SEEK_SET);
+    }
+    if (_byte_send == get_file_size(getPath()))
     {
         setIsFinished(TRUE);
+        close(_s_pollfd->fd);
+        _fields.removePollFd(_s_pollfd);
+        delete (_s_pollfd);
+        _s_pollfd = NULL;
     }
-    std::cout << ret << "BYTE SEND" << std::endl;
-    fs.close();
 }

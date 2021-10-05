@@ -17,7 +17,7 @@ class SocketClient : public ASocket
         pollfd              & _s_pollfd;
 
     public :
-        SocketClient(size_t port, int host, int fd, std::vector<Config> const & config, pollfd &s_pollfd);
+        SocketClient(size_t port, int host, int fd, std::vector<Config> const & config, pollfd &s_pollfd, std::vector<pollfd*> * pollfds);
 
         void exec();
 };

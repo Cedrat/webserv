@@ -15,6 +15,7 @@ class RequestInProgress
         int                 _host;
         size_t              _port;
         std::vector<Config> _configs;
+        std::vector<pollfd *> *_pollfds;
 
         int         checkBasicError();
         int         checkCommonError();
@@ -33,6 +34,10 @@ class RequestInProgress
         void                setFd(int fd);
         void                setHost(int host);
         void                setPort(size_t port);
+        
+        void                setPollFds(std::vector <pollfd *> * pollfds);
+        void                addPollFd(pollfd * s_pollfd);
+        void                removePollFd(pollfd * s_pollfd);
 
         void        checkFinished(); 
         

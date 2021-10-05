@@ -3,7 +3,8 @@
 #include "Location.hpp"
 #include "Erreur.hpp"
 
-AField::AField(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : _str_request(str_request), _data_request(data_request) , _pollfd(s_pollfd), _error(OK)
+AField::AField(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : _str_request(str_request), _data_request(data_request)
+                                                                                             , _pollfd(s_pollfd), _error(OK)
 {
 }
 
@@ -100,4 +101,14 @@ void AField::setPollin()
 {
    _pollfd.events = POLLIN;
    _pollfd.revents = 0; 
+}
+
+void AField::addPollFd(pollfd * s_pollfd)
+{
+    _data_request.addPollFd(s_pollfd);
+}
+
+void AField::removePollFd(pollfd * s_pollfd)
+{
+    _data_request.removePollFd(s_pollfd);
 }

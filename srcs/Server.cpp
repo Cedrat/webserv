@@ -101,6 +101,10 @@ void Server::acceptConnection(void)
     int ret = 0;
 
     poll(poll_fd_copy.data(), poll_fd_copy.size(), 1000);
+    for (size_t i = 0; i < poll_fd_copy.size() ; i++)
+    {
+        (*_pollfds)[i]->revents = poll_fd_copy[i].revents; 
+    }
     for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
     {
         if (poll_fd_copy[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
@@ -158,7 +162,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
         new_poll->events = POLLIN;
         new_poll->revents = 0;
         
-        ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
+        ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll, _pollfds);
         _sockets.push_back(new_socket);
 
 

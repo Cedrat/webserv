@@ -2,13 +2,14 @@
 #include "SocketClient.hpp"
 #include "AMethod.hpp"
 
-SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> const & configs, pollfd &s_pollfd) 
+SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> const & configs, pollfd &s_pollfd, std::vector<pollfd *> *pollfds) 
 : ASocket(port, host, std::time(0), CLIENT) , _method(NULL) ,_configs(configs), _s_pollfd(s_pollfd)
 {
     _request.setFd(fd);
     _request.setConfigs(configs);
     _request.setHost(host);
     _request.setPort(port);
+    _request.setPollFds(pollfds);
 }
 
  void SocketClient::exec()

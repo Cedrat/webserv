@@ -51,6 +51,9 @@ class AField
         virtual void fillField() = 0;
 
         virtual AMethod * getAMethod() = 0;
+
+        void                addPollFd(pollfd * s_pollfd);
+        void                removePollFd(pollfd * s_pollfd);
 };
 
 
