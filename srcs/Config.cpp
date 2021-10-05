@@ -13,7 +13,47 @@ Config::Config()
 
 Config::~Config() { }
 
+Config::Config( Config const & src )
+{
+	this->_principal_server = src._principal_server;
+	this->_server_or_client = src._server_or_client;
+	this->_port = src.getPort();
+	this->_host = src.getHost();
+	this->_max_body_size = src.getMaxBodySize();
+	this->_ip = src.getIP();
+	this->_locations = src.getLocations();
+	this->_server_names = src.getServerNames();
+	this->_error_pages = src.getErrorPages();
+}
 
+Config & Config::operator=( Config const & rhs )
+{
+	if (this != &rhs)
+	{
+		this->_principal_server = rhs.IsPrincipalServer();
+		this->_server_or_client = rhs.IsServerOrClient();
+		this->_port = rhs.getPort();
+		this->_host = rhs.getHost();
+		this->_max_body_size = rhs.getMaxBodySize();
+		this->_ip = rhs.getIP();
+		if (this->_locations.empty() == FALSE)
+		{
+			this->_locations.clear();
+			this->_locations = rhs.getLocations();
+		}
+		if (this->_server_names.empty() == FALSE)
+		{
+			this->_server_names.clear();
+			this->_server_names = rhs.getServerNames();
+		}
+		if (this->_error_pages.empty() == FALSE)
+		{
+			this->_error_pages.clear();
+			this->_error_pages = rhs.getErrorPages();
+		}
+	}
+	return *this;
+}
 
 
 
