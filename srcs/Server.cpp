@@ -41,7 +41,7 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 
 Server::Server() : _is_running(FALSE)
 {
-
+    _pollfds = new std::vector<pollfd *>;
 }
 Server::~Server()
 {}
@@ -54,7 +54,7 @@ void    Server::addSocket(ASocket * socket)
 
 void Server::addPollFd(pollfd * datafd)
 {
-    _pollfds.push_back(datafd);
+    _pollfds->push_back(datafd);
 }
 
 void    Server::addNewSocket(ASocket *socket, pollfd * datafd)
@@ -72,7 +72,7 @@ void Server::createAndAddSocketServer(size_t port, int host)
 {
     ASocket *socket = new SocketServer(port, host);
 
-    _pollfds.push_back(create_a_listenable_socket(port, host));
+    _pollfds->push_back(create_a_listenable_socket(port, host));
     _sockets.push_back(socket);
 }
 
@@ -95,7 +95,7 @@ void Server::createSocketsServer(void)
 
 void Server::acceptConnection(void)
 {
-    std::vector<pollfd> poll_fd_copy = copy_value_of_pointer_vector(_pollfds);
+    std::vector<pollfd> poll_fd_copy = copy_value_of_pointer_vector(*_pollfds);
     
     char buffer[BUFFER_SIZE];
     int ret = 0;
@@ -110,7 +110,7 @@ void Server::acceptConnection(void)
         else if (poll_fd_copy[i].revents & POLLIN)
         {
             try {
-                exec_pollin(_sockets[i], poll_fd_copy[i].fd, *_pollfds[i]);
+                exec_pollin(_sockets[i], poll_fd_copy[i].fd, *(*_pollfds)[i]);
             }
             catch (EOFException const &e)
             {
@@ -163,7 +163,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 
 
         //Request request(fd_client, socket->getHost(),  socket->getPort());
-        _pollfds.push_back(new_poll);
+        _pollfds->push_back(new_poll);
         //_requests.push_back(request);
         std::cout << "New client connected : " << fd_client << std::endl;
     }
@@ -189,9 +189,9 @@ void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
 
 void Server::removeClient(size_t index)
 {
-    std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
-    close(_pollfds[index]->fd);
-    delete _pollfds[index];
+    std::cout << "Client " << (*_pollfds)[index]->fd << " disconnected" << std::endl;
+    close((*_pollfds)[index]->fd);
+    delete (*_pollfds)[index];
     _sockets.erase(_sockets.begin() + index);
-    _pollfds.erase(_pollfds.begin() + index);
+    _pollfds->erase(_pollfds->begin() + index);
 }

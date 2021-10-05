@@ -11,7 +11,7 @@ class Server
 {
     private :
         std::vector<ASocket *>      _sockets;
-        std::vector<struct pollfd *>  _pollfds;
+        std::vector<struct pollfd *>*_pollfds;
         std::vector<Config>         _configs;
         bool                        _is_running;
         
