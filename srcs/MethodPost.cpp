@@ -124,7 +124,7 @@ void MethodPost::receiveData()
     int ret;
     
     ret = read(_fd, buffer, BUFFER_SIZE);
-    buffer[ret + 1] = 0;
+    buffer[ret] = 0;
     _body_received.append(buffer, ret);
 
     std::cout << "size_Body "<<  _body_received.size() << "ret = " << ret << std::endl;
