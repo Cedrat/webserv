@@ -13,7 +13,7 @@ MethodPost.cpp					extract_header_request.cpp
 PATH_OBJS = ./objs/
 OBJS = $(addprefix ${PATH_SRC},${SRCS:.cpp=.o})
 OBJS_CONFIG = $(addprefix ,${CONFIG:.cpp=.o})
-DEBUG = -g3  #-fsanitize=address -fsanitize=undefined
+DEBUG = -g  #-fsanitize=address -fsanitize=undefined
 
 CXX= clang++
 

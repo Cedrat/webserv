@@ -34,7 +34,7 @@ class Config
 
     public :
         Config(void);
-        ~Config(void);
+        virtual ~Config(void);
         Config( Config const & src );
         Config & operator=( Config const & rhs );
 

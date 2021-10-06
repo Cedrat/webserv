@@ -1,6 +1,7 @@
 
 #include "ConfigParser.hpp"
 #include "Server.hpp"
+#include "EOFException.hpp"
 
 int main()
 {
@@ -21,9 +22,11 @@ int main()
 	try {
 		server.createSocketsServer();
 	}
-	catch(char const * &e)
+	catch(EmergencyExit const& e)
 	{
-		std::cerr << e << std::endl;
+		server.endServer();
+		//Clean server
+		return 0;
 	}
 	server.launchingServer();
 }

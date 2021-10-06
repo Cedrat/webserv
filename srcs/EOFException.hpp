@@ -9,4 +9,16 @@ class EOFException : public std::exception
     }
 };
 
+class EmergencyExit : public std::exception
+{
+    virtual const char* what() const throw()
+    {
+        return ("EOF");
+    }
+    void quitProgram() const throw()
+    {
+        return ;
+    }
+};
+
 #endif

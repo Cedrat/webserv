@@ -27,7 +27,7 @@ class Location
 
     public : 
         Location();
-        ~Location();
+        virtual ~Location();
         Location( Location const & src );
         Location & operator=( Location const & rhs );
 
