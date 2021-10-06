@@ -45,15 +45,11 @@ ConfigParser & ConfigParser::operator=( ConfigParser const & rhs )
 		this->_locationNb = rhs._locationNb;
 		//this->_configFile = rhs._configFile;
 		if (this->_server.empty() == FALSE)
-		{
 			this->_server.clear();
-			this->_server = rhs._server;
-		}
+		this->_server = rhs._server;
 		if (this->_location.empty() == FALSE)
-		{
 			this->_location.clear();
-			this->_location = rhs._location;
-		}
+		this->_location = rhs._location;
 	}
 	return *this;
 }
@@ -91,7 +87,7 @@ void ConfigParser::openConfigFile( std::string const & file )
 
 	if (extPos == std::string::npos || (extPos != file.size() - 5)
 		|| file.size() <= 5)
-		throw std::invalid_argument("Error : Invalid configuration file format");
+		throw std::invalid_argument("Error : Invalid configuration file format");	//throw sans invalid_argument ?
 
 	this->_configFile.open(file.c_str(), std::ifstream::in);
 	if (this->_configFile.is_open() == false)

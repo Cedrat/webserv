@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
 	make \
 	vim \
 	php7.2-cgi \
+	curl \
 	&& rm -rf /var/lib/apt/lists/*
 
 # [Copy files]

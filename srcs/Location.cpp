@@ -33,20 +33,16 @@ Location & Location::operator=( Location const & rhs )
 		this->_location = rhs.getLocation();
 		this->_root = rhs.getRoot();
 		if (this->_methods.empty() == FALSE)
-		{
 			this->_methods.clear();
-			this->_methods = rhs.getMethods();
-		}
+		this->_methods = rhs.getMethods();
 		this->_autoindex = rhs.getAutoIndex();
 		this->_set_autoindex = rhs._set_autoindex;
 		this->_default_file = rhs.getDefaultFile();
 		this->_upload_folder = rhs.getUploadFolder();
 		this->_redirect = rhs.getRedirect();
 		if (this->_cgi.empty() == FALSE)
-		{
 			this->_cgi.clear();
-			this->_cgi = rhs.getCgi();
-		}
+		this->_cgi = rhs.getCgi();
 	}
 	return *this;
 }

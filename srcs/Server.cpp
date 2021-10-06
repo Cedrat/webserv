@@ -147,7 +147,7 @@ void Server::launchingServer(void)
 		}
 		catch (char const* str)
 		{
-			std::cout << "ERROR CATCH" << str << std::endl;
+			std::cout << "ERROR CATCH : " << str << std::endl;
 		}
 	} 
  

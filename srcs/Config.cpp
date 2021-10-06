@@ -37,20 +37,14 @@ Config & Config::operator=( Config const & rhs )
 		this->_max_body_size = rhs.getMaxBodySize();
 		this->_ip = rhs.getIP();
 		if (this->_locations.empty() == FALSE)
-		{
 			this->_locations.clear();
-			this->_locations = rhs.getLocations();
-		}
+		this->_locations = rhs.getLocations();
 		if (this->_server_names.empty() == FALSE)
-		{
 			this->_server_names.clear();
-			this->_server_names = rhs.getServerNames();
-		}
+		this->_server_names = rhs.getServerNames();
 		if (this->_error_pages.empty() == FALSE)
-		{
 			this->_error_pages.clear();
-			this->_error_pages = rhs.getErrorPages();
-		}
+		this->_error_pages = rhs.getErrorPages();
 	}
 	return *this;
 }
