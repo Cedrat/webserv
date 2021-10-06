@@ -6,7 +6,7 @@
 int main()
 {
 	Server server;
-
+//test
    char file[] = "./srcs/step.conf";
 	try
 	{
