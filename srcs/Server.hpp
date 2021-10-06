@@ -34,6 +34,8 @@ class Server
         void exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd);
 
         void removeClient(size_t index);
+
+        void endServer();
 };
 
 #endif

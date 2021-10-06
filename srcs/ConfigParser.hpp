@@ -33,8 +33,8 @@ class ConfigParser
 {
     public:
         ConfigParser( char *filepath );
-        //ConfigParser( ConfigParser const & src );
-        //ConfigParser & operator=( ConfigParser const & rhs );
+        ConfigParser( ConfigParser const & src );
+        ConfigParser & operator=( ConfigParser const & rhs );
         ~ConfigParser();
 
         void parser( std::string const & file );

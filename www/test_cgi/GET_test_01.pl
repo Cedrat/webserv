@@ -251,3 +251,4 @@ ALL
 exit;   # terminate program since failure to open data file
 }
 
+unlink("order.txt");

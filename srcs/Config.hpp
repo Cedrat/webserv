@@ -35,6 +35,8 @@ class Config
     public :
         Config(void);
         ~Config(void);
+        Config( Config const & src );
+        Config & operator=( Config const & rhs );
 
         //Assignation des valeurs
         void setHostAndPort( std::vector<std::string> line );
