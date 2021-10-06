@@ -1,13 +1,9 @@
 #include "Location.hpp"
 
-Location::Location() : _autoindex(FALSE)
+Location::Location() : _root(UNSET), _autoindex(FALSE), _set_autoindex(FALSE),
+						_default_file(UNSET), _upload_folder(UNSET), _redirect(UNSET)
 {
-	this->_root = UNSET;
 	this->_methods.push_back(UNSET);
-	this->_default_file = UNSET;
-	this->_upload_folder = UNSET;
-	this->_redirect = UNSET;
-	this->_set_autoindex = FALSE;
 	this->_cgi.insert(std::pair<std::string, std::string>("0", "0"));
 }
 

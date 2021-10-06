@@ -27,13 +27,13 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 	if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
 	{
 		delete mypollfd;
-		throw("\nError from binding");
+		throw ("Binding error");
 	}
 		
 	if (listen(new_socket, BACKLOG) == -1)
 	{
 		delete mypollfd;
-		throw("\nError from listening");
+		throw ("Listening error");
 	}
 
 	//fcntl(new_socket, F_SETFL, O_NONBLOCK);
@@ -81,10 +81,9 @@ void Server::createAndAddSocketServer(size_t port, int host)
 		_pollfds.push_back(create_a_listenable_socket(port, host));
 		_sockets.push_back(socket);
 	}
-	catch(char const * & e) {
+	catch(char const* & e) {
 		delete socket;
-		std::cerr << e << std::endl;
-		endServer();
+		throw(EmergencyExit());
 	}
 }
 
@@ -210,7 +209,10 @@ void Server::removeClient(size_t index)
 
 void Server::endServer()
 {
+	for (size_t i = 0; i < _sockets.size(); i++)
+	{
+		delete _sockets[i];
+	}
 	_sockets.clear();
 	_pollfds.clear();
-	exit(0);
 }

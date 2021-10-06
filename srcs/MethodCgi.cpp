@@ -60,6 +60,12 @@ void MethodCgi::processCGI()
 	char **env;
 	env = convertEnv();
 
+	/*
+
+	Faire pareil pour les args
+	
+	*/
+
 	//Gestion de l'execution du cgi
 	execCGI(args, env);
 	freeEnv(env);
