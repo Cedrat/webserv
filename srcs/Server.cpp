@@ -127,7 +127,7 @@ void Server::acceptConnection(void)
 	char buffer[BUFFER_SIZE];
 	int ret = 0;
 
-	poll(poll_fd_copy.data(), poll_fd_copy.size(), 1000);
+	poll(poll_fd_copy.data(), poll_fd_copy.size(), TIMEOUT);
 	for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
 	{
 		if (poll_fd_copy[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
@@ -220,6 +220,7 @@ void Server::removeClient(size_t index)
 	std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
 	close(_pollfds[index]->fd);
 	delete _pollfds[index];
+	delete _sockets[index];
 	_sockets.erase(_sockets.begin() + index);
 	_pollfds.erase(_pollfds.begin() + index);
 }

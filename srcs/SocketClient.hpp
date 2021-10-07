@@ -18,6 +18,10 @@ class SocketClient : public ASocket
 
     public :
         SocketClient(size_t port, int host, int fd, std::vector<Config> const & config, pollfd &s_pollfd);
+        ~SocketClient(){
+            if (_method != NULL)
+                delete _method;
+            }
 
         void exec();
 };
