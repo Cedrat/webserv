@@ -13,19 +13,12 @@
 # include "../includes/Syntax.hpp"
 # include "../includes/utils.hpp"
 
-bool isIP( std::string line, char c, int host )
+bool isIP( std::string line, char c )
 {
     size_t start = 0;
     size_t dot_pos;
     size_t dot_nb = 0;
 
-    if ((dot_pos = line.find("localhost")) != std::string::npos)  //Gestion host = localhost
-    {
-        if (line.at(dot_pos + 9) != ':')
-            return false;
-        inet_pton(AF_INET, "127.0.0.1", &host);
-        return true;
-    }
     for (int i = 0; line[i] != c; i++)  //Verification que chiffres only OU . de separation
     {
         if (!isdigit(line[i]) && line[i] != '.')

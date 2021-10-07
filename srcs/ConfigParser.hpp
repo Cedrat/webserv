@@ -21,8 +21,9 @@
 # include <fstream>
 # include <iostream>
 
-# include "../srcs/Config.hpp"
+# include "Config.hpp"
 # include "../includes/Formatting.hpp"
+# include "CustomException.hpp"
 
 # define SERVER_DIRECTIVE_NB 4
 # define LOCATION_DIRECTIVE_NB 7

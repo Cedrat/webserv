@@ -57,11 +57,6 @@ void Location::setRoot( std::vector<std::string> line )
 {
 	if (_root == UNSET)
 	{
-		if (line.size() == 1)
-		{
-			_root = "";
-			return ;
-		}
 		_root = line[1];
 	}
 	else
@@ -88,11 +83,6 @@ void Location::setMethods( std::vector<std::string> line )
 {
 	if (_methods[0] == UNSET)
 	{
-		if (line.size() == 1)
-		{
-			_methods[0] = "GET";
-			return ;
-		}
 		_methods.clear();
 		for (size_t i = 1; i < line.size(); i++)
 			_methods.push_back(line[i]);

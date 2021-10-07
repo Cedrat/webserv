@@ -21,10 +21,10 @@ ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
 	try {
 		parser(file);
 	}
-	catch(std::exception & e){
-		std::cerr << e.what() << std::endl;
-		exit(0);
-	}
+    catch(const std::invalid_argument& ia){
+        std::cerr << ia.what() << std::endl;
+        throw(ParserExit());
+    }
 }
 
 ConfigParser::~ConfigParser() { }
@@ -79,6 +79,8 @@ void ConfigParser::parser( std::string const & file )
 		if (treatServerBlock() == false)
 			throw std::invalid_argument("Error in config file.");
 	}
+	if (_serverNb <= 0)
+		throw std::invalid_argument("Error : Config file is empty");
 }
 
 void ConfigParser::openConfigFile( std::string const & file )
@@ -87,7 +89,7 @@ void ConfigParser::openConfigFile( std::string const & file )
 
 	if (extPos == std::string::npos || (extPos != file.size() - 5)
 		|| file.size() <= 5)
-		throw std::invalid_argument("Error : Invalid configuration file format");	//throw sans invalid_argument ?
+		throw std::invalid_argument("Error : Invalid configuration file format");
 
 	this->_configFile.open(file.c_str(), std::ifstream::in);
 	if (this->_configFile.is_open() == false)
@@ -180,6 +182,8 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * ser
 	{
 		//On defini serveur par defaut, on check les donnees et absence de doublon
 		//On ajoute le serveur complet a la liste & les blocs location
+		if (server->checkServerData() == false)
+			return false;
 		for (int i = 0; i < _serverNb; i++)
 		{
 			if (server->isEqual(_server[i]))
@@ -187,8 +191,6 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * ser
 			if ((_server[i].getPort() == server->getPort()) && server->IsPrincipalServer() == true && _server[i].IsPrincipalServer() == true)
 				server->setPrincipalServer(false);
 		}
-		if (server->checkServerData() == false)
-			return false;
 		_server.push_back(*server);
 		_server[_serverNb].setLocation(_location);
 		_location.clear();
@@ -242,9 +244,9 @@ std::vector<std::string> ConfigParser::FormattingLine( std::ifstream & file )
 		line = trimStartAndEndWhitespaces(line);
 		line = trimDotComa(line);
 	}
-	catch(std::exception & e) {
-		std::cerr << e.what() << std::endl;
-		exit(0);
+	catch(char const* & e) {
+		std::cerr << e << std::endl;
+		throw(ParserExit());
 	}
 	//Decouper : 1 elements = 1 vector -> Server,{,listen,...
 	if (!line.empty())
@@ -312,11 +314,11 @@ bool ConfigParser::addServerProperty( std::vector<std::string> line, Config * se
 
 bool ConfigParser::addLocationProperty( std::vector<std::string> line, Location * location )
 {
-	if (line[0] == "root" && line.size() >= 1 && line.size() <= 2)
+	if (line[0] == "root" && line.size() == 2)
 		location->setRoot(line);
 	else if (line[0] == "autoindex" && line.size() == 2)
 		location->setAutoindex(line);
-	else if (line[0] == "method" && line.size() >= 1)
+	else if (line[0] == "method" && line.size() >= 2)
 		location->setMethods(line);
 	else if (line[0] == "index" && line.size() == 2)
 		location->setDefaultFile(line);

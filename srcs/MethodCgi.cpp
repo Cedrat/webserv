@@ -53,25 +53,17 @@ Main CGI process
 **************************************************************/
 void MethodCgi::processCGI()
 {
-	std::string     binary_path = construct_path(_location.getCgiBinary(), _location);
-	const char      *args[3] = {binary_path.c_str(), this->getPath().c_str(), NULL};
-
 	//Transformer les variables d'env en char**
-	char **env;
+	char	**env;
+	char	**args;
 	env = convertEnv();
+	args = setArgs();
 
-	/*
-
-	Faire pareil pour les args
-	
-	*/
-
-	//Gestion de l'execution du cgi
 	execCGI(args, env);
 	freeEnv(env);
 }
 
-void MethodCgi::execCGI( const char ** args, char ** env )
+void MethodCgi::execCGI( char ** args, char ** env )
 {
 	int     fd[2];
 	int     tmp = open(this->_tmp_out.c_str(), 
@@ -102,7 +94,7 @@ void MethodCgi::execCGI( const char ** args, char ** env )
 		dup2(fd[0], STDIN_FILENO);
 		dup2(tmp, STDOUT_FILENO);
 
-		if ((execve(args[0], const_cast<char *const *>(args), env)) < 0)
+		if ((execve(args[0], args, env)) < 0)
 		{
 			std::cerr << "Execve failed" << std::endl;
 			close(fd[0]);
@@ -195,17 +187,30 @@ Utils
 **************************************************************/
 std::string MethodCgi::createTmpFile()
 {
-	char _tmpFileName[] = "tmpXXXXXX";
-	mkstemp(_tmpFileName);
+	char _tmp_file_name[] = "tmpXXXXXX";
+	int	fd;
 
-	return _tmpFileName;
+	fd = mkstemp(_tmp_file_name);
+	if (fd < 0)
+		throw(EmergencyExit());
+	else
+		close(fd);
+
+	return _tmp_file_name;
 }
 
-void MethodCgi::freeEnv(char ** env)
+void MethodCgi::freeEnv( char ** env )
 {
 	for(int i = 0; env[i]; i++)
 		delete [] env[i];
 	delete [] env;
+}
+
+void MethodCgi::freeArgs( char ** args )
+{
+	for(int i = 0; args[i]; i++)
+		delete [] args[i];
+	delete [] args;
 }
 
 char ** MethodCgi::convertEnv()
@@ -225,6 +230,22 @@ char ** MethodCgi::convertEnv()
 	new_env[i] = NULL;
 
 	return new_env;
+}
+
+char ** MethodCgi::setArgs()
+{
+	std::string     binary_path = construct_path(_location.getCgiBinary(), _location);
+	char 			**args = new char*[3];
+
+	args[0] = new char[binary_path.size() + 1];
+	args[0] = strcpy(args[0], binary_path.c_str());
+
+	args[1] = new char[this->getPath().size() + 1];
+	args[1] = strcpy(args[1], this->getPath().c_str());
+
+	args[2] = NULL;
+
+	return args;
 }
 
 

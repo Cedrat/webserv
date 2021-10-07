@@ -1,22 +1,23 @@
 
 #include "ConfigParser.hpp"
 #include "Server.hpp"
-#include "EOFException.hpp"
+#include "CustomException.hpp"
 
 int main()
 {
 	Server server;
-//test
+
    char file[] = "./srcs/step.conf";
 	try
 	{
 		ConfigParser conf(file);
 		for(int i = 0; i < conf.getServerNb(); i++)
 			server.addConfig(conf.getOneServer(i));
+		//std::cout << "Everything went well :)" << std::endl;
 	}
-	catch(char const* & e)
+	catch(ParserExit const& e)
 	{
-		std::cerr << e << std::endl;
+		return 0;
 	}
 
 	try {

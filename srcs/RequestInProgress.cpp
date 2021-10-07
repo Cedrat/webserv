@@ -2,7 +2,7 @@
 #include "Erreur.hpp"
 #include "define.hpp"
 #include "Generator.hpp"
-#include "EOFException.hpp"
+#include "CustomException.hpp"
 
 RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 {

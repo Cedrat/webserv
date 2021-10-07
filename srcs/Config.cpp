@@ -68,11 +68,18 @@ void Config::setHostAndPort( std::vector<std::string> line )
 			setOneHostOrPort(static_cast<std::string>(line[1]));
 		else
 		{
+			size_t dot_pos;
 			//Assigner la valeur avant ':' à host
-			if (isIP(line[1], ':', _host) == true)
+			if (isIP(line[1], ':') == true)
 			{
 				_ip = line[1].substr(0, separator).c_str();
 				inet_pton(AF_INET, _ip.c_str(), &_host);
+			}
+			else if ((dot_pos = line[1].find("localhost")) != std::string::npos)
+			{
+				if (line[1].at(dot_pos + 9) != ':')
+            		throw std::invalid_argument("Error : Config - Invalid host");
+        		inet_pton(AF_INET, "127.0.0.1", &_host);
 			}
 			else
  				throw std::invalid_argument("Error : Config - Invalid host");
@@ -95,11 +102,15 @@ void Config::setOneHostOrPort( std::string line )
 		_ip = line;
 		inet_pton(AF_INET, "127.0.0.1", &_host);
 	}   
-	else if (isIP(line, '\0', _host) == true)
+	else if (isIP(line, '\0') == true)
 	{
 		inet_pton(AF_INET, line.c_str(), &_host);
 		_ip = line;
 	}  
+	else if (line.find("localhost") != std::string::npos)
+	{
+		inet_pton(AF_INET, "127.0.0.1", &_host);
+	}
 	else if (isPort(line) == true)
 		this->_port = atoi(line.c_str());
 	else
@@ -258,26 +269,6 @@ bool Config::isEqual(const Config & rhs)
 	return false;
 }
 
-//Duplicata de isEqual mais legetement different. A vor lequel garder ?
-bool    Config::checkIfHostNameIsPresent(std::string host_name) const
-{
-   std::vector<std::string> host_names;
-	 
-	 host_names = getServerNames();
-
-	std::vector<std::string>::iterator it_begin = host_names.begin();
-	std::vector<std::string>::iterator it_end = host_names.end();
-
-
-	for (int i = 0; it_begin != it_end; i++, it_begin++)
-	{
-		if (host_names[i] == host_name)
-			return (TRUE);
-	}
-	if (host_name == ("127.0.0.1:" + int_to_string(getPort())) || host_name == ("localhost:" + int_to_string(getPort())))
-		return (TRUE);
-	return (FALSE); 
-}
 
 
 
@@ -322,7 +313,7 @@ std::vector<Location> Config::getLocations() const
 Location Config::getOneLocation( size_t id ) const
 {
 	if (_locations.size() < id)
-		throw std::out_of_range("Error : Out of array location request");
+		throw std::invalid_argument("Error : Out of array location request");
 	return this->_locations[id];
 }
 

@@ -8,7 +8,7 @@
 #include "SocketServer.hpp"
 #include "SocketClient.hpp"
 #include "copy_value_of_pointer_vector.hpp"
-#include "EOFException.hpp"
+#include "CustomException.hpp"
 
 pollfd * create_a_listenable_socket(size_t port, int host)
 {
@@ -82,6 +82,7 @@ void Server::createAndAddSocketServer(size_t port, int host)
 		_sockets.push_back(socket);
 	}
 	catch(char const* & e) {
+		std::cerr << e << std::endl;
 		delete socket;
 		throw(EmergencyExit());
 	}

@@ -15,7 +15,7 @@
 
 #include <string>
 
-    bool isIP( std::string line, char c, int host );
+    bool isIP( std::string line, char c );
     bool isPort( std::string line );
     bool isExtension( std::string ext );
 

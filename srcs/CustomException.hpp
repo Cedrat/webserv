@@ -1,5 +1,5 @@
-#ifndef EOFEXCEPTION_HPP
-# define EOFEXCEPTION_HPP
+#ifndef CUSTOMEXCEPTION_HPP
+# define CUSTOMEXCEPTION_HPP
 
 class EOFException : public std::exception
 {
@@ -13,11 +13,19 @@ class EmergencyExit : public std::exception
 {
     virtual const char* what() const throw()
     {
-        return ("EOF");
+        return ("Server error");
     }
     void quitProgram() const throw()
     {
         return ;
+    }
+};
+
+class ParserExit : public std::exception
+{
+    virtual const char* what() const throw()
+    {
+        return ("Parser Error");
     }
 };
 

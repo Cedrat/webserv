@@ -4,6 +4,7 @@
 # include "AMethod.hpp"
 # include "../includes/utils.hpp"
 # include "Config.hpp"
+# include "CustomException.hpp"
 
 # define BUFFER_CGI 50
 
@@ -36,12 +37,14 @@ class MethodCgi : public AMethod
         void setEnv();
 
         char **     convertEnv();
+        char **     setArgs();
         void        freeEnv( char ** env );
+        void        freeArgs( char ** args );
         std::string createTmpFile();
         
         void        exec();
         void        processCGI();
-        void        execCGI( const char ** args, char ** env );
+        void        execCGI( char ** args, char ** env );
         void        readCgiFile();
         void        extractHeader();
         void        adaptHeader();
