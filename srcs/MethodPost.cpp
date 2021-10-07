@@ -95,17 +95,17 @@ void MethodPost::exec()
     else
     {
         if (getHeaderSent() == FALSE)
-    {
-        setHeader();
-        sendHeader();
-        setHeaderSent(TRUE);
-        std::cerr << "Header sent" << std::endl;
-    }
-    else
-    {
-        std::cout << "body sent" << std::endl;
-        sendBody();
-    }
+        {
+            setHeader();
+            sendHeader();
+            setHeaderSent(TRUE);
+            std::cerr << "Header sent" << std::endl;
+        }
+        else
+        {
+            std::cout << "body sent" << std::endl;
+            sendBody();
+        }
     }
 }
 
@@ -137,6 +137,7 @@ void MethodPost::receiveData()
 
 }
 
+
 void MethodPost::writeFile()
 {
     std::fstream file;
@@ -152,7 +153,7 @@ void MethodPost::writeProcessedDataChunked()
 {
     int fd = open(getPath().c_str(),  O_APPEND| O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
-    _chunked_request->writeProcessedData(fd);
+    _chunked_request->writeProcessedData(fd); //check maxbodysize
 
     close(fd); 
 }

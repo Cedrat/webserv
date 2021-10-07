@@ -6,7 +6,7 @@
 class ChunkedRequest;
 class MethodPost: public AMethod
 {
-    private :
+    protected :
         std::string _body_received;
         int         _byte_received;
         bool        _file_received;
@@ -14,6 +14,8 @@ class MethodPost: public AMethod
         int         _error;
 
         ChunkedRequest *_chunked_request;
+
+        std::string _tmp_path;
 
         std::string extractBodyRequest();
         void        receiveData();
