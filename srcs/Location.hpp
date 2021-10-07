@@ -28,6 +28,8 @@ class Location
     public : 
         Location();
         ~Location();
+        Location( Location const & src );
+        Location & operator=( Location const & rhs );
 
         //Assignation des valeurs
         void setLocationDirective( std::vector<std::string> line );

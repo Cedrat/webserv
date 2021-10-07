@@ -17,15 +17,18 @@
 # include <sys/stat.h>
 # include <fstream>
 # include <ctime>
+# include <cstring>
 # include <cstdlib>
 # include <vector>
 # include <arpa/inet.h>
-#include <poll.h>
+# include <poll.h>
 # include <fcntl.h>
 # include <signal.h>
 # include <cstdio>
 # include <string.h>
 # include <sys/wait.h>
+
+# include <map>
 
 
 class Socket;

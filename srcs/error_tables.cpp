@@ -28,3 +28,4 @@ std::string get_string_error(int num_error)
 
     return (error_table().find(num_error)->second);
 }
+

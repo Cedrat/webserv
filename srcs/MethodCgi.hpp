@@ -3,9 +3,7 @@
 
 # include "AMethod.hpp"
 # include "../includes/utils.hpp"
-# include <map>
 # include "Config.hpp"
-# include <cstring>
 
 # define BUFFER_CGI 50
 
