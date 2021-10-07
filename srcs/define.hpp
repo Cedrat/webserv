@@ -24,7 +24,7 @@
 typedef int fd;
 
 #define MAX_REQUEST_SIZE 8000
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 10000
 
 
 # include <cstdio> //For size_t define;

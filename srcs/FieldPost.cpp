@@ -23,14 +23,19 @@ void FieldPost::setTransfertEncoding(std::string const transfert_encoding)
     _transfert_encoding = transfert_encoding;
 }
 
-std::string const & FieldPost::getContentLength()
+std::string const & FieldPost::getStrContentLength() const 
+{
+    return (_str_content_length);
+}
+
+int const & FieldPost::getContentLength() const 
 {
     return (_content_length);
 }
 
 void FieldPost::setContentLength(std::string const & length)
 {
-    _content_length = length;
+    _str_content_length = length;
 }
 
 void FieldPost::fillField()
@@ -54,8 +59,8 @@ void FieldPost::fillField()
         else if (str_to_lower(splitted_line[0]) == "content-length")
         {
             trim_field(splitted_line[1]);
-            _content_length = splitted_line[1];
-            std::cout << "Post content length : " << _content_length << std::endl;
+            _str_content_length = splitted_line[1];
+            std::cout << "Post content length : " << _str_content_length << std::endl;
         }
          else if (str_to_lower(splitted_line[0]) == "transfer-encoding")
         {
@@ -110,14 +115,18 @@ void FieldPost::verifyMissingData()
 
 void FieldPost::verifyData()
 {
-    if (_content_length.empty())
+    if (_str_content_length.empty())
     {
         if (_transfert_encoding.find("chunked") == std::string::npos)
             _error = BAD_REQUEST;
     }
-    if (str_is_not_number(_content_length))
+    if (str_is_not_number(_str_content_length))
     {
         _error = BAD_REQUEST;
+    }
+    else
+    {
+        _content_length = atoi(_str_content_length.c_str());
     }
 }
 AMethod *FieldPost::createErrorMethod(Config config)
@@ -147,6 +156,7 @@ void FieldPost::checkValidPath()
     {
         std::cout << "second " << _final_path <<  std::endl;
         std::cout << check_if_file_exist("./upload") << std::endl;
+        
         _error = BAD_REQUEST;
     }   
 
@@ -164,6 +174,6 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
 
 void FieldPost::checkBodySize(Config const &config)
 {
-    if (atoi(_content_length.c_str()) > config.getMaxBodySize())
+    if (atoi(_str_content_length.c_str()) > config.getMaxBodySize())
         _error = ENTITY_TOO_LARGE;
 }

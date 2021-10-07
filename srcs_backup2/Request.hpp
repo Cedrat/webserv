@@ -30,7 +30,7 @@ class Request
         std::string _method;
         std::string _path;
         std::string _host_name;
-        int         _content_length;
+        int         _str_content_length;
         bool        _in_progress;
         int         _status;
         ResponseHTTP _response;
@@ -46,7 +46,7 @@ class Request
         std::string const & getMethod() const;
         std::string const & getPath() const;
         std::string const & getHostName() const;
-        int const &         getContentLength() const;
+        int const &         getStrContentLength() const;
         std::string const & getRequest() const;        
         bool const &        getInProgress() const;
         int const &         getStatus() const;

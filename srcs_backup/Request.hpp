@@ -26,7 +26,7 @@ class Request
         std::string _host_name;
         std::string _method_line;
         std::string _path_file_request;
-        int         _content_length;
+        int         _str_content_length;
         bool        _header_completed;
         bool        _keep_alive;
         int _error;
@@ -50,7 +50,7 @@ class Request
         void        setHeaderCompleted(bool);
         void        setContentLength(int);
 
-        int             getContentLength() const;
+        int             getStrContentLength() const;
         bool            getKeepAlive();
         int             getError() const;
         std::string     getMethod() const;

@@ -42,6 +42,8 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+
+int atoi_hexa(std::string nb);
 std::string extract_header_request(std::string request);
 bool isCgiPath(std::string path, std::string extension);
 void decompose_path(std::string &path, std::string &query);

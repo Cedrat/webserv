@@ -5,7 +5,7 @@
 #include "Location.hpp"
 
 Request::Request(fd fd_request, int host, size_t port) : _fd(fd_request), _host(host), _port(port) ,
- _request_completed(FALSE),  _error(OK), _content_length(-1),  _in_progress(FALSE), 
+ _request_completed(FALSE),  _error(OK), _str_content_length(-1),  _in_progress(FALSE), 
  _status(PARSING_REQUEST)
 {
 
@@ -77,9 +77,9 @@ std::string const & Request::getHostName() const
 }
 
 
-int const & Request::getContentLength() const
+int const & Request::getStrContentLength() const
 {
-    return _content_length; 
+    return _str_content_length; 
 }
 
 std::string const & Request::getRequest() const
@@ -111,7 +111,7 @@ void Request::setHostName(std::string host_name)
 }
 void Request::setContentLength(int content_length)
 {
-    _content_length = content_length;
+    _str_content_length = content_length;
 }
 
 void Request::setStatus(const int status)
@@ -190,7 +190,7 @@ void    Request::resetRequest()
    _method = "";
    _path = "";
    _host_name = "";
-   _content_length = -1;
+   _str_content_length = -1;
    _request_completed = FALSE;
    _status = PARSING_REQUEST;
    _response.resetByteSend();

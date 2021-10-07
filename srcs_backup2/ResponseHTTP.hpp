@@ -16,7 +16,7 @@ class ResponseHTTP
         int             _fd_to_answer;
         bool            _ai;
         
-        // int             _content_length;
+        // int             _str_content_length;
         // int             _request_type;
 
 

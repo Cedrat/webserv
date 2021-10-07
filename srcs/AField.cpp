@@ -48,6 +48,19 @@ std::string const &AField::getTransfertEncoding() const
     throw "bad bad bad";
 }
 
+std::string const &AField::getStrContentLength() const
+{
+    std::cout << "bad call to getStrContentLength" << std::endl;
+    throw "bad bad bad";
+}
+
+int const &AField::getContentLength() const
+{
+    std::cout << "bad call to getContentLength" << std::endl;
+    throw "bad bad bad";
+}
+
+
 RequestInProgress const & AField::getDataRequest() const
 {
     return (_data_request);

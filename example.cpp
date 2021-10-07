@@ -132,7 +132,7 @@ class Post : public IMethod
     private :
         bool _request_received;
         bool _chunked_request;
-        int  _content_length;
+        int  _str_content_length;
 
     public :
         void exec();
