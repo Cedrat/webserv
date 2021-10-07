@@ -35,6 +35,7 @@ class Server
 
         void removeClient(size_t index);
 
+        void cleanAndCloseServer(int err);
         void endServer();
 };
 

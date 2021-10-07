@@ -28,5 +28,12 @@ int main()
 		//Clean server
 		return 0;
 	}
-	server.launchingServer();
+	try{
+		server.launchingServer();
+	}
+	catch (EmergencyExit const &e)
+	{
+		std::cout << "Server has quitted ! Good Night ! " << std::endl;
+		return (0);
+	}
 }

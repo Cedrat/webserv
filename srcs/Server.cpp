@@ -10,6 +10,7 @@
 #include "copy_value_of_pointer_vector.hpp"
 #include "EOFException.hpp"
 
+
 pollfd * create_a_listenable_socket(size_t port, int host)
 {
    struct sockaddr_in   my_addr;
@@ -49,8 +50,23 @@ Server::Server() : _is_running(FALSE)
 
 }
 Server::~Server()
-{}
+{
+	for (size_t i = 0; i < _pollfds.size() ; i++)
+	{
+		if (_pollfds[i] != NULL)
+			delete _pollfds[i];
+	}
+	for (size_t i = 0; i < _sockets.size() ; i++)
+	{
+		if (_sockets[i] != NULL)
+			delete _sockets[i];
+	}
+}
 
+void clean_and_close_server(int err)
+{
+	throw(EmergencyExit());
+}
 
 void    Server::addSocket(ASocket * socket)
 {
@@ -140,6 +156,7 @@ void Server::launchingServer(void)
 	_is_running = TRUE;
 	while (_is_running)
 	{
+		signal(SIGINT, &clean_and_close_server);
 		try
 		{
 			acceptConnection();

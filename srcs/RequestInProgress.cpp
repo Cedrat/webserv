@@ -11,7 +11,7 @@ RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 
 RequestInProgress::~RequestInProgress()
 {
-
+    
 }
 
 void RequestInProgress::setConfigs(std::vector<Config> configs)
