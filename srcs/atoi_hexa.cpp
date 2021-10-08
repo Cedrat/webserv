@@ -5,6 +5,7 @@ static int pos_in_hexa_array(char value)
 {
     char hexa_array[] = "0123456789ABCDEF";
 
+    value = toupper(value);
     for (int i = 0; i < 17; i++)
     {
         if (hexa_array[i] == value)

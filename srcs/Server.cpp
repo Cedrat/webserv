@@ -37,7 +37,6 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 		throw ("Listening error");
 	}
 
-	//fcntl(new_socket, F_SETFL, O_NONBLOCK);
 	mypollfd->fd = new_socket;
 	mypollfd->events = POLLIN;
 	mypollfd->revents = 0;
@@ -189,10 +188,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 		ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
 		_sockets.push_back(new_socket);
 
-
-		//Request request(fd_client, socket->getHost(),  socket->getPort());
 		_pollfds.push_back(new_poll);
-		//_requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;
 	}
 	else
@@ -201,18 +197,13 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 		std::cout << "Event " << s_pollfd.events << std::endl;
 		socket->setTimeout(std::time(0));
 		socket->exec();
-		// s_pollfd.events = POLLOUT;
-		// s_pollfd.revents = 0;
+	
 	}
 }
 
 void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
 {
-	std::cout << "POLLOUT " << std::endl;
 	socket->exec();
-	//send(fd_client, "You got a new pokemon\n", 23, 0);
-	// s_pollfd.events = POLLIN;
-	// s_pollfd.revents = 0;
 }
 
 void Server::removeClient(size_t index)

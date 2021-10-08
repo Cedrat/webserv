@@ -15,7 +15,7 @@ AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FA
 
 MethodPost::~MethodPost()
 {
-
+    delete &_fields;
 }
 
 void MethodPost::init()
@@ -24,19 +24,25 @@ void MethodPost::init()
     _body_received = extractBodyRequest();
     if (_fields.getTransfertEncoding() == "chunked")
     {
+        std::cout << "Chunked Request" << std::endl;
         Info data;
         setChunkedRequest(new ChunkedRequest);
         _chunked_request->addData(_body_received);
         std::cout << "Body_received" << _body_received << std::endl;
         data = _chunked_request->processData();
         writeProcessedDataChunked();
+        std::cout << "data : " << data << std::endl;
         _body_received = "";
         if (data == all_data_read)
+        {
             _file_received = TRUE;
+            _fields.setPollout();
+        }
         else if (data == incorrect_data)
         {
             _file_received = TRUE;
             _error = BAD_REQUEST;
+            _fields.setPollout();
         }
     }
     else
@@ -70,6 +76,7 @@ void MethodPost::exec()
             data = _chunked_request->processData();
             writeProcessedDataChunked();
             _body_received = "";
+            std::cout << "data : " << data << std::endl;
             if (data == all_data_read)
                 _file_received = TRUE;
              else if (data == incorrect_data)
@@ -113,7 +120,7 @@ std::string MethodPost::extractBodyRequest()
 {
     std::string copy_request = _header;
 
-    copy_request.erase(0, _header.find("\r\n\r\n") + 4 );
+    copy_request.erase(0, _header.find("\r\n\r\n") + 2);
     
     return (copy_request);
 }

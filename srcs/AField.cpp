@@ -44,19 +44,19 @@ std::string const &AField::getQuery() const
   
 std::string const &AField::getTransfertEncoding() const
 {
-    std::cout << "bad call to getTransfertEncoding" << std::endl;
+    std::cerr << "bad call to getTransfertEncoding" << std::endl;
     throw "bad bad bad";
 }
 
 std::string const &AField::getStrContentLength() const
 {
-    std::cout << "bad call to getStrContentLength" << std::endl;
+    std::cerr << "bad call to getStrContentLength" << std::endl;
     throw "bad bad bad";
 }
 
 int const &AField::getContentLength() const
 {
-    std::cout << "bad call to getContentLength" << std::endl;
+    std::cerr << "bad call to getContentLength" << std::endl;
     throw "bad bad bad";
 }
 

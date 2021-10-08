@@ -1,9 +1,11 @@
 #include "../includes/utils.hpp"
 #include "ChunkedRequest.hpp"
+#include "EOFException.hpp"
 
 
 static bool is_hexa_base(char i)
 {
+    i = toupper(i);
     if (('0' <= i && i <= '9') || ('A' <= i && i <= 'F'))
         return (TRUE);
     return (FALSE);
@@ -54,8 +56,7 @@ Info ChunkedRequest::processData()
         }
         
     }
-    std::cout << "data " << data << std::endl;
-    return data;
+        return data;
 }
 
 Info ChunkedRequest::checkNextDataIsByteToTreat()
@@ -111,7 +112,11 @@ void ChunkedRequest::writeProcessedData(int fd)
     int ret;
     ret = write(fd, _processed_data.c_str(), _processed_data.size());
     if (ret < 0)
-        std::cout << "tant pis" << std::endl;
+        return ;
+    else if (ret == 0)
+    {
+        throw (EOFException());
+    }
     else if (ret == _processed_data.size())
     {
         _processed_data = "";
