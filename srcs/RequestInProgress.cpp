@@ -11,7 +11,7 @@ RequestInProgress::RequestInProgress() : _is_finished(FALSE)
 
 RequestInProgress::~RequestInProgress()
 {
-
+    
 }
 
 void RequestInProgress::setConfigs(std::vector<Config> configs)
@@ -43,7 +43,9 @@ void RequestInProgress::receiveData()
     if (ret < 0)
         ret = 0;
     buffer[ret] = 0;
-    str_request = buffer;
+    str_request.append(buffer, ret);
+    std::cerr << "request received " << str_request << std::endl;
+    write(2, buffer, ret);
 
     if (!(_str_request.empty() && str_request == "\r\n"))
         addToRequest(str_request);
@@ -56,6 +58,7 @@ std::string const & RequestInProgress::getRequest() const
 
 void RequestInProgress::addToRequest(std::string str_request)
 {
+    write(1, str_request.c_str(), str_request.size());
     this->_str_request += str_request;
 }
 

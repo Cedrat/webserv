@@ -11,6 +11,8 @@
 
 # define TIMEOUT 60
 
+# define POLL_TIME 1 * 1000 // one second.
+
 # define OK 200
 # define NO_CONTENT 204
 # define MOVED_PERMANENTLY 301
@@ -24,7 +26,7 @@
 typedef int fd;
 
 #define MAX_REQUEST_SIZE 8000
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 10000
 
 
 # include <cstdio> //For size_t define;

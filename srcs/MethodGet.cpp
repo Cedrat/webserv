@@ -10,7 +10,8 @@ MethodGet::MethodGet(int fd, std::string path, std::string header, AField  &data
 
 MethodGet::~MethodGet()
 {
-    
+    std::cout << "FIELDs" << std::endl;
+    delete &_fields;
 }
 
 

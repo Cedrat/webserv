@@ -316,12 +316,12 @@ void    Request::checkSyntaxRequest()
 
 void Request::setContentLength(int content_length)
 {
-    _content_length = content_length;
+    _str_content_length = content_length;
 }
 
-int Request::getContentLength() const
+int Request::getStrContentLength() const
 {
-    return(_content_length);
+    return(_str_content_length);
 }
 
 void Request::checkAndAddMethod(std::string request)
@@ -368,8 +368,8 @@ void Request::checkAndAddContentLength(std::string request)
     std::cout << "Content debut de fonction " << std::endl;
     if (match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
     {
-        _content_length = string_to_int(request.substr(request.find("Content-Length: ") + 16, request.find("\n", request.find("Content-Length: ") + 16) - (request.find("Content-Length: ") + 17)));
-        std::cout << "Content length " << _content_length << std::endl;
+        _str_content_length = string_to_int(request.substr(request.find("Content-Length: ") + 16, request.find("\n", request.find("Content-Length: ") + 16) - (request.find("Content-Length: ") + 17)));
+        std::cout << "Content length " << _str_content_length << std::endl;
         _where_is_request = REQUEST_FINISHED;
     }
 }

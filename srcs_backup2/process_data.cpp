@@ -8,7 +8,7 @@
 std::string extract_method(std::string request);
 std::string extract_path(std::string request);
 std::string extract_host_name(std::string request);
-int extract_content_length(std::string request);
+int extract_str_content_length(std::string request);
 bool duplicata(std::string request);
 bool not_enough_field(std::string method, std::string request);
 int verif_post_data(Request & request, std::vector<Config> configs);
@@ -186,7 +186,7 @@ std::string extract_host_name(std::string request)
     return "";
 }
 
-int extract_content_length(std::string request)
+int extract_str_content_length(std::string request)
 {
     int content_length;
 

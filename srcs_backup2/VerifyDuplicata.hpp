@@ -7,7 +7,7 @@ class VerifyDuplicata
 {
     private :  
         int _nb_host;
-        int _nb_content_length;
+        int _nb_str_content_length;
 
     public : 
         VerifyDuplicata(std::string request);

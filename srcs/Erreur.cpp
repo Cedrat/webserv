@@ -11,6 +11,7 @@ AMethod(fd, path, header, field)
 Erreur::~Erreur()
 {
 
+    delete &_fields;
 }
 void Erreur::init() 
 {
@@ -50,10 +51,10 @@ void Erreur::sendBody()
         std::cout << "how much read? " << fs.gcount() << std::endl;
         ret = ::send(getFd(), buffer, fs.gcount(), 0);
         //_byte_send += ret;
-        // if (ret == fs.gcount() && fs.eof())
-        // {
-        //     _finished = TRUE;
-        // }
+        if (ret == fs.gcount() && fs.eof())
+        {
+            _is_finished = TRUE;
+        }
          std::cout << ret << "BYTE SEND" << std::endl;
         fs.close();
 }

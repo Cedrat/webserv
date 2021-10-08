@@ -10,6 +10,7 @@
 #include "copy_value_of_pointer_vector.hpp"
 #include "CustomException.hpp"
 
+
 pollfd * create_a_listenable_socket(size_t port, int host)
 {
    struct sockaddr_in   my_addr;
@@ -49,8 +50,23 @@ Server::Server() : _is_running(FALSE)
 
 }
 Server::~Server()
-{}
+{
+	for (size_t i = 0; i < _pollfds.size() ; i++)
+	{
+		if (_pollfds[i] != NULL)
+			delete _pollfds[i];
+	}
+	for (size_t i = 0; i < _sockets.size() ; i++)
+	{
+		if (_sockets[i] != NULL)
+			delete _sockets[i];
+	}
+}
 
+void clean_and_close_server(int err)
+{
+	throw(EmergencyExit());
+}
 
 void    Server::addSocket(ASocket * socket)
 {
@@ -112,7 +128,7 @@ void Server::acceptConnection(void)
 	char buffer[BUFFER_SIZE];
 	int ret = 0;
 
-	poll(poll_fd_copy.data(), poll_fd_copy.size(), 1000);
+	poll(poll_fd_copy.data(), poll_fd_copy.size(), TIMEOUT);
 	for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
 	{
 		if (poll_fd_copy[i].revents & POLLHUP || check_timeout(_sockets[i]->getTimeout()))
@@ -141,6 +157,7 @@ void Server::launchingServer(void)
 	_is_running = TRUE;
 	while (_is_running)
 	{
+		signal(SIGINT, &clean_and_close_server);
 		try
 		{
 			acceptConnection();
@@ -204,6 +221,7 @@ void Server::removeClient(size_t index)
 	std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
 	close(_pollfds[index]->fd);
 	delete _pollfds[index];
+	delete _sockets[index];
 	_sockets.erase(_sockets.begin() + index);
 	_pollfds.erase(_pollfds.begin() + index);
 }

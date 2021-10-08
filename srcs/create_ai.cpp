@@ -29,7 +29,7 @@ std::string create_ai_page(const char * short_path, const char * long_path)
     ai_page += "</html>";
 
     std::cout << "AI PAGE CREATED" << std::endl;
-
+    free(dir);
     return (ai_page);
 }
 

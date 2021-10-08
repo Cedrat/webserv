@@ -23,9 +23,6 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
                 std::cerr << _request.getRequest() << std::endl;
                 _request.reset();
                 _method->init();
-                std::cout << "HEY POLLOUT" << std::endl;
-                std::cout << _s_pollfd.fd << std::endl; 
-                std::cout << "Event pollfd" << _s_pollfd.events << std::endl;
             }
         }
         else 
@@ -36,6 +33,7 @@ SocketClient::SocketClient(size_t port, int host, int fd, std::vector<Config> co
                 std::cerr << "fin prematurée" << std::endl;
                 _s_pollfd.events = POLLIN;
                 _s_pollfd.revents = 0;
+                std::cout << "DELETE METHOD" << std::endl;
                 delete _method;
                 _method = NULL;
             }
