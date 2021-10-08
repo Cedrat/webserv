@@ -15,6 +15,8 @@ AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FA
 
 MethodPost::~MethodPost()
 {
+    if (_chunked_request != NULL)
+        delete _chunked_request;
     delete &_fields;
 }
 
@@ -28,10 +30,11 @@ void MethodPost::init()
         Info data;
         setChunkedRequest(new ChunkedRequest);
         _chunked_request->addData(_body_received);
-        std::cout << "Body_received" << _body_received << std::endl;
+        _byte_received += _body_received.size();
+        if (maxBodySizeIsReached())
+            return ;
         data = _chunked_request->processData();
         writeProcessedDataChunked();
-        std::cout << "data : " << data << std::endl;
         _body_received = "";
         if (data == all_data_read)
         {
@@ -73,10 +76,12 @@ void MethodPost::exec()
         {
             Info data;
             _chunked_request->addData(_body_received);
+            _byte_received += _body_received.size();
+            if (maxBodySizeIsReached())
+                return ;
             data = _chunked_request->processData();
             writeProcessedDataChunked();
             _body_received = "";
-            std::cout << "data : " << data << std::endl;
             if (data == all_data_read)
                 _file_received = TRUE;
              else if (data == incorrect_data)
@@ -159,8 +164,8 @@ void MethodPost::writeFile()
 void MethodPost::writeProcessedDataChunked()
 {
     int fd = open(getPath().c_str(),  O_APPEND| O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-
-    _chunked_request->writeProcessedData(fd); //check maxbodysize
+    
+    _chunked_request->writeProcessedData(fd); 
 
     close(fd); 
 }
@@ -219,4 +224,18 @@ void MethodPost::setHeader()
 void MethodPost::setChunkedRequest(ChunkedRequest *chunked_request)
 {
     _chunked_request = chunked_request;
+}
+
+bool MethodPost::maxBodySizeIsReached()
+{
+    Config config = _fields.getDataRequest().getConfigs()[find_index_best_config(_fields.getDataRequest().getConfigs(), _fields.getHostName(), _fields.getDataRequest().getPort(), _fields.getDataRequest().getHost())];
+
+    if (_byte_received > config.getMaxBodySize())
+    {
+        _error = ENTITY_TOO_LARGE;
+        _file_received = TRUE;
+        _fields.setPollout();
+        return TRUE;
+    }
+    return FALSE;
 }

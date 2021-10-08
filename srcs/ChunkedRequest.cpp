@@ -93,7 +93,7 @@ void ChunkedRequest::extractNbBytesToRead()
 
 void ChunkedRequest::treatData()
 {
-    if (_nb_bytes_to_treat > _data_not_processed.size())
+    if (_nb_bytes_to_treat > static_cast<int>(_data_not_processed.size()))
     {
         _processed_data += _data_not_processed;
         _nb_bytes_to_treat -= _data_not_processed.size();
@@ -109,6 +109,8 @@ void ChunkedRequest::treatData()
 
 void ChunkedRequest::writeProcessedData(int fd)
 {
+    if (_processed_data.size() == 0)
+        return;
     int ret;
     ret = write(fd, _processed_data.c_str(), _processed_data.size());
     if (ret < 0)
@@ -117,11 +119,11 @@ void ChunkedRequest::writeProcessedData(int fd)
     {
         throw (EOFException());
     }
-    else if (ret == _processed_data.size())
+    else if (ret == static_cast<int>(_processed_data.size()))
     {
         _processed_data = "";
     }
-    else if (ret != _processed_data.size())
+    else if (ret != static_cast<int>(_processed_data.size()))
     {
         _processed_data.erase(0, ret);
     }

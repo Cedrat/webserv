@@ -64,6 +64,7 @@ Server::~Server()
 
 void clean_and_close_server(int err)
 {
+	(void)err;
 	throw(EmergencyExit());
 }
 
@@ -123,8 +124,6 @@ void Server::acceptConnection(void)
 {
 	std::vector<pollfd> poll_fd_copy = copy_value_of_pointer_vector(_pollfds);
 	
-	char buffer[BUFFER_SIZE];
-	int ret = 0;
 
 	poll(poll_fd_copy.data(), poll_fd_copy.size(), TIMEOUT);
 	for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
@@ -145,7 +144,7 @@ void Server::acceptConnection(void)
 		}
 		else if (poll_fd_copy[i].revents & POLLOUT)
 		{
-			exec_pollout(_sockets[i], poll_fd_copy[i].fd, poll_fd_copy[i]);
+			exec_pollout(_sockets[i]);
 		}
 	}
 
@@ -201,7 +200,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 	}
 }
 
-void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
+void Server::exec_pollout(ASocket *socket)
 {
 	socket->exec();
 }

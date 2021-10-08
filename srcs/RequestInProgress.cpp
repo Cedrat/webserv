@@ -155,6 +155,7 @@ int RequestInProgress::checkCommonError()
     Config best_config = _configs[find_index_best_config(_configs,host_name,_host,_port)];
 
     std::cout << "Method : " << method << "\n path : " << path << "\nhost_name :" << host_name << std::endl;
+    return (1);
 }
 
 std::string extract_method(std::string str_request)

@@ -31,7 +31,7 @@ class Server
         void acceptConnection(void);
 
         void exec_pollin(ASocket *socket, int current_fd, pollfd & s_pollfd);
-        void exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd);
+        void exec_pollout(ASocket *socket);
 
         void removeClient(size_t index);
 
