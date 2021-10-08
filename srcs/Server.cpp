@@ -135,7 +135,7 @@ void Server::acceptConnection(void)
 		else if (poll_fd_copy[i].revents & POLLIN)
 		{
 			try {
-				exec_pollin(_sockets[i], poll_fd_copy[i].fd, *_pollfds[i]);
+				exec_pollin(_sockets[i], poll_fd_copy[i].fd);
 			}
 			catch (EOFException const &e)
 			{
@@ -167,7 +167,7 @@ void Server::launchingServer(void)
  
 }
 
-void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
+void Server::exec_pollin(ASocket *socket, int fd_request)
 {
 
 	if (socket->getType() == SERVER)
@@ -192,11 +192,8 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 	}
 	else
 	{
-		std::cout << "I'm a client " << std::endl;
-		std::cout << "Event " << s_pollfd.events << std::endl;
 		socket->setTimeout(std::time(0));
 		socket->exec();
-	
 	}
 }
 

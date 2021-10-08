@@ -42,7 +42,7 @@ void Erreur::sendBody()
     std::fstream fs;
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
-    std::cout << "PATH : " << getPath() << std::endl; 
+    
     fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
     fs.seekg(0);
     fs.read(buffer, BUFFER_SIZE);

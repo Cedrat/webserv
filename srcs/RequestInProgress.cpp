@@ -44,7 +44,6 @@ void RequestInProgress::receiveData()
         ret = 0;
     buffer[ret] = 0;
     str_request.append(buffer, ret);
-    std::cerr << "request received " << str_request << std::endl;
     write(2, buffer, ret);
 
     if (!(_str_request.empty() && str_request == "\r\n"))
@@ -120,7 +119,7 @@ AMethod * RequestInProgress::getAnswer(pollfd &s_pollfd)
         return (new Erreur(_socket_fd, file_path, header,  * new FieldGet(_str_request, *this, s_pollfd)));
     }
     method = extract_method(_str_request);
-    //std::cout << "WHAT IS THE METHOD MAN ? " << method << std::endl;
+
     AField *field = field_generator.generate(method, _str_request, *this, s_pollfd);
 
     return (field->getAMethod());
@@ -131,7 +130,6 @@ int RequestInProgress::checkBasicError()
     int ret_error;
 
     std::string header_request = extract_header_request(_str_request);
-    std::cout << "Header request is : " << header_request << std::endl;
     ret_error = check_syntax_request(header_request);
     if (ret_error != OK)
         return (ret_error);
@@ -154,7 +152,6 @@ int RequestInProgress::checkCommonError()
 
     Config best_config = _configs[find_index_best_config(_configs,host_name,_host,_port)];
 
-    std::cout << "Method : " << method << "\n path : " << path << "\nhost_name :" << host_name << std::endl;
     return (1);
 }
 
@@ -171,7 +168,7 @@ std::string extract_path(std::string str_request)
     std::vector<std::string> splitted_string = split_string(str_request, "\n");
     std::vector<std::string> splitted_line = split_string(splitted_string[0], " ");
 
-    return (splitted_line[1]);
+    return (decoding_http_string(splitted_line[1]));
 }
 
 std::string extract_host_name(std::string str_request)

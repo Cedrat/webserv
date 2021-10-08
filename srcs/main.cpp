@@ -6,7 +6,6 @@
 int main()
 {
 	Server server;
-//test
    char file[] = "./srcs/step.conf";
 	try
 	{
@@ -25,8 +24,7 @@ int main()
 	catch(EmergencyExit const& e)
 	{
 		server.endServer();
-		//Clean server
-		return 0;
+			return 0;
 	}
 	try{
 		server.launchingServer();

@@ -10,7 +10,6 @@ MethodGet::MethodGet(int fd, std::string path, std::string header, AField  &data
 
 MethodGet::~MethodGet()
 {
-    std::cout << "FIELDs" << std::endl;
     delete &_fields;
 }
 
@@ -27,13 +26,10 @@ void MethodGet::exec()
     {
         sendHeader();
         setHeaderSent(TRUE);
-        std::cerr << "Header sent" << std::endl;
     }
     else
     {
-        std::cout << "body sent" << std::endl;
         sendBody();
-        //setIsFinished(TRUE);
     }
 }
 
@@ -45,21 +41,19 @@ void MethodGet::sendHeader()
 void MethodGet::sendBody()
 {
     signal(SIGPIPE, SIG_IGN);
+    
     std::fstream fs;
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
-    std::cout << "PATH : " << getPath() << std::endl; 
     fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
     fs.seekg(_byte_send);
     fs.read(buffer, BUFFER_SIZE);
     buffer[fs.gcount()] = '\0'; 
-    std::cout << "how much read? " << fs.gcount() << std::endl;
     ret = ::send(getFd(), buffer, fs.gcount(), 0);
     _byte_send += ret;
     if (ret == fs.gcount() && fs.eof())
     {
         setIsFinished(TRUE);
     }
-    std::cout << ret << "BYTE SEND" << std::endl;
     fs.close();
 }

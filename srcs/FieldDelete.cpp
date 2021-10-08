@@ -6,7 +6,6 @@
 
 FieldDelete::FieldDelete(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request , data_request, s_pollfd)
 {
-    std::cout << "Created" << std::endl;
     fillField();
 }
 
@@ -21,24 +20,20 @@ void FieldDelete::fillField()
     std::vector<std::string> splitted_line;
 
     _method = split_string(splitted_request[0], " ")[0];
-    _path   = split_string(splitted_request[0], " ")[1];
+    _path   = decoding_http_string(split_string(splitted_request[0], " ")[1]);
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");
-        std::cout << "Splitted request " << i << " " << splitted_request[i] << std::endl;
-        std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
         if (str_to_lower(splitted_line[0]) == "host")
         {
             trim(splitted_line[1], ' ');
             _host_name = splitted_line[1];
-            std::cout << "host_name in field get " << _host_name << std::endl;
         }
     } 
 }
 
 void FieldDelete::verifyMissingData()
 {
-    std::cout << "host_name : " << _host_name << std::endl;
     if (_host_name == "")
         _error = BAD_REQUEST;
 }
@@ -100,8 +95,6 @@ AMethod *FieldDelete::createErrorMethod(Config config)
     header = "HTTP/1.1 " + get_string_error(_error);
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
-
-    std::cout << "ERROR HEADER : " << header << std::endl;
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this);
     return (method);

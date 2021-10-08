@@ -7,10 +7,8 @@ std::string create_alias(std::string path, Location location);
 std::string construct_path(std::string path, Location location)
 {
     path = create_alias(path, location);
-    std::cout << location.getAutoIndex() << std::endl;
     if (check_if_file_exist(path) && is_folder(path.c_str()))
     {
-        std::cout << "Folder" << std::endl;
         if (path.rfind("/") != path.size() - 1)
             path += "/";
     }

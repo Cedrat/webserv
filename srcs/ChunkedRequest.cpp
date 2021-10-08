@@ -129,14 +129,3 @@ void ChunkedRequest::writeProcessedData(int fd)
     }
     
 };
-
-
-// int main()
-// {
-//     ChunkedRequest test;
-
-//     test.addData("\r\n5\r\n");
-//     test.processData();
-//     test.addData("\r\n");
-//     test.processData();
-// }

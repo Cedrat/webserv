@@ -24,7 +24,6 @@ int delete_f(const char *path)
     struct stat sb;
 
     stat(path, &sb);
-    std::cout << "Path to delete " << path << std::endl; 
     if (S_ISDIR(sb.st_mode) != 1)
     {
         if (unlink(path) < 0)
