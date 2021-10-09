@@ -1,6 +1,7 @@
 #include "Erreur.hpp"
 #include "define.hpp"
 #include "AField.hpp"
+#include "EOFException.hpp"
 
 Erreur::Erreur(int fd, std::string path, std::string header, AField &field) : 
 AMethod(fd, path, header, field)
@@ -51,6 +52,8 @@ void Erreur::sendBody()
     if (ret == fs.gcount() && fs.eof())
     {
         _is_finished = TRUE;
+        fs.close();
+        throw(BadRequestException());
     }
     fs.close();
 }

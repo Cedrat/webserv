@@ -17,6 +17,11 @@ std::string const &AField::getMethod() const
     return (_method);
 }
 
+int const &AField::getError() const
+{
+    return (_error);
+}
+
 std::string const &AField::getPath() const
 {   
     return (_path); 

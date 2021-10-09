@@ -137,14 +137,21 @@ void Server::acceptConnection(void)
 			try {
 				exec_pollin(_sockets[i], poll_fd_copy[i].fd);
 			}
-			catch (EOFException const &e)
+			catch (CloseSocketException const &e)
 			{
 				removeClient(i);
 			}
 		}
 		else if (poll_fd_copy[i].revents & POLLOUT)
 		{
-			exec_pollout(_sockets[i]);
+			try {
+				exec_pollout(_sockets[i]);
+			}
+			catch (CloseSocketException const &e)
+			{
+				std::cout << e.what() << std::endl;
+				removeClient(i);
+			}
 		}
 	}
 

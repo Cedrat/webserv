@@ -138,6 +138,8 @@ AMethod *FieldPost::createErrorMethod(Config config)
 
 void FieldPost::checkValidPath()
 {
+    if (check_valid_path(_path) == FALSE)
+        _error = BAD_REQUEST;
     if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
     {
         _error = BAD_REQUEST;
