@@ -3,8 +3,8 @@
 #include "AField.hpp"
 #include "EOFException.hpp"
 
-Erreur::Erreur(int fd, std::string path, std::string header, AField &field) : 
-AMethod(fd, path, header, field)
+Erreur::Erreur(int fd, std::string path, std::string header, AField &field, int error) : 
+AMethod(fd, path, header, field) , _error(error)
 {
 
 }
@@ -52,8 +52,11 @@ void Erreur::sendBody()
     if (ret == fs.gcount() && fs.eof())
     {
         _is_finished = TRUE;
-        fs.close();
-        throw(BadRequestException());
+        if (_error == BAD_REQUEST)
+        {
+            fs.close();
+            throw(BadRequestException());
+        }
     }
     fs.close();
 }
