@@ -7,7 +7,7 @@
 
 
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
 {
     std::cout << "Welcome to MethodPost" << std::endl;
 }
@@ -26,6 +26,7 @@ void MethodPost::init()
     _body_received = extractBodyRequest();
     if (_fields.getTransfertEncoding() == "chunked")
     {
+        _body_received = "\r\n" + _body_received;
         std::cout << "Chunked Request" << std::endl;
         Info data;
         setChunkedRequest(new ChunkedRequest);
@@ -123,7 +124,7 @@ std::string MethodPost::extractBodyRequest()
 {
     std::string copy_request = _header;
 
-    copy_request.erase(0, _header.find("\r\n\r\n") + 2);
+    copy_request.erase(0, _header.find("\r\n\r\n") + 4);
     
     return (copy_request);
 }

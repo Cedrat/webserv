@@ -9,7 +9,6 @@ class FieldDelete : public AField
     private :
         AMethod *createGetMethod();
         AMethod *createErrorMethod(Config config, Location location);
-        AMethod *createRedirMethod(Config config, Location location);
         void     delFile();
 
     public : 

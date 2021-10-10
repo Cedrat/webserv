@@ -105,19 +105,6 @@ AMethod *FieldDelete::createErrorMethod(Config config, Location location)
     return (method);
 }
 
-AMethod *FieldDelete::createRedirMethod(Config config, Location location)
-{
-    std::string path_error = config.getPathError(_error);
-
-    std::string header = "HTTP/1.1 " + get_string_error(_error);
-    header += "\nLocation: " + redir_path(_path, location.getRedirect(), location.getLocation());    
-    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
-    header +=  date_string() + "\n\n";
-
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this,_error);
-    return (method);
-}
-
 void FieldDelete::delFile()
 {
     if (delete_f(_final_path.c_str()) > 0)
