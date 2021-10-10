@@ -68,7 +68,7 @@ AMethod *FieldDelete::getAMethod()
 	_final_path = construct_path(getPath(), location);
 	if (_error != OK)
     {
-		return (createErrorMethod(config));
+		return (createErrorMethod(config, location));
     }
 	verifyRedirect(location);
 	if (_error == MOVED_PERMANENTLY)
@@ -76,27 +76,32 @@ AMethod *FieldDelete::getAMethod()
     if (methodNotAuthorized(location))
     {
         _error = METHOD_NOT_ALLOWED;
-        return (createErrorMethod(config));
+        return (createErrorMethod(config, location));
     }
 	if (check_if_file_exist(_final_path) == FALSE)
     {
         _error = NOT_FOUND;
-	    return (createErrorMethod(config));
+	    return (createErrorMethod(config, location));
     }
     delFile();
-	return (createErrorMethod(config));
+	return (createErrorMethod(config, location));
 }
 
-AMethod *FieldDelete::createErrorMethod(Config config)
+AMethod *FieldDelete::createErrorMethod(Config config, Location location)
 {
     std::string header;
     std::string path_error = config.getPathError(_error);
     
     header = "HTTP/1.1 " + get_string_error(_error);
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    if(_error == METHOD_NOT_ALLOWED)
+    {
+        header+= fields_allowed(location);
+    }
     header +=  date_string() + "\n\n";
+    
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this, _error);
     return (method);
 }
 
@@ -109,7 +114,7 @@ AMethod *FieldDelete::createRedirMethod(Config config, Location location)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this,_error);
     return (method);
 }
 

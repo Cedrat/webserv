@@ -132,7 +132,7 @@ AMethod *FieldPost::createErrorMethod(Config config)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this, _error);
     return (method);
 }
 

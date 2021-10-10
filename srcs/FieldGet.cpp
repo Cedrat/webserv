@@ -73,15 +73,21 @@ AMethod *FieldGet::getAMethod()
 	_final_path = construct_path(getPath(), location);
 	if (_error != OK)
 	{
-		return (createErrorMethod(config));
+		return (createErrorMethod(config, location));
 	}
+
 	verifyRedirect(location);
 	if (_error == MOVED_PERMANENTLY)
 		return (createRedirMethod(config, location));
+	if (methodNotAuthorized(location))
+    {
+        _error = METHOD_NOT_ALLOWED;
+        return (createErrorMethod(config, location));
+    }
 	if (check_if_file_exist(_final_path) == FALSE)
 	{
 		_error = NOT_FOUND;
-		return (createErrorMethod(config));
+		return (createErrorMethod(config, location));
 	}	
 	if (isAIPath(_final_path, location))
 	{
@@ -105,17 +111,22 @@ AMethod *FieldGet::createGetMethod()
 	return(method);
 }
 
-AMethod *FieldGet::createErrorMethod(Config config)
+AMethod *FieldGet::createErrorMethod(Config config, Location location)
 {
-	std::string header;
-	std::string path_error = config.getPathError(_error);
-	
-	header = "HTTP/1.1 " + get_string_error(_error);
-	header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
-	header +=  date_string() + "\n\n";
+    std::string header;
+    std::string path_error = config.getPathError(_error);
+    
+    header = "HTTP/1.1 " + get_string_error(_error);
+    header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    if(_error == METHOD_NOT_ALLOWED)
+    {
+        header+= fields_allowed(location);
+    }
+    header +=  date_string() + "\n\n";
+    
 
-	AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
-	return (method);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this, _error);
+    return (method);
 }
 
 AMethod *FieldGet::createAiMethod()
