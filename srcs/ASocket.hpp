@@ -14,6 +14,7 @@ class ASocket
 
     public :
 		ASocket(size_t port, int host, int timeout,int type);
+        int _fd;
         virtual ~ASocket();
 
         int const &     getTimeout() const;

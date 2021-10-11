@@ -27,12 +27,14 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 
 	if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
 	{
+		close(new_socket);
 		delete mypollfd;
 		throw ("Binding error");
 	}
 		
 	if (listen(new_socket, BACKLOG) == -1)
 	{
+		close(new_socket);
 		delete mypollfd;
 		throw ("Listening error");
 	}
@@ -58,7 +60,10 @@ Server::~Server()
 	for (size_t i = 0; i < _sockets.size() ; i++)
 	{
 		if (_sockets[i] != NULL)
+		{
+			close(_sockets[i]->_fd);
 			delete _sockets[i];
+		}
 	}
 }
 
@@ -92,9 +97,12 @@ void Server::addConfig(Config config)
 void Server::createAndAddSocketServer(size_t port, int host)
 {
 	ASocket *socket = new SocketServer(port, host);
+	pollfd *test;
 
 	try {
-		_pollfds.push_back(create_a_listenable_socket(port, host));
+		test = create_a_listenable_socket(port, host);
+		_pollfds.push_back(test);
+		socket->_fd = test->fd;
 		_sockets.push_back(socket);
 	}
 	catch(char const* & e) {
@@ -192,6 +200,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request)
 		new_poll->revents = 0;
 		
 		ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
+		new_socket->_fd = fd_client;
 		_sockets.push_back(new_socket);
 
 		_pollfds.push_back(new_poll);
@@ -212,7 +221,7 @@ void Server::exec_pollout(ASocket *socket)
 void Server::removeClient(size_t index)
 {
 	std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
-	close(_pollfds[index]->fd);
+	close(_sockets[index]->_fd);
 	delete _pollfds[index];
 	delete _sockets[index];
 	_sockets.erase(_sockets.begin() + index);
@@ -223,7 +232,9 @@ void Server::endServer()
 {
 	for (size_t i = 0; i < _sockets.size(); i++)
 	{
+		close(_sockets[i]->_fd);
 		delete _sockets[i];
+		delete _pollfds[i];
 	}
 	_sockets.clear();
 	_pollfds.clear();

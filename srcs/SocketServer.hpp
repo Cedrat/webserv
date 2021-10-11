@@ -6,6 +6,7 @@
 
 class SocketServer : public ASocket
 {
+    
     public :
         SocketServer(size_t port, int host);
         
