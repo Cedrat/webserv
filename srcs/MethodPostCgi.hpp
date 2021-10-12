@@ -15,6 +15,7 @@ class MethodPostCgi : public MethodPost
         Config      _config;
         Location    _location;
         std::string _body;
+        std::string _path_file;
 
         bool        _cgi_init;
         bool        _get_body;

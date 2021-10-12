@@ -9,8 +9,7 @@ MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_rece
 	_file_received = FALSE;
 	_byte_send = 0;
 	_error = NO_CONTENT;
-
-	std::cout << "Welcome to MethodPostCgi" << std::endl;
+	_path_file = construct_path_post(_fields.getPath(), location);
 }
 
 MethodPostCgi::~MethodPostCgi() {
@@ -60,7 +59,8 @@ void MethodPostCgi::exec()
 	}
 	else if (_cgi_init == FALSE)
 	{
-		_cgi = new MethodCgi(_fd, _fields.getPath(), "", _config, _location, _body, "POST", _fields, _path);
+		//_path pas nécessaire finalement. A enlever ?
+		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _body, "POST", _fields, _path);
 		_cgi->init();
 		_cgi_init = TRUE;
 	}

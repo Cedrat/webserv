@@ -19,7 +19,7 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
 	//Temporaire pour url cassées :<
-	treatPath();
+	//treatPath();
 	
 	_fields.setPollout();
 	this->_tmp_out = createTmpFile();
@@ -177,15 +177,18 @@ void MethodCgi::setEnv()
 	this->_env["REQUEST_METHOD="] = this->_method;
 
 		//Fichier à ouvrir avec le binaire 
-	this->_env["PATH_INFO="] = this->getPath();     //A verifier
+	this->_env["PATH_INFO="] = "/POST_test_02.php";     //Remplacer par nom du fichier seul
 	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
 	this->_env["QUERY_STRING="] = _fields.getQuery();
 	//Chemin vers le fichier + requete query.
-	this->_env["REQUEST_URI="] = this->getPath() + _fields.getQuery();
-	this->_env["SCRIPT_FILENAME="] = this->getPath();
+	//this->_env["REQUEST_URI="] = this->getPath() + _fields.getQuery();
+	
+	this->_env["SCRIPT_FILENAME="] = this->_path;
 
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
+	this->_env["CONTENT_TYPE="] = "application/x-www-form-urlencoded";
+	//Corriger CONTENT_TYPE et PATH_INFO
 }
 
 
@@ -350,3 +353,21 @@ void MethodCgi::sendBody()
 	}
 	std::cout << ret << "BYTE SEND" << std::endl;
 }
+
+
+
+/*
+	A FAIRE :
+
+Variables d'environnement
+PATH_INFO
+CONTENT_TYPE
++ les variables actuellement desactivees
+
+Retravailler STDIN. Creer fichier de la même 
+manière que pour STDOUT au lieu d'utiliser un FILE *
+
+Nettoyage
+
+
+*/

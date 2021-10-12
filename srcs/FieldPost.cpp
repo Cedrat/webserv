@@ -184,8 +184,6 @@ void FieldPost::checkBodySize(Config const &config)
 
 AMethod *FieldPost::createCgiMethod(Config config, Location location)
 {
-std::cout << "Enter CGI Post" << std::endl;
-
     AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, *this, config, location);
     return method;
 }
