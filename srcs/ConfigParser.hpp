@@ -32,7 +32,7 @@
 class ConfigParser
 {
     public:
-        ConfigParser( char *filepath );
+        ConfigParser( const char *filepath );
         ConfigParser( ConfigParser const & src );
         ConfigParser & operator=( ConfigParser const & rhs );
         ~ConfigParser();

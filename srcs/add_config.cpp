@@ -1,13 +1,10 @@
 #include "ConfigParser.hpp"
 
-void add_config(const char *path_conf)
+void add_config(const char *path_file)
 {
-
-    (void) path_conf;
-    char file[] = "./step.conf";
     try
     {
-        ConfigParser cp(file);
+        ConfigParser cp(path_file);
     }
     catch(std::exception & e)
     {

@@ -12,7 +12,7 @@
 
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
+ConfigParser::ConfigParser(const char *filepath ) : _serverNb(0), _locationNb(0)
 {
 	if (strlen(filepath) <= 0)
 		throw std::invalid_argument("Error : The config file path is empty");
@@ -22,8 +22,7 @@ ConfigParser::ConfigParser( char *filepath ) : _serverNb(0), _locationNb(0)
 		parser(file);
 	}
 	catch(std::exception & e){
-		std::cerr << e.what() << std::endl;
-		exit(0);
+		throw(std::invalid_argument(e.what()));
 	}
 }
 
@@ -91,7 +90,9 @@ void ConfigParser::openConfigFile( std::string const & file )
 
 	this->_configFile.open(file.c_str(), std::ifstream::in);
 	if (this->_configFile.is_open() == false)
+	{
 		throw std::invalid_argument("Error : Can't open file");
+	}
 }
 
 
