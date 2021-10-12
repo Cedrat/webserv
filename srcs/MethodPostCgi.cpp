@@ -55,6 +55,7 @@ void MethodPostCgi::exec()
 	}
 	else if (this->_get_body == FALSE)
 	{
+		//Stockage du body dans une variable pour transfert au CGI
 		getBody();
 	}
 	else if (_cgi_init == FALSE)

@@ -105,10 +105,7 @@ AMethod *FieldPost::getAMethod()
     }
     if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
 	{
-        std::cout << "Enter CGI Post" << std::endl;
-
-        AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, *this, config, location);
-		return method;
+		return (createCgiMethod(config, location));
 	}
     return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this));
 }
@@ -183,4 +180,12 @@ void FieldPost::checkBodySize(Config const &config)
 {
     if (atoi(_str_content_length.c_str()) > config.getMaxBodySize())
         _error = ENTITY_TOO_LARGE;
+}
+
+AMethod *FieldPost::createCgiMethod(Config config, Location location)
+{
+std::cout << "Enter CGI Post" << std::endl;
+
+    AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, *this, config, location);
+    return method;
 }
