@@ -190,7 +190,6 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 		ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
 		_sockets.push_back(new_socket);
 
-
 		//Request request(fd_client, socket->getHost(),  socket->getPort());
 		_pollfds.push_back(new_poll);
 		//_requests.push_back(request);

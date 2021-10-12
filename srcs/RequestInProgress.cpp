@@ -119,6 +119,7 @@ AMethod * RequestInProgress::getAnswer(pollfd &s_pollfd)
         method = "ERREUR";
         return (new Erreur(_socket_fd, file_path, header,  * new FieldGet(_str_request, *this, s_pollfd)));
     }
+
     method = extract_method(_str_request);
     //std::cout << "WHAT IS THE METHOD MAN ? " << method << std::endl;
     AField *field = field_generator.generate(method, _str_request, *this, s_pollfd);

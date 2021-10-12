@@ -7,7 +7,7 @@
 
 
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
 {
     std::cout << "Welcome to MethodPost" << std::endl;
 }
@@ -15,7 +15,9 @@ AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FA
 
 MethodPost::~MethodPost()
 {
-
+    if (_chunked_request != NULL)
+        delete _chunked_request;
+    delete &_fields;
 }
 
 void MethodPost::init()
@@ -24,19 +26,27 @@ void MethodPost::init()
     _body_received = extractBodyRequest();
     if (_fields.getTransfertEncoding() == "chunked")
     {
+        _body_received = "\r\n" + _body_received;
+        std::cout << "Chunked Request" << std::endl;
         Info data;
         setChunkedRequest(new ChunkedRequest);
         _chunked_request->addData(_body_received);
-        std::cout << "Body_received" << _body_received << std::endl;
+        _byte_received += _body_received.size();
+        if (maxBodySizeIsReached())
+            return ;
         data = _chunked_request->processData();
         writeProcessedDataChunked();
         _body_received = "";
         if (data == all_data_read)
+        {
             _file_received = TRUE;
+            _fields.setPollout();
+        }
         else if (data == incorrect_data)
         {
             _file_received = TRUE;
             _error = BAD_REQUEST;
+            _fields.setPollout();
         }
     }
     else
@@ -67,6 +77,9 @@ void MethodPost::exec()
         {
             Info data;
             _chunked_request->addData(_body_received);
+            _byte_received += _body_received.size();
+            if (maxBodySizeIsReached())
+                return ;
             data = _chunked_request->processData();
             writeProcessedDataChunked();
             _body_received = "";
@@ -99,11 +112,9 @@ void MethodPost::exec()
             setHeader();
             sendHeader();
             setHeaderSent(TRUE);
-            std::cerr << "Header sent" << std::endl;
         }
         else
         {
-            std::cout << "body sent" << std::endl;
             sendBody();
         }
     }
@@ -113,7 +124,7 @@ std::string MethodPost::extractBodyRequest()
 {
     std::string copy_request = _header;
 
-    copy_request.erase(0, _header.find("\r\n\r\n") + 4 );
+    copy_request.erase(0, _header.find("\r\n\r\n") + 4);
     
     return (copy_request);
 }
@@ -152,8 +163,8 @@ void MethodPost::writeFile()
 void MethodPost::writeProcessedDataChunked()
 {
     int fd = open(getPath().c_str(),  O_APPEND| O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-
-    _chunked_request->writeProcessedData(fd); //check maxbodysize
+    
+    _chunked_request->writeProcessedData(fd); 
 
     close(fd); 
 }
@@ -179,19 +190,16 @@ void MethodPost::sendBody()
     std::fstream fs;
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
-    std::cout << "PATH : " << getPath() << std::endl; 
     fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
     fs.seekg(_byte_send);
     fs.read(buffer, BUFFER_SIZE);
     buffer[fs.gcount()] = '\0'; 
-    std::cout << "how much read? " << fs.gcount() << std::endl;
     ret = ::send(getFd(), buffer, fs.gcount(), 0);
     _byte_send += ret;
     if (ret == fs.gcount() && fs.eof())
     {
         setIsFinished(TRUE);
     }
-    std::cout << ret << "BYTE SEND" << std::endl;
     fs.close();
 }
 
@@ -212,4 +220,18 @@ void MethodPost::setHeader()
 void MethodPost::setChunkedRequest(ChunkedRequest *chunked_request)
 {
     _chunked_request = chunked_request;
+}
+
+bool MethodPost::maxBodySizeIsReached()
+{
+    Config config = _fields.getDataRequest().getConfigs()[find_index_best_config(_fields.getDataRequest().getConfigs(), _fields.getHostName(), _fields.getDataRequest().getPort(), _fields.getDataRequest().getHost())];
+
+    if (_byte_received > config.getMaxBodySize())
+    {
+        _error = ENTITY_TOO_LARGE;
+        _file_received = TRUE;
+        _fields.setPollout();
+        return TRUE;
+    }
+    return FALSE;
 }

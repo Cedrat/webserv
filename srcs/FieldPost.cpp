@@ -99,10 +99,17 @@ AMethod *FieldPost::getAMethod()
         return (createRedirMethod(config, location));
     }
     checkBodySize(config);
-     if (_error != OK)
+    if (_error != OK)
     {
         return (createErrorMethod(config));
     }
+    if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
+	{
+        std::cout << "Enter CGI Post" << std::endl;
+
+        AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, *this, config, location);
+		return method;
+	}
     return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this));
 }
 

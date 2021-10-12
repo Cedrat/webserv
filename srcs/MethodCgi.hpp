@@ -28,9 +28,12 @@ class MethodCgi : public AMethod
         bool        _pid_ended;
         size_t      _readed;
 
+        std::string _post_path;
+
     public:
         MethodCgi(int fd, std::string path, std::string header, 
-                Config config, Location location, std::string body, std::string method, AField & field);
+                Config config, Location location, std::string body, 
+                std::string method, AField & field, std::string post_path );
         ~MethodCgi();
 
         void init();
@@ -50,6 +53,9 @@ class MethodCgi : public AMethod
         void        adaptHeader();
         void        sendBody();
         void        setErrorResponse();
+
+        bool        getStatus();
+        void        treatPath();
         
 };
 

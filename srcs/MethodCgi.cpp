@@ -2,8 +2,8 @@
 #include "AField.hpp"
 #include "define.hpp"
 
-MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field) 
-	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0)
+MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field, std::string post_path) 
+	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0), _post_path(post_path)
 {
 	_tmp_out = "";
 	_read_ended = FALSE;
@@ -18,6 +18,9 @@ MethodCgi::~MethodCgi()
 
 void MethodCgi::init()
 {
+	//Temporaire pour url cassées :<
+	treatPath();
+	
 	_fields.setPollout();
 	this->_tmp_out = createTmpFile();
 	setEnv();
@@ -28,8 +31,10 @@ void MethodCgi::exec()
 {
 	if (getHeaderSent() == FALSE)
 	{
-		if (waitpid(_pid, NULL, WNOHANG) > 0)
+		if (waitpid(_pid, NULL, WNOHANG) != 0 && _pid_ended == FALSE)
+		{
 			_pid_ended = TRUE;      //CGI process terminé
+		}
 		if (_pid_ended == TRUE && _read_ended == FALSE)
 			readCgiFile();          //read non bloquant
 		else if (_pid_ended == TRUE && _read_ended == TRUE)
@@ -70,16 +75,20 @@ void MethodCgi::execCGI( char ** args, char ** env )
 					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
 					S_IRUSR | S_IWUSR);
 
+	FILE *fin = tmpfile();
+	long tmp_in = fileno(fin);
+
 	//Creation des pipes
-	if ((pipe(fd) < 0) || (tmp < 0))
+	if ((pipe(fd) < 0) || (tmp < 0) || (tmp_in < 0))
 	{
 		std::cerr << "Pipe or tmp file opening failed" << std::endl;
 		return ;
 	}
 
 	//Ecriture du body dans le cas de POST
-	write(fd[0], _body.c_str(), _body.size());
-	lseek(fd[0], 0, SEEK_SET);
+	write(tmp_in, _body.c_str(), _body.size());
+	lseek(tmp_in, 0, SEEK_SET);
+
 
 	_pid = fork();
 	if (_pid == -1)     //Error
@@ -90,14 +99,12 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	}
 	else if (_pid == 0)       //Child
 	{
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
+		dup2(tmp_in, STDIN_FILENO);
 		dup2(tmp, STDOUT_FILENO);
 
 		if ((execve(args[0], args, env)) < 0)
 		{
-			std::cerr << "Execve failed" << std::endl;
-			close(fd[0]);
+			close(tmp_in);
 			close(tmp);
 			remove(this->_tmp_out.c_str());
 			exit(-1);
@@ -105,7 +112,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	}
 	else  //Parent
 	{
-		close(fd[0]);
+		close(tmp_in);
 		close(tmp);
 	}
 }
@@ -171,10 +178,11 @@ void MethodCgi::setEnv()
 
 		//Fichier à ouvrir avec le binaire 
 	this->_env["PATH_INFO="] = this->getPath();     //A verifier
-	this->_env["PATH_TRANSLATED="] = this->getPath();   //path sans la partie www/, juste fin du chemin vers fichier ?
+	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
 	this->_env["QUERY_STRING="] = _fields.getQuery();
 	//Chemin vers le fichier + requete query.
 	this->_env["REQUEST_URI="] = this->getPath() + _fields.getQuery();
+	this->_env["SCRIPT_FILENAME="] = this->getPath();
 
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
@@ -248,6 +256,18 @@ char ** MethodCgi::setArgs()
 	return args;
 }
 
+bool MethodCgi::getStatus()
+{
+	return this->_is_finished;
+}
+
+void MethodCgi::treatPath()
+{
+	if (_path.find("./www") == std::string::npos)
+		_path.insert(0, "./www");
+	
+}
+
 
 
 /**************************************************************
@@ -310,8 +330,6 @@ Body
 **************************************************************/
 void MethodCgi::sendBody()
 {
-	//signal(SIGPIPE, SIG_IGN);
-
 	char                buffer[BUFFER_SIZE + 1];
 	int                 ret = 0;
 	std::stringstream   ss;
@@ -320,27 +338,15 @@ void MethodCgi::sendBody()
 
 	ss.seekg(_sent);
 	ss.read(buffer, BUFFER_SIZE);
-	buffer[ss.gcount()] = '\0'; 
-	std::cout << "how much read? " << ss.gcount() << std::endl;
+	buffer[ss.gcount()] = '\0';
 
+	std::cout << "how much read? " << ss.gcount() << std::endl;
 	ret = ::send(getFd(), buffer, ss.gcount(), 0);
 	_sent += ret;
+
 	if (ret == ss.gcount() && ss.eof())
 	{
 		setIsFinished(TRUE);
 	}
 	std::cout << ret << "BYTE SEND" << std::endl;
 }
-
-
-
-/* TO DO :
-
-Check les leaks apres la verif de la config (et check si leak en cas d'erreur dans la conf)
-Check les leaks apres initiliasation du serveur ratee
-	-> EX : Si un serveur ne peut pas s'initialiser (port deja bind par ex)
-
-Gerer catch des signaux pouur quitter proprement le programme
-	-> A faire pus tard
-
-*/

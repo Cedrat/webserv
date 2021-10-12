@@ -3,6 +3,7 @@
 
 #include "../includes/utils.hpp"
 #include "AField.hpp"
+#include "MethodPostCgi.hpp"
 
 class FieldPost : public AField
 {
