@@ -34,7 +34,6 @@ void ResponseHTTP::send()
     fs.open(_path_file.c_str(),  std::fstream::in | std::fstream::app);
     fs.seekg(_byte_send);
     fs.read(buffer, BUFFER_SIZE);
-    std::cout << fs.gcount() << "surveillange" << std::endl;
     if (fs)
     {
         ret = ::send(_fd_to_answer, buffer, fs.gcount(), 0);

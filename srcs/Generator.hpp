@@ -21,7 +21,7 @@ class FieldGenerator
                 return (new FieldPost(str_request, data_request, s_pollfd));
             else if (method == "DELETE")
                 return (new FieldDelete(str_request, data_request, s_pollfd));
-            throw ("bad method");
+            return (new FieldGet(str_request, data_request, s_pollfd));
         }
 };
 

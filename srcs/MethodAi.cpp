@@ -22,13 +22,10 @@ void MethodAi::exec()
     {
         sendHeader();
         setHeaderSent(TRUE);
-        std::cerr << "Header sent" << std::endl;
     }
     else
     {
-        std::cout << "body sent" << std::endl;
         sendBody();
-        //setIsFinished(TRUE);
     }
 }
 

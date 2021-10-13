@@ -9,7 +9,6 @@
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
 AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
 {
-    std::cout << "Welcome to MethodPost" << std::endl;
 }
 
 
@@ -27,7 +26,6 @@ void MethodPost::init()
     if (_fields.getTransfertEncoding() == "chunked")
     {
         _body_received = "\r\n" + _body_received;
-        std::cout << "Chunked Request" << std::endl;
         Info data;
         setChunkedRequest(new ChunkedRequest);
         _chunked_request->addData(_body_received);
@@ -57,7 +55,6 @@ void MethodPost::init()
         if (_byte_received >= _fields.getContentLength())
         {
             _fields.setPollin();
-            std::cout << "File received entirely" << std::endl;
             _file_received = TRUE;
             _fields.setPollout();
         }
@@ -99,7 +96,6 @@ void MethodPost::exec()
             if (_byte_received >= _fields.getContentLength())
             {
                 _fields.setPollin();
-                std::cout << "File received entirely" << std::endl;
                 _file_received = TRUE;
                 _fields.setPollout();
             }
@@ -137,10 +133,6 @@ void MethodPost::receiveData()
     ret = read(_fd, buffer, BUFFER_SIZE);
     buffer[ret] = 0;
     _body_received.append(buffer, ret);
-
-    std::cout << "size_Body "<<  _body_received.size() << "ret = " << ret << std::endl;
-     
-    std::cout << "_body_received :\n" << _body_received << std::endl;
 
     // check length body_received and content-Length
     // If content-Length inferior to size body

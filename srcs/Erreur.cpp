@@ -1,16 +1,16 @@
 #include "Erreur.hpp"
 #include "define.hpp"
 #include "AField.hpp"
+#include "CustomException.hpp"
 
-Erreur::Erreur(int fd, std::string path, std::string header, AField &field) : 
-AMethod(fd, path, header, field)
+Erreur::Erreur(int fd, std::string path, std::string header, AField &field, int error) : 
+AMethod(fd, path, header, field) , _error(error)
 {
 
 }
 
 Erreur::~Erreur()
 {
-
     delete &_fields;
 }
 void Erreur::init() 
@@ -42,19 +42,20 @@ void Erreur::sendBody()
     std::fstream fs;
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
-        std::cout << "PATH : " << getPath() << std::endl; 
-        fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
-        //fs.seekg(_byte_send);
-        fs.seekg(0);
-        fs.read(buffer, BUFFER_SIZE);
-        buffer[fs.gcount()] = '\0'; 
-        std::cout << "how much read? " << fs.gcount() << std::endl;
-        ret = ::send(getFd(), buffer, fs.gcount(), 0);
-        //_byte_send += ret;
-        if (ret == fs.gcount() && fs.eof())
+    
+    fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
+    fs.seekg(0);
+    fs.read(buffer, BUFFER_SIZE);
+    buffer[fs.gcount()] = '\0'; 
+    ret = ::send(getFd(), buffer, fs.gcount(), 0);
+    if (ret == fs.gcount() && fs.eof())
+    {
+        _is_finished = TRUE;
+        if (_error == BAD_REQUEST)
         {
-            _is_finished = TRUE;
+            fs.close();
+            throw(BadRequestException());
         }
-         std::cout << ret << "BYTE SEND" << std::endl;
-        fs.close();
+    }
+    fs.close();
 }

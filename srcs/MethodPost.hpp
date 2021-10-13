@@ -31,7 +31,7 @@ class MethodPost: public AMethod
 
     public :
         MethodPost(int fd, std::string path, std::string request_received, AField &field);
-        ~MethodPost();
+        virtual ~MethodPost();
 
     void init();
     void exec();

@@ -13,7 +13,7 @@ MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config
 
 MethodCgi::~MethodCgi()
 {
-
+	delete &_fields;
 }
 
 void MethodCgi::init()
@@ -41,13 +41,11 @@ void MethodCgi::exec()
 		{
 			send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
 			setHeaderSent(TRUE);
-			std::cerr << "CGI header sent" << std::endl;
 		}
 	}
-	else
+	else	
 	{
 		sendBody();
-		std::cout << "CGI body sent" << std::endl;
 	}
 }
 
@@ -66,6 +64,7 @@ void MethodCgi::processCGI()
 
 	execCGI(args, env);
 	freeEnv(env);
+	freeArgs(args);
 }
 
 void MethodCgi::execCGI( char ** args, char ** env )
@@ -113,6 +112,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	else  //Parent
 	{
 		close(tmp_in);
+		fclose(fin);
 		close(tmp);
 	}
 }
@@ -346,7 +346,6 @@ void MethodCgi::sendBody()
 	ss.read(buffer, BUFFER_SIZE);
 	buffer[ss.gcount()] = '\0';
 
-	std::cout << "how much read? " << ss.gcount() << std::endl;
 	ret = ::send(getFd(), buffer, ss.gcount(), 0);
 	_sent += ret;
 
@@ -354,7 +353,6 @@ void MethodCgi::sendBody()
 	{
 		setIsFinished(TRUE);
 	}
-	std::cout << ret << "BYTE SEND" << std::endl;
 }
 
 

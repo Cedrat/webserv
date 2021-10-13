@@ -27,8 +27,6 @@ std::string create_ai_page(const char * short_path, const char * long_path)
         ai_page += "<p><a href=\"" + str_path +  name_file + "\">" + " " + name_file + "</a></p>\n";
     }
     ai_page += "</html>";
-
-    std::cout << "AI PAGE CREATED" << std::endl;
     closedir(dir);
     return (ai_page);
 }

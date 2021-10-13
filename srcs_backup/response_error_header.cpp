@@ -13,7 +13,6 @@ std::string  response_error_header(int num_code,  Config config, fd fd_to_answer
     std::string path;
     path = config.getPathError(num_code);
 
-    std::cout << "response_error_header" <<  path << std::endl;
     std::string line;
     std::ifstream file;
     std:: string page;

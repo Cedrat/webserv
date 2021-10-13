@@ -8,7 +8,7 @@ class FieldGet : public AField
 {
     private :
         AMethod *createGetMethod();
-        AMethod *createErrorMethod(Config config);
+        AMethod *createErrorMethod(Config config, Location location);
         AMethod *createAiMethod();
         //AMethod *createRedirMethod(Config config, Location location);
         AMethod *createCgiMethod(Config config, Location location);

@@ -17,7 +17,8 @@ class FieldPost : public AField
         AMethod *createCgiMethod(Config config, Location location);
         std::string createPathUploadFolder(std::string upload_folder);
         void    checkValidPath();
-        void    checkBodySize(Config const & config);    
+        void    checkBodySize(Config const & config);
+        void    verifyPath(); 
     
 public :
         FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd);

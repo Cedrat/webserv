@@ -122,7 +122,6 @@ void Request::verifyMethod(Config  config)
 
     if (location.checkIfMethodIsPresent(getMethod()) == FALSE)
     {
-        std::cout << "METHOD_NOT_ALLOWED" << std::endl;
         setError(METHOD_NOT_ALLOWED);
     }
 }
@@ -290,10 +289,8 @@ void    Request::checkSyntaxRequest()
     std::vector<std::string> all_lines;
     std::string lines = _request;
 
-    std::cout << "___" << lines << "___" <<  std::endl;
     if (lines.find("\r\n\r\n") != std::string::npos)
         lines.erase(lines.find("\r\n\r\n"), lines.size() - (lines.find("\r\n\r\n")));
-    std::cout << "___" << lines << "___" <<  std::endl;
     char motif2[] = "[a-zA-z0-9]+: .+\r\n";
     all_lines = split_string(lines, "\n");
     checkDuplicate(all_lines);
@@ -308,7 +305,6 @@ void    Request::checkSyntaxRequest()
         }
         else if (all_lines[i].find(" ") != std::string::npos)
         {
-            std::cout << "heho" << std::endl;
             setError(BAD_REQUEST);
         }
     }
@@ -357,7 +353,6 @@ void Request::checkAndAddHostName(std::string request)
     if (_where_is_request == HOST_LINE && match_regex(const_cast<char *>(request.c_str()), motif) >= 1 && getError() == OK)
     {
         _host_name = request.substr(request.find("Host: ") + 6, request.find("\n", request.find("Host: ") + 6) - (request.find("Host: ") + 7));
-        std::cout << "L'Host name retenu est " << _host_name << std::endl;
         _where_is_request = REQUEST_FINISHED;
     }
 }
@@ -365,11 +360,9 @@ void Request::checkAndAddHostName(std::string request)
 void Request::checkAndAddContentLength(std::string request)
 {
     char motif[] = "Content-Length:";
-    std::cout << "Content debut de fonction " << std::endl;
     if (match_regex(const_cast<char *>(request.c_str()), motif) >= 1)
     {
         _str_content_length = string_to_int(request.substr(request.find("Content-Length: ") + 16, request.find("\n", request.find("Content-Length: ") + 16) - (request.find("Content-Length: ") + 17)));
-        std::cout << "Content length " << _str_content_length << std::endl;
         _where_is_request = REQUEST_FINISHED;
     }
 }

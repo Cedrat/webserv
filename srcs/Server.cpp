@@ -27,17 +27,18 @@ pollfd * create_a_listenable_socket(size_t port, int host)
 
 	if (bind(new_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1)
 	{
+		close(new_socket);
 		delete mypollfd;
 		throw ("Binding error");
 	}
 		
 	if (listen(new_socket, BACKLOG) == -1)
 	{
+		close(new_socket);
 		delete mypollfd;
 		throw ("Listening error");
 	}
 
-	//fcntl(new_socket, F_SETFL, O_NONBLOCK);
 	mypollfd->fd = new_socket;
 	mypollfd->events = POLLIN;
 	mypollfd->revents = 0;
@@ -59,12 +60,16 @@ Server::~Server()
 	for (size_t i = 0; i < _sockets.size() ; i++)
 	{
 		if (_sockets[i] != NULL)
+		{
+			close(_sockets[i]->_fd);
 			delete _sockets[i];
+		}
 	}
 }
 
 void clean_and_close_server(int err)
 {
+	(void)err;
 	throw(EmergencyExit());
 }
 
@@ -92,9 +97,12 @@ void Server::addConfig(Config config)
 void Server::createAndAddSocketServer(size_t port, int host)
 {
 	ASocket *socket = new SocketServer(port, host);
+	pollfd *test;
 
 	try {
-		_pollfds.push_back(create_a_listenable_socket(port, host));
+		test = create_a_listenable_socket(port, host);
+		_pollfds.push_back(test);
+		socket->_fd = test->fd;
 		_sockets.push_back(socket);
 	}
 	catch(char const* & e) {
@@ -125,8 +133,6 @@ void Server::acceptConnection(void)
 {
 	std::vector<pollfd> poll_fd_copy = copy_value_of_pointer_vector(_pollfds);
 	
-	char buffer[BUFFER_SIZE];
-	int ret = 0;
 
 	poll(poll_fd_copy.data(), poll_fd_copy.size(), TIMEOUT);
 	for (size_t i = 0; i < _sockets.size() && i < poll_fd_copy.size(); i++)
@@ -138,16 +144,23 @@ void Server::acceptConnection(void)
 		else if (poll_fd_copy[i].revents & POLLIN)
 		{
 			try {
-				exec_pollin(_sockets[i], poll_fd_copy[i].fd, *_pollfds[i]);
+				exec_pollin(_sockets[i], poll_fd_copy[i].fd);
 			}
-			catch (EOFException const &e)
+			catch (CloseSocketException const &e)
 			{
 				removeClient(i);
 			}
 		}
 		else if (poll_fd_copy[i].revents & POLLOUT)
 		{
-			exec_pollout(_sockets[i], poll_fd_copy[i].fd, poll_fd_copy[i]);
+			try {
+				exec_pollout(_sockets[i]);
+			}
+			catch (CloseSocketException const &e)
+			{
+				std::cerr << e.what() << std::endl;
+				removeClient(i);
+			}
 		}
 	}
 
@@ -164,13 +177,13 @@ void Server::launchingServer(void)
 		}
 		catch (char const* str)
 		{
-			std::cout << "ERROR CATCH : " << str << std::endl;
+			std::cerr << "ERROR CATCH : " << str << std::endl;
 		}
 	} 
  
 }
 
-void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
+void Server::exec_pollin(ASocket *socket, int fd_request)
 {
 
 	if (socket->getType() == SERVER)
@@ -179,7 +192,6 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 		struct sockaddr_in their_addr;
 		socklen_t their_size = sizeof(struct sockaddr_in);
 			
-		std::cout << socket->getHost() << std::endl;
 		fd_client = accept(fd_request, (struct sockaddr *)&their_addr, &their_size);
 		
 		pollfd *new_poll = new pollfd;
@@ -188,37 +200,28 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 		new_poll->revents = 0;
 		
 		ASocket *new_socket = new SocketClient(socket->getPort(), socket->getHost(), fd_client, _configs, *new_poll);
+		new_socket->_fd = fd_client;
 		_sockets.push_back(new_socket);
 
-		//Request request(fd_client, socket->getHost(),  socket->getPort());
 		_pollfds.push_back(new_poll);
-		//_requests.push_back(request);
 		std::cout << "New client connected : " << fd_client << std::endl;
 	}
 	else
 	{
-		std::cout << "I'm a client " << std::endl;
-		std::cout << "Event " << s_pollfd.events << std::endl;
 		socket->setTimeout(std::time(0));
 		socket->exec();
-		// s_pollfd.events = POLLOUT;
-		// s_pollfd.revents = 0;
 	}
 }
 
-void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
+void Server::exec_pollout(ASocket *socket)
 {
-	//std::cout << "POLLOUT " << std::endl;
 	socket->exec();
-	//send(fd_client, "You got a new pokemon\n", 23, 0);
-	// s_pollfd.events = POLLIN;
-	// s_pollfd.revents = 0;
 }
 
 void Server::removeClient(size_t index)
 {
 	std::cout << "Client " << _pollfds[index]->fd << " disconnected" << std::endl;
-	close(_pollfds[index]->fd);
+	close(_sockets[index]->_fd);
 	delete _pollfds[index];
 	delete _sockets[index];
 	_sockets.erase(_sockets.begin() + index);
@@ -229,7 +232,9 @@ void Server::endServer()
 {
 	for (size_t i = 0; i < _sockets.size(); i++)
 	{
+		close(_sockets[i]->_fd);
 		delete _sockets[i];
+		delete _pollfds[i];
 	}
 	_sockets.clear();
 	_pollfds.clear();
