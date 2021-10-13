@@ -1,9 +1,9 @@
 #include "MethodPostCgi.hpp"
 
 MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_received, AField &field,
-		Config config, Location location )
+		Config config, Location location, std::string content_type )
 	: MethodPost(fd, path, request_received, field), _config(config), _location(location), _body(""),
-	_cgi_init(FALSE), _get_body(FALSE), _content_type("")
+	_content_type(content_type), _cgi_init(FALSE), _get_body(FALSE)
 {
 	_byte_received = 0;
 	_file_received = FALSE;
@@ -60,13 +60,12 @@ void MethodPostCgi::exec()
 	else if (_cgi_init == FALSE)
 	{
 		//_path pas nécessaire finalement. A enlever ?
-		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _body, "POST", _fields, _path);
+		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _body, "POST", _fields, _content_type);
 		_cgi->init();
 		_cgi_init = TRUE;
 	}
 	else
 	{
-		std::cout << "CGI exec" << std::endl;
 		_cgi->exec();
 		if (_cgi->getStatus() == TRUE)
 		{

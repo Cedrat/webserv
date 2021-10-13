@@ -24,7 +24,7 @@ class MethodPostCgi : public MethodPost
 
     public:
         MethodPostCgi( int fd, std::string path, std::string request_received, AField &field,
-            Config config, Location location );
+            Config config, Location location, std::string content_type );
         ~MethodPostCgi();
         void exec();
         void getBody();

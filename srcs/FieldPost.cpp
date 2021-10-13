@@ -69,12 +69,11 @@ void FieldPost::fillField()
             std::cout << "Post transfer-encoding : " << _transfert_encoding << std::endl;
         }
         /* Faire recup conent-type ici, avec value dans Field et un getter*/
-        /*else if (str_to_lower(splitted_line[0]) == "transfer-encoding")
+        else if (str_to_lower(splitted_line[0]) == "content-type")
         {
             trim_field(splitted_line[1]);
-            _transfert_encoding = splitted_line[1].c_str();
-            std::cout << "Post transfer-encoding : " << _transfert_encoding << std::endl;
-        }*/
+            _content_type = splitted_line[1].c_str();
+        }
     } 
 } 
 
@@ -191,6 +190,7 @@ void FieldPost::checkBodySize(Config const &config)
 
 AMethod *FieldPost::createCgiMethod(Config config, Location location)
 {
-    AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, *this, config, location);
+    AMethod * method = new MethodPostCgi(_data_request.getFd(), _final_path, _str_request, 
+            *this, config, location, _content_type);
     return method;
 }

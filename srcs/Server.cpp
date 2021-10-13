@@ -208,7 +208,7 @@ void Server::exec_pollin(ASocket *socket, int fd_request,  pollfd & s_pollfd)
 
 void Server::exec_pollout(ASocket *socket, int fd_client, pollfd & s_pollfd)
 {
-	std::cout << "POLLOUT " << std::endl;
+	//std::cout << "POLLOUT " << std::endl;
 	socket->exec();
 	//send(fd_client, "You got a new pokemon\n", 23, 0);
 	// s_pollfd.events = POLLIN;

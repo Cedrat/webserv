@@ -13,7 +13,6 @@ int main()
 		ConfigParser conf(file);
 		for(int i = 0; i < conf.getServerNb(); i++)
 			server.addConfig(conf.getOneServer(i));
-		std::cout << "Everything went well :)" << std::endl;
 	}
 	catch(ParserExit const& e)
 	{

@@ -2,8 +2,8 @@
 #include "AField.hpp"
 #include "define.hpp"
 
-MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field, std::string post_path) 
-	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0), _post_path(post_path)
+MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field, std::string content_type) 
+	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0), _content_type(content_type)
 {
 	_tmp_out = "";
 	_read_ended = FALSE;
@@ -177,18 +177,15 @@ void MethodCgi::setEnv()
 	this->_env["REQUEST_METHOD="] = this->_method;
 
 		//Fichier à ouvrir avec le binaire 
-	this->_env["PATH_INFO="] = "/POST_test_02.php";     //Remplacer par nom du fichier seul
+	this->_env["PATH_INFO="] = getPathInfo();
 	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
 	this->_env["QUERY_STRING="] = _fields.getQuery();
-	//Chemin vers le fichier + requete query.
-	//this->_env["REQUEST_URI="] = this->getPath() + _fields.getQuery();
+	this->_env["REQUEST_URI="] = this->_path + _fields.getQuery();
 	
 	this->_env["SCRIPT_FILENAME="] = this->_path;
-
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
-	this->_env["CONTENT_TYPE="] = "application/x-www-form-urlencoded";	//axtract-body ?
-	//Corriger CONTENT_TYPE et PATH_INFO
+	this->_env["CONTENT_TYPE="] = this->_content_type;
 }
 
 
@@ -264,11 +261,17 @@ bool MethodCgi::getStatus()
 	return this->_is_finished;
 }
 
-void MethodCgi::treatPath()
+std::string MethodCgi::getPathInfo()
 {
-	if (_path.find("./www") == std::string::npos)
-		_path.insert(0, "./www");
-	
+	std::string	file_path;
+	size_t		pos;
+
+	if ((pos =_path.rfind("/")) != std::string::npos)
+	{
+		file_path = _path.substr(0, pos);
+		return file_path;
+	}
+	return _path;
 }
 
 

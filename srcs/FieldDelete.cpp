@@ -25,13 +25,13 @@ void FieldDelete::fillField()
     for (size_t i = 1; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ":");
-        std::cout << "Splitted request " << i << " " << splitted_request[i] << std::endl;
-        std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
+        //std::cout << "Splitted request " << i << " " << splitted_request[i] << std::endl;
+        //std::cout << "splitted line [0] " << str_to_lower(splitted_line[0]) << std::endl;
         if (str_to_lower(splitted_line[0]) == "host")
         {
             trim(splitted_line[1], ' ');
             _host_name = splitted_line[1];
-            std::cout << "host_name in field get " << _host_name << std::endl;
+            //std::cout << "host_name in field get " << _host_name << std::endl;
         }
     } 
 }

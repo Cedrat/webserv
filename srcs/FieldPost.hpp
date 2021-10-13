@@ -11,6 +11,7 @@ class FieldPost : public AField
         std::string _transfert_encoding;
         std::string _str_content_length;
         int         _content_length;
+        std::string _content_type;
 
         AMethod *createErrorMethod(Config config);
         AMethod *createCgiMethod(Config config, Location location);
