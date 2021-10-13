@@ -8,7 +8,7 @@ MethodAi::MethodAi(int fd, std::string ai_file, std::string header, AField &fiel
 
 MethodAi::~MethodAi()
 {
-
+    delete &_fields;
 }
 
 void MethodAi::init()

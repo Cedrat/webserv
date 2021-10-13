@@ -3,6 +3,7 @@
 
 #include "../includes/utils.hpp"
 #include "AField.hpp"
+#include "MethodPostCgi.hpp"
 
 class FieldPost : public AField
 {
@@ -12,6 +13,7 @@ class FieldPost : public AField
         int         _content_length;
 
         AMethod *createErrorMethod(Config config);
+        AMethod *createCgiMethod(Config config, Location location);
         std::string createPathUploadFolder(std::string upload_folder);
         void    checkValidPath();
         void    checkBodySize(Config const & config);    

@@ -16,11 +16,12 @@ class AMethod
 		bool _is_finished;
 		std::string _path;
 		std::string _header;
-		AField & 	_fields;
+		AField  	 &_fields;
 
 	public :
 		AMethod(int fd, std::string path, std::string header, AField &fields);
-		virtual ~AMethod() {};
+		virtual ~AMethod() {
+		};
 		virtual void init() = 0;
 		virtual void exec() = 0;
 

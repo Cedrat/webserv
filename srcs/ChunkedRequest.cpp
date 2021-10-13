@@ -1,9 +1,11 @@
 #include "../includes/utils.hpp"
 #include "ChunkedRequest.hpp"
+#include "CustomException.hpp"
 
 
 static bool is_hexa_base(char i)
 {
+    i = toupper(i);
     if (('0' <= i && i <= '9') || ('A' <= i && i <= 'F'))
         return (TRUE);
     return (FALSE);
@@ -54,8 +56,7 @@ Info ChunkedRequest::processData()
         }
         
     }
-    std::cout << "data " << data << std::endl;
-    return data;
+        return data;
 }
 
 Info ChunkedRequest::checkNextDataIsByteToTreat()
@@ -92,7 +93,7 @@ void ChunkedRequest::extractNbBytesToRead()
 
 void ChunkedRequest::treatData()
 {
-    if (_nb_bytes_to_treat > _data_not_processed.size())
+    if (_nb_bytes_to_treat > static_cast<int>(_data_not_processed.size()))
     {
         _processed_data += _data_not_processed;
         _nb_bytes_to_treat -= _data_not_processed.size();
@@ -108,28 +109,23 @@ void ChunkedRequest::treatData()
 
 void ChunkedRequest::writeProcessedData(int fd)
 {
+    if (_processed_data.size() == 0)
+        return;
     int ret;
     ret = write(fd, _processed_data.c_str(), _processed_data.size());
     if (ret < 0)
-        std::cout << "tant pis" << std::endl;
-    else if (ret == _processed_data.size())
+        return ;
+    else if (ret == 0)
+    {
+        throw (EOFException());
+    }
+    else if (ret == static_cast<int>(_processed_data.size()))
     {
         _processed_data = "";
     }
-    else if (ret != _processed_data.size())
+    else if (ret != static_cast<int>(_processed_data.size()))
     {
         _processed_data.erase(0, ret);
     }
     
 };
-
-
-// int main()
-// {
-//     ChunkedRequest test;
-
-//     test.addData("\r\n5\r\n");
-//     test.processData();
-//     test.addData("\r\n");
-//     test.processData();
-// }

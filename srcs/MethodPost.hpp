@@ -27,6 +27,7 @@ class MethodPost: public AMethod
         void        sendBody();
         void        setChunkedRequest(ChunkedRequest *);
         void        writeProcessedDataChunked();
+        bool        maxBodySizeIsReached();
 
     public :
         MethodPost(int fd, std::string path, std::string request_received, AField &field);
