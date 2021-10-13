@@ -68,6 +68,13 @@ void FieldPost::fillField()
             _transfert_encoding = splitted_line[1].c_str();
             std::cout << "Post transfer-encoding : " << _transfert_encoding << std::endl;
         }
+        /* Faire recup conent-type ici, avec value dans Field et un getter*/
+        /*else if (str_to_lower(splitted_line[0]) == "transfer-encoding")
+        {
+            trim_field(splitted_line[1]);
+            _transfert_encoding = splitted_line[1].c_str();
+            std::cout << "Post transfer-encoding : " << _transfert_encoding << std::endl;
+        }*/
     } 
 } 
 

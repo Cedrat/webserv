@@ -6,7 +6,6 @@ bool isCgiPath(std::string path, std::string extension)
 
     if ((pos = path.find(extension)) != std::string::npos)
     {
-        //Check si il y a quelque chose après ?
         return true;
     }
     return false;

@@ -3,7 +3,7 @@
 MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_received, AField &field,
 		Config config, Location location )
 	: MethodPost(fd, path, request_received, field), _config(config), _location(location), _body(""),
-	_cgi_init(FALSE), _get_body(FALSE)
+	_cgi_init(FALSE), _get_body(FALSE), _content_type("")
 {
 	_byte_received = 0;
 	_file_received = FALSE;

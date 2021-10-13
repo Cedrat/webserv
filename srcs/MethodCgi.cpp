@@ -187,7 +187,7 @@ void MethodCgi::setEnv()
 
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
-	this->_env["CONTENT_TYPE="] = "application/x-www-form-urlencoded";
+	this->_env["CONTENT_TYPE="] = "application/x-www-form-urlencoded";	//axtract-body ?
 	//Corriger CONTENT_TYPE et PATH_INFO
 }
 
