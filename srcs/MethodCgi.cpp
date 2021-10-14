@@ -6,6 +6,7 @@ MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config
 	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0), _content_type(content_type)
 {
 	_tmp_out = "";
+	_tmp_in = "";
 	_read_ended = FALSE;
 	_pid_ended = FALSE;
 	_readed = 0;
@@ -18,11 +19,9 @@ MethodCgi::~MethodCgi()
 
 void MethodCgi::init()
 {
-	//Temporaire pour url cassées :<
-	//treatPath();
-	
 	_fields.setPollout();
 	this->_tmp_out = createTmpFile();
+	this->_tmp_in = createTmpFile();
 	setEnv();
 	processCGI();
 }
@@ -69,18 +68,16 @@ void MethodCgi::processCGI()
 
 void MethodCgi::execCGI( char ** args, char ** env )
 {
-	int     fd[2];
-	int     tmp = open(this->_tmp_out.c_str(), 
+	int     tmp_out = open(this->_tmp_out.c_str(), 
+					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
+					S_IRUSR | S_IWUSR);
+	int     tmp_in = open(this->_tmp_in.c_str(), 
 					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
 					S_IRUSR | S_IWUSR);
 
-	FILE *fin = tmpfile();
-	long tmp_in = fileno(fin);
-
-	//Creation des pipes
-	if ((pipe(fd) < 0) || (tmp < 0) || (tmp_in < 0))
+	if ((tmp_out < 0) || (tmp_in < 0))
 	{
-		std::cerr << "Pipe or tmp file opening failed" << std::endl;
+		std::cerr << "Tmp file opening failed" << std::endl;
 		return ;
 	}
 
@@ -93,27 +90,28 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	if (_pid == -1)     //Error
 	{
 		std::cerr << "Error with fork()" << std::endl;
-		remove(this->_tmp_out.c_str());
+		remove(this->_tmp_in.c_str());
 		return ;
 	}
 	else if (_pid == 0)       //Child
 	{
 		dup2(tmp_in, STDIN_FILENO);
-		dup2(tmp, STDOUT_FILENO);
+		dup2(tmp_out, STDOUT_FILENO);
 
 		if ((execve(args[0], args, env)) < 0)
 		{
 			close(tmp_in);
-			close(tmp);
+			close(tmp_out);
 			remove(this->_tmp_out.c_str());
+			remove(this->_tmp_in.c_str());
 			exit(-1);
 		}
 	}
 	else  //Parent
 	{
 		close(tmp_in);
-		fclose(fin);
-		close(tmp);
+		close(tmp_out);
+		remove(this->_tmp_in.c_str());
 	}
 }
 
@@ -175,13 +173,11 @@ void MethodCgi::setEnv()
 	this->_env["SERVER_PROTOCOL="] = "HTTP/1.1";
 	this->_env["SERVER_PORT="] = int_to_string(_config.getPort());
 	this->_env["REQUEST_METHOD="] = this->_method;
-
-		//Fichier à ouvrir avec le binaire 
+	// Paths and stuff
 	this->_env["PATH_INFO="] = getPathInfo();
 	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
 	this->_env["QUERY_STRING="] = _fields.getQuery();
 	this->_env["REQUEST_URI="] = this->_path + _fields.getQuery();
-	
 	this->_env["SCRIPT_FILENAME="] = this->_path;
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
@@ -195,7 +191,7 @@ Utils
 **************************************************************/
 std::string MethodCgi::createTmpFile()
 {
-	char _tmp_file_name[] = "tmpXXXXXX";
+	char _tmp_file_name[] = "tmp/tmpXXXXXX";
 	int	fd;
 
 	fd = mkstemp(_tmp_file_name);
@@ -361,14 +357,13 @@ void MethodCgi::sendBody()
 	A FAIRE :
 
 Variables d'environnement
-PATH_INFO
-CONTENT_TYPE
-+ les variables actuellement desactivees
+	-> les variables actuellement desactivees
 
 Retravailler STDIN. Creer fichier de la même 
 manière que pour STDOUT au lieu d'utiliser un FILE *
 
 Nettoyage
 
-
 */
+
+

@@ -63,7 +63,6 @@ void FieldPost::fillField()
             trim_field(splitted_line[1]);
             _transfert_encoding = splitted_line[1].c_str();
         }
-        /* Faire recup conent-type ici, avec value dans Field et un getter*/
         else if (str_to_lower(splitted_line[0]) == "content-type")
         {
             trim_field(splitted_line[1]);

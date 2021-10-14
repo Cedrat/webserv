@@ -9,6 +9,7 @@
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
 AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
 {
+
 }
 
 

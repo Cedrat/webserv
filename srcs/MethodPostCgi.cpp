@@ -125,12 +125,10 @@ void MethodPostCgi::exec()
 	}
 	else if (this->_get_body == FALSE)
 	{
-		//Stockage du body dans une variable pour transfert au CGI
 		getBody();
 	}
 	else if (_cgi_init == FALSE)
 	{
-		//_path pas nécessaire finalement. A enlever ?
 		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _body, "POST", _fields, _content_type);
 		_cgi->init();
 		_cgi_init = TRUE;
@@ -152,16 +150,28 @@ void MethodPostCgi::getBody()
 
     file.open(_path.c_str(), std::fstream::in | std::fstream::binary | std::fstream::app);
 
-	file.seekg(0, file.end);
-	int len = file.tellg();
-	char buffer[len + 1];
+    if (file.is_open() == FALSE)
+    {
+        //Proteger ici
+        throw (CloseSocketException());
+    }
 
-	file.seekg(0, file.beg);
-	file.read(buffer, len);
-	buffer[file.gcount()] = '\0';
-	_body = buffer;
-	file.close();
-	_get_body = TRUE;
+    char buffer[BUFFER_SIZE + 1];
+    file.read(buffer, BUFFER_SIZE);
+    buffer[file.gcount()] = '\0'; 
+    _body += buffer;
+
+    if (file)
+    {
+        _get_body = TRUE;
+        file.close();
+    }
+	else
+    {
+        //Proteger ici
+        file.close();
+        throw (CloseSocketException()); 
+    }
 }
 
 void MethodPostCgi::setChunkedRequest(ChunkedRequest *chunked_request)
@@ -188,7 +198,7 @@ std::string MethodPostCgi::extractBodyRequest()
     std::string copy_request = _header;
 
     copy_request.erase(0, _header.find("\r\n\r\n") + 4);
-    
+
     return (copy_request);
 }
 
@@ -200,8 +210,4 @@ void MethodPostCgi::receiveData()
     ret = read(_fd, buffer, BUFFER_SIZE);
     buffer[ret] = 0;
     _body_received.append(buffer, ret);
-    // check length body_received and content-Length
-    // If content-Length inferior to size body
-    // pass pollfd to pollout and prepare header request and body request kiss.
-
 }
