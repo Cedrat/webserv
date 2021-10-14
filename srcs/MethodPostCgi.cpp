@@ -156,18 +156,6 @@ void MethodPostCgi::getBody()
         throw (CloseSocketException());
     }
 
-	/*file.seekg(0, file.end);
-	int len = file.tellg();
-	char buffer[len + 1];
-
-	file.seekg(0, file.beg);
-	file.read(buffer, len);
-	buffer[file.gcount()] = '\0';
-	_body = buffer;
-	file.close();
-	_get_body = TRUE;*/
-
-
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
     file.seekg(_byte_send);
@@ -181,7 +169,6 @@ void MethodPostCgi::getBody()
         _get_body = TRUE;
     }
     file.close();
-
 }
 
 void MethodPostCgi::setChunkedRequest(ChunkedRequest *chunked_request)
