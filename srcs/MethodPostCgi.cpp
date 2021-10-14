@@ -156,22 +156,32 @@ void MethodPostCgi::getBody()
         throw (CloseSocketException());
     }
 
+	/*file.seekg(0, file.end);
+	int len = file.tellg();
+	char buffer[len + 1];
+
+	file.seekg(0, file.beg);
+	file.read(buffer, len);
+	buffer[file.gcount()] = '\0';
+	_body = buffer;
+	file.close();
+	_get_body = TRUE;*/
+
+
     char buffer[BUFFER_SIZE + 1];
+    int ret = 0;
+    file.seekg(_byte_send);
     file.read(buffer, BUFFER_SIZE);
     buffer[file.gcount()] = '\0'; 
+    ret = file.gcount();
+    _byte_send += ret;
     _body += buffer;
-
-    if (file)
+    if (ret == file.gcount() && file.eof())
     {
         _get_body = TRUE;
-        file.close();
     }
-	else
-    {
-        //Proteger ici
-        file.close();
-        throw (CloseSocketException()); 
-    }
+    file.close();
+
 }
 
 void MethodPostCgi::setChunkedRequest(ChunkedRequest *chunked_request)
