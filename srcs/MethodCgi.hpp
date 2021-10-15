@@ -57,6 +57,7 @@ class MethodCgi : public AMethod
 
         bool        getStatus();
         std::string getPathInfo();
+        std::string getFileSize();
 };
 
 #endif

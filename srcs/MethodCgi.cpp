@@ -70,10 +70,23 @@ void MethodCgi::execCGI( char ** args, char ** env )
 {
 	int     tmp_out = open(this->_tmp_out.c_str(), 
 					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
-					S_IRUSR | S_IWUSR);
-	int     tmp_in = open(this->_tmp_in.c_str(), 
+					S_IRUSR | S_IWUSR | std::ios::binary);
+	int     tmp_in;
+	
+	if (_body.empty() == TRUE)
+	{
+		tmp_in = open(this->_tmp_in.c_str(), 
 					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
 					S_IRUSR | S_IWUSR);
+	}
+	else
+	{
+		tmp_in = open(this->_body.c_str(), 
+					O_RDWR | O_NONBLOCK, 
+					S_IRUSR | S_IWUSR | std::ios::binary);
+	}
+	
+
 
 	if ((tmp_out < 0) || (tmp_in < 0))
 	{
@@ -82,7 +95,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	}
 
 	//Ecriture du body dans le cas de POST
-	write(tmp_in, _body.c_str(), _body.size());
+	//write(tmp_in, _body.c_str(), _body.size());
 	lseek(tmp_in, 0, SEEK_SET);
 
 
@@ -180,9 +193,10 @@ void MethodCgi::setEnv()
 	this->_env["REQUEST_URI="] = this->_path + _fields.getQuery();
 	this->_env["SCRIPT_FILENAME="] = this->_path;
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
-	this->_env["CONTENT_LENGTH="] = int_to_string(this->_body.size());
+	this->_env["CONTENT_LENGTH="] = getFileSize();
 	this->_env["CONTENT_TYPE="] = this->_content_type;
 }
+
 
 
 
@@ -200,7 +214,7 @@ std::string MethodCgi::createTmpFile()
 	else
 		close(fd);
 
-	return _tmp_file_name;
+	return  _tmp_file_name;
 }
 
 void MethodCgi::freeEnv( char ** env )
@@ -268,6 +282,26 @@ std::string MethodCgi::getPathInfo()
 		return file_path;
 	}
 	return _path;
+}
+
+std::string MethodCgi::getFileSize()
+{
+	if (_body.empty() == TRUE)
+		return int_to_string(0);
+
+	std::ifstream file;
+
+    file.open(_body.c_str(), std::fstream::in | std::fstream::binary | std::fstream::app);
+    if (file.is_open() == FALSE)
+    {
+        return int_to_string(0);
+    }
+
+    file.seekg (0, std::ios::end);
+    unsigned long end = file.tellg();
+	file.close();
+	
+	return int_to_string(end);
 }
 
 
@@ -365,5 +399,3 @@ manière que pour STDOUT au lieu d'utiliser un FILE *
 Nettoyage
 
 */
-
-

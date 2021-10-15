@@ -123,13 +123,13 @@ void MethodPostCgi::exec()
 			}
 		}
 	}
-	else if (this->_get_body == FALSE)
+	/*else if (this->_get_body == FALSE)
 	{
 		getBody();
-	}
+	}*/
 	else if (_cgi_init == FALSE)
 	{
-		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _body, "POST", _fields, _content_type);
+		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _path, "POST", _fields, _content_type);
 		_cgi->init();
 		_cgi_init = TRUE;
 	}
@@ -146,7 +146,7 @@ void MethodPostCgi::exec()
 
 void MethodPostCgi::getBody()
 {
-	std::fstream file;
+	std::ifstream file;
 
     file.open(_path.c_str(), std::fstream::in | std::fstream::binary | std::fstream::app);
 
@@ -156,19 +156,28 @@ void MethodPostCgi::getBody()
         throw (CloseSocketException());
     }
 
+    //Get file length
+    std::streampos end;
+    file.seekg (0, std::ios::end);
+    end = file.tellg();
+    if (_byte_send == 0)
+        file.seekg (0, file.beg);
+
+    //read in file
     char buffer[BUFFER_SIZE + 1];
     int ret = 0;
     file.seekg(_byte_send);
     file.read(buffer, BUFFER_SIZE);
-    buffer[file.gcount()] = '\0'; 
     ret = file.gcount();
     _byte_send += ret;
     _body += buffer;
-    if (ret == file.gcount() && file.eof())
+    if (_byte_send == end)
     {
         _get_body = TRUE;
+        //std::cout << _body << std::endl;
     }
     file.close();
+
 }
 
 void MethodPostCgi::setChunkedRequest(ChunkedRequest *chunked_request)
