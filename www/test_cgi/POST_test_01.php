@@ -8,7 +8,6 @@ $name = $email = $gender = $comment = $website = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $name = test_input($_POST["name"]);
-  echo $name;
   $email = test_input($_POST["email"]);
   $website = test_input($_POST["website"]);
   $comment = test_input($_POST["comment"]);
