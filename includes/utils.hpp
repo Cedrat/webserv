@@ -42,6 +42,8 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+
+std::string create_alias(std::string path, Location location);
 std::string  fields_allowed(Location location);
 int atoi_hexa(std::string nb);
 std::string extract_header_request(std::string request);

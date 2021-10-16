@@ -3,6 +3,7 @@
 #include "MethodGet.hpp"
 #include "Erreur.hpp"
 #include "MethodAi.hpp"
+#include "../includes/utils.hpp"
 
 FieldDelete::FieldDelete(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request , data_request, s_pollfd)
 {
@@ -59,13 +60,24 @@ bool FieldDelete::isAIPath(std::string path, Location const &location)
     return (FALSE);
 }
 
+std::string construct_delete_path(std::string path, Location location)
+{
+    path = create_alias(path, location);
+    if (check_if_file_exist(path) && is_folder(path.c_str()))
+    {
+        if (path.rfind("/") != path.size() - 1)
+            path += "/";
+    }
+    return (path);
+}
+
 AMethod *FieldDelete::getAMethod()
 {
 	verifyMissingData();
 	verifyData();
 	Config config = _data_request.getConfigs()[find_index_best_config(_data_request.getConfigs(), getHostName(), _data_request.getPort(), _data_request.getHost())];
     Location location = find_best_location(getPath(), config);     
-	_final_path = construct_path(getPath(), location);
+	_final_path = construct_delete_path(getPath(), location);
 	if (_error != OK)
     {
 		return (createErrorMethod(config, location));
