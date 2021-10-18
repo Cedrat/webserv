@@ -28,6 +28,7 @@ public :
         void setTransfertEncoding(std::string const transfert_encoding);
   
         std::string const & getStrContentLength() const;
+        std::string const & getContentType() const;
         int const & getContentLength() const ;
         std::string const & getTransfertEncoding() const;
 

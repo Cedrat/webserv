@@ -7,7 +7,8 @@ ASocket.cpp                     FieldGet.cpp                    RequestInProgres
 Config.cpp                      Formatting.cpp                  Server.cpp                      construct_path.cpp              find_index_best_config.cpp      path_security.cpp		 MethodAi.cpp redir_path.cpp \
 isCgiPath.cpp MethodCgi.cpp \
 FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_not_number.cpp				trim_fields.cpp 				remove_chars_after_the_last_token.cpp decompose_path.cpp \
-MethodPost.cpp					extract_header_request.cpp		ChunkedRequest.cpp				atoi_hexa.cpp					MethodPostCgi.cpp 				fields_allowed.cpp
+MethodPost.cpp					extract_header_request.cpp		ChunkedRequest.cpp				atoi_hexa.cpp					MethodPostCgi.cpp 				fields_allowed.cpp create_tmp_file.cpp \
+upload_utilitaries.cpp MethodUpload.cpp
 #PATH_CONFIG = ./config/
 #CONFIG = ConfigParser.cpp        locationConfig.cpp      add_config.cpp         serverConfig.cpp
 

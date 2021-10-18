@@ -65,6 +65,13 @@ int const &AField::getContentLength() const
     throw "bad bad bad";
 }
 
+std::string const &AField::getContentType() const
+{
+    std::cerr << "bad call to getContentType" << std::endl;
+    throw "bad bad bad";
+}
+
+
 
 RequestInProgress const & AField::getDataRequest() const
 {

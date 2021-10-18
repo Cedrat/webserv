@@ -40,6 +40,7 @@ class AField
         int         const & getError() const;
         virtual std::string const & getTransfertEncoding() const;
         virtual std::string const & getStrContentLength() const;
+        virtual std::string const & getContentType() const ;
         virtual int const & getContentLength() const;
 
         RequestInProgress const & getDataRequest() const;

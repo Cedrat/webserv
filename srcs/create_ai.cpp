@@ -17,6 +17,9 @@ std::string create_ai_page(const char * short_path, const char * long_path)
     std::string str_path(short_path);
 
     
+    if (str_path.rfind("/") != str_path.size() -1)
+        str_path += "/";
+
     ai_page += "<!DOCTYPE html>\n<html>\n";
     struct dirent * info;
     while ((info = readdir(dir)))

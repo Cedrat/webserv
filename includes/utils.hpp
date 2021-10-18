@@ -42,7 +42,9 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
-
+std::string create_tmp_file_with_extension(std::string extension);
+std::string extract_extension(std::string body);
+std::string createTmpFile();
 std::string create_alias(std::string path, Location location);
 std::string  fields_allowed(Location location);
 int atoi_hexa(std::string nb);

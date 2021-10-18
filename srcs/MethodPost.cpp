@@ -6,6 +6,8 @@
 #include "ChunkedRequest.hpp"
 
 
+
+
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
 AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
 {
@@ -23,6 +25,14 @@ void MethodPost::init()
 {
     _fields.setPollin();
     _body_received = extractBodyRequest();
+    if (_fields.getContentType().find("multipart/form-data;") == 0)
+    {
+        std::string extension;
+        extension = extract_extension(_header);
+        _path += create_tmp_file_with_extension(extension);
+        std::cout << _path << std::endl;
+    }
+    std::cout << "l28 :"<< _fields.getContentType()<< std::endl;
     if (_fields.getTransfertEncoding() == "chunked")
     {
         _body_received = "\r\n" + _body_received;
