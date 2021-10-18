@@ -5,7 +5,6 @@ static std::string extract_extension_in_content_disposition(std::string str_to_p
     std::string filename = split_string(str_to_process, "filename=")[1];
 
     trim(filename, '\"');
-    std::cout << filename << std::endl;
 
     std::vector<std::string> decomposed_filename = split_string(filename, ".");
     return (decomposed_filename[decomposed_filename.size() -1]);
@@ -17,7 +16,6 @@ std::string extract_extension(std::string body)
     std::vector<std::string> splitted_line;
 
 
-    std::cout << "BODY : " << body << std::endl;
     for (size_t i = 0; i < splitted_request.size(); i++)
     {
         splitted_line = split_string(splitted_request[i], ": ");

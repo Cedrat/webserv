@@ -76,7 +76,6 @@ void FieldPost::fillField()
         {
             trim_field(splitted_line[1]);
             _content_type = splitted_line[1].c_str();
-            std::cout << "l76 FIELD POST" << _content_type << std::endl;
         }                   
     } 
 } 
@@ -183,7 +182,6 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
         temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
     else 
         temp_path = "." + upload_folder;
-    std::cout << temp_path << std::endl;
     return (temp_path);
 }
 

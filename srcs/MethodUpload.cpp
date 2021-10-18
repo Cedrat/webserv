@@ -232,12 +232,10 @@ std::string    MethodUpload::createRandomNameWithExtensionAndCheckAvailability(s
         for (int i = 0; i < size_name; i++)
         {
             name_file[i] = alphanum[std::rand()%62];
-            std::cout << name_file << std::endl;
         }
         name_file += "." + extension;
         if (check_if_file_exist(path_test + name_file) == FALSE)
             is_not_available = FALSE;
-        std::cout << name_file << std::endl;
     }
     return (name_file);
 }

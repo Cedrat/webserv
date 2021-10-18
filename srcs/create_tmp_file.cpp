@@ -15,7 +15,6 @@ std::string create_tmp_file_with_extension(std::string extension)
     
     mkstemps(_tmpFileName, extension.size() + 1);
 
-    std::cout << _tmpFileName << "+" << extension << std::endl;
     return _tmpFileName;
 }
 

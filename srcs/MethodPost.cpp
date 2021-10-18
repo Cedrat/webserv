@@ -30,9 +30,7 @@ void MethodPost::init()
         std::string extension;
         extension = extract_extension(_header);
         _path += create_tmp_file_with_extension(extension);
-        std::cout << _path << std::endl;
     }
-    std::cout << "l28 :"<< _fields.getContentType()<< std::endl;
     if (_fields.getTransfertEncoding() == "chunked")
     {
         _body_received = "\r\n" + _body_received;
