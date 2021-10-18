@@ -1,7 +1,6 @@
 <?php
 
 $uploaddir = 'upload/';
-
 $uploadfile = $uploaddir . basename($_FILES['file']['name']);
 
 

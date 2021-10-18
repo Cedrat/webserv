@@ -191,10 +191,12 @@ void MethodCgi::setEnv()
 	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
 	this->_env["QUERY_STRING="] = _fields.getQuery();
 	this->_env["REQUEST_URI="] = this->_path + _fields.getQuery();
+	this->_env["SCRIPT_NAME="] = construct_path(_location.getCgiBinary(), _location);
 	this->_env["SCRIPT_FILENAME="] = this->_path;
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = getFileSize();
 	this->_env["CONTENT_TYPE="] = this->_content_type;
+	//this->_env["DOCUMENT_ROOT="] = "/mnt/nfs/homes/dchampda/Documents/webserv/www/cgi_bin";
 }
 
 

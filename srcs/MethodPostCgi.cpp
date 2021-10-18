@@ -3,7 +3,7 @@
 MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_received, AField &field,
 		Config config, Location location, std::string content_type )
 	: AMethod(fd, path, request_received, field), _config(config), _location(location), _body(""),
-	_content_type(content_type), _cgi_init(FALSE), _get_body(FALSE)
+	_content_type(content_type), _cgi_init(FALSE)
 {
 	_byte_received = 0;
 	_file_received = FALSE;
@@ -123,10 +123,6 @@ void MethodPostCgi::exec()
 			}
 		}
 	}
-	/*else if (this->_get_body == FALSE)
-	{
-		getBody();
-	}*/
 	else if (_cgi_init == FALSE)
 	{
 		_cgi = new MethodCgi(_fd, _path_file, "", _config, _location, _path, "POST", _fields, _content_type);
@@ -144,41 +140,6 @@ void MethodPostCgi::exec()
 	}
 }
 
-void MethodPostCgi::getBody()
-{
-	std::ifstream file;
-
-    file.open(_path.c_str(), std::fstream::in | std::fstream::binary | std::fstream::app);
-
-    if (file.is_open() == FALSE)
-    {
-        //Proteger ici
-        throw (CloseSocketException());
-    }
-
-    //Get file length
-    std::streampos end;
-    file.seekg (0, std::ios::end);
-    end = file.tellg();
-    if (_byte_send == 0)
-        file.seekg (0, file.beg);
-
-    //read in file
-    char buffer[BUFFER_SIZE + 1];
-    int ret = 0;
-    file.seekg(_byte_send);
-    file.read(buffer, BUFFER_SIZE);
-    ret = file.gcount();
-    _byte_send += ret;
-    _body += buffer;
-    if (_byte_send == end)
-    {
-        _get_body = TRUE;
-        //std::cout << _body << std::endl;
-    }
-    file.close();
-
-}
 
 void MethodPostCgi::setChunkedRequest(ChunkedRequest *chunked_request)
 {

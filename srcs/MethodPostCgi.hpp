@@ -19,7 +19,6 @@ class MethodPostCgi : public AMethod
         std::string _content_type;
 
         bool        _cgi_init;
-        bool        _get_body;
         MethodCgi * _cgi;
 
         std::string _body_received;
