@@ -206,7 +206,7 @@ std::string MethodCgi::createTmpFile()
 	{
 		setErrorResponse(500);
 		_pid_ended = TRUE;
-		return ;
+		return ("");
 	}
 	else
 		close(fd);
