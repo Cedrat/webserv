@@ -175,10 +175,13 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
 
 std::string FieldPost::createPathUploadCgi(std::string upload_folder)
 {
-    char tmp_file_name[] = "tmpXXXXXX";
+    int	fd;
     std::string temp_path;
 
-    int	fd;
+    temp_path = upload_folder + "tmpXXXXXX";
+
+    char *tmp_file_name = new char [temp_path.size() + 1];
+    strcpy(tmp_file_name, temp_path.c_str());
 
 	fd = mkstemp(tmp_file_name);
 	if (fd < 0)
@@ -188,9 +191,7 @@ std::string FieldPost::createPathUploadCgi(std::string upload_folder)
     }	
 	else
 		close(fd);
-    temp_path = upload_folder + tmp_file_name;
-
-    return (temp_path);
+    return (tmp_file_name);
 }
 
 void FieldPost::checkBodySize(Config const &config)
