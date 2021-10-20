@@ -18,6 +18,8 @@ class AMethod
 		std::string _header;
 		AField  	 &_fields;
 
+		int  _byte_send;
+
 	public :
 		AMethod(int fd, std::string path, std::string header, AField &fields);
 		virtual ~AMethod() {
@@ -37,6 +39,9 @@ class AMethod
 		std::string const & getPath();
 		std::string const & getHeader();
 		int const & getFd();
+
+		void sendBody();
+		void sendHeader();
 };
 
 #endif

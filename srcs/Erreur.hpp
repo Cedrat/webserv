@@ -6,12 +6,9 @@
 class Erreur : public AMethod
 {
     private:
-        void sendHeader();
-        void sendBody();
-        int _error;
 
     public :
-        Erreur(int fd, std::string path, std::string header, AField &fields, int error);
+        Erreur(int fd, std::string path, std::string header, AField &fields);
         ~Erreur();
         void init();
         void exec();

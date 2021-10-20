@@ -9,7 +9,7 @@
 
 
 MethodPost::MethodPost(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(NO_CONTENT), _chunked_request(NULL)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _error(NO_CONTENT), _chunked_request(NULL)
 {
 }
 
@@ -177,30 +177,6 @@ void MethodPost::writePreparation()
         int nb_chars_to_erase = (_byte_received - _fields.getContentLength());
         _body_received.erase(_body_received.end() - nb_chars_to_erase, _body_received.end());
     }
-}
-
-void MethodPost::sendHeader()
-{
-   send(getFd(), getHeader().c_str(), getHeader().size(), 0); 
-}
-
-void MethodPost::sendBody()
-{
-    signal(SIGPIPE, SIG_IGN);
-    std::fstream fs;
-    char buffer[BUFFER_SIZE + 1];
-    int ret = 0;
-    fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
-    fs.seekg(_byte_send);
-    fs.read(buffer, BUFFER_SIZE);
-    buffer[fs.gcount()] = '\0'; 
-    ret = ::send(getFd(), buffer, fs.gcount(), 0);
-    _byte_send += ret;
-    if (ret == fs.gcount() && fs.eof())
-    {
-        setIsFinished(TRUE);
-    }
-    fs.close();
 }
 
 void MethodPost::setHeader()

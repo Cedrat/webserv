@@ -3,6 +3,8 @@
 
 
 #include "AMethod.hpp"
+
+enum CurrentStatus {header_received = 1, header_not_received};
 class ChunkedRequest;
 class MethodUpload: public AMethod
 {
@@ -17,6 +19,7 @@ class MethodUpload: public AMethod
 
         std::string _tmp_path;
 
+        CurrentStatus _status;
         std::string extractBodyRequest();
         void        receiveData();
         void        writeFile();
@@ -26,8 +29,6 @@ class MethodUpload: public AMethod
         void        removeAllDecorations();
 
         void        setHeader();
-        void        sendHeader();
-        void        sendBody();
         void        setChunkedRequest(ChunkedRequest *);
         void        writeProcessedDataChunked();
         bool        maxBodySizeIsReached();

@@ -29,11 +29,6 @@ void MethodAi::exec()
     }
 }
 
-void MethodAi::sendHeader()
-{
-   send(getFd(), getHeader().c_str(), getHeader().size(), 0); 
-}
-
 void MethodAi::sendBody()
 {
     signal(SIGPIPE, SIG_IGN);

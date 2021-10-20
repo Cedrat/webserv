@@ -9,7 +9,7 @@
 
 
 MethodUpload::MethodUpload(int fd, std::string path, std::string request_received, AField &field) :
-AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(CREATED), _chunked_request(NULL)
+AMethod(fd, path, request_received, field), _byte_received(0), _file_received(FALSE), _byte_send(0), _error(CREATED), _chunked_request(NULL), _status(header_not_received)
 {
 }
 
@@ -32,10 +32,18 @@ void MethodUpload::init()
     if (_body_received.find("\r\n\r\n") != std::string::npos)
     {
         writePreparation();
-        if (_byte_received >= _fields.getContentLength())
-            removeAllDecorations();
-        else
-            removeBeginDecorations();
+        try {
+            if (_byte_received >= _fields.getContentLength())
+                removeAllDecorations();
+            else
+                removeBeginDecorations();
+        }
+        catch (BadRequestException const & e)
+        {
+            _error = BAD_REQUEST;
+            _file_received = TRUE;
+            _fields.setPollout();
+        }
         writeFile();
         _body_received = "";
         if (_byte_received >= _fields.getContentLength())
@@ -44,6 +52,7 @@ void MethodUpload::init()
             _file_received = TRUE;
             _fields.setPollout();
         }
+        _status = header_received;
     }
 }
     // check length body_received and content-Length
@@ -57,9 +66,22 @@ void MethodUpload::exec()
     {
         receiveData();
         writePreparation();
-        if (_byte_received >= _fields.getContentLength())
+        try {
+            if (_status == header_not_received)
+            {
+                removeBeginDecorations();
+                _status = header_received;    
+            }
+            if (_byte_received >= _fields.getContentLength())
+            {
+                removeEndDecorations();
+            }
+        }
+        catch (BadRequestException const & e)
         {
-            removeEndDecorations();
+            _error = BAD_REQUEST;
+            _file_received = TRUE;
+            _fields.setPollout();
         }
         writeFile();
         _body_received = "";
@@ -140,29 +162,6 @@ void MethodUpload::writePreparation()
     }
 }
 
-void MethodUpload::sendHeader()
-{
-   send(getFd(), getHeader().c_str(), getHeader().size(), 0); 
-}
-
-void MethodUpload::sendBody()
-{
-    signal(SIGPIPE, SIG_IGN);
-    std::fstream fs;
-    char buffer[BUFFER_SIZE + 1];
-    int ret = 0;
-    fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
-    fs.seekg(_byte_send);
-    fs.read(buffer, BUFFER_SIZE);
-    buffer[fs.gcount()] = '\0'; 
-    ret = ::send(getFd(), buffer, fs.gcount(), 0);
-    _byte_send += ret;
-    if (ret == fs.gcount() && fs.eof())
-    {
-        setIsFinished(TRUE);
-    }
-    fs.close();
-}
 
 void MethodUpload::setHeader()
 {
@@ -199,22 +198,28 @@ bool MethodUpload::maxBodySizeIsReached()
 
 void MethodUpload::removeBeginDecorations()
 {
-    if (_body_received.find("\r\n") != std::string::npos)
-        _body_received.erase(0, _body_received.find("\r\n")+ 2);
-    if (_body_received.find("\r\n") != std::string::npos)
-        _body_received.erase(0, _body_received.find("\r\n")+ 2);
-    if (_body_received.find("\r\n") != std::string::npos)
-        _body_received.erase(0, _body_received.find("\r\n")+ 2);
-    if (_body_received.find("\r\n") != std::string::npos)
-        _body_received.erase(0, _body_received.find("\r\n")+ 2);
+    int nb_lines_to_erase = 4;
+
+    for (int i = 0; i < nb_lines_to_erase; i++)
+    {
+        if (_body_received.find("\r\n") != std::string::npos)
+            _body_received.erase(0, _body_received.find("\r\n")+ 2);
+        else
+            throw BadRequestException();
+    }
+    
 }
 
 void MethodUpload::removeEndDecorations()
 {
-    if (_body_received.find("-----------------------------"))
+    if (_body_received.find("-----------------------------") != std::string::npos)
         _body_received.erase(_body_received.find("-----------------------------"), _body_received.size());
+     else
+        throw BadRequestException();
     if (_body_received.find("\r\n") != std::string::npos)
         _body_received.erase(_body_received.size() - 2, 2);
+     else
+        throw BadRequestException();
 }
 
 std::string    MethodUpload::createRandomNameWithExtensionAndCheckAvailability(std::string extension, std::string path_test)

@@ -10,7 +10,6 @@ class MethodPost: public AMethod
         std::string _body_received;
         int         _byte_received;
         bool        _file_received;
-        int         _byte_send;
         int         _error;
 
         ChunkedRequest *_chunked_request;
@@ -23,8 +22,6 @@ class MethodPost: public AMethod
         void        writePreparation();
 
         void        setHeader();
-        void        sendHeader();
-        void        sendBody();
         void        setChunkedRequest(ChunkedRequest *);
         void        writeProcessedDataChunked();
         bool        maxBodySizeIsReached();

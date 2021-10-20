@@ -6,10 +6,6 @@
 class MethodGet : public AMethod
 {
     private:
-
-    void sendHeader();
-    void sendBody();
-
     int _byte_send;
 
     public :

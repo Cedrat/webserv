@@ -1,9 +1,11 @@
 #include "AMethod.hpp"
-
+#include "define.hpp"
+#include "CustomException.hpp"
+#include "AField.hpp"
 
 AMethod::AMethod(int fd, std::string path, std::string header, AField &field)
     : _fd(fd), _header_sent(FALSE), _request_sent(FALSE), _is_finished(FALSE),
-    _path(path), _header(header), _fields(field)
+    _path(path), _header(header), _fields(field) , _byte_send(0)
 {
 
 }
@@ -61,4 +63,48 @@ std::string const & AMethod::getPath()
 std::string const & AMethod::getHeader()
 {
     return (this->_header);
+}
+
+void AMethod::sendBody()
+{
+    signal(SIGPIPE, SIG_IGN);
+    
+    std::fstream fs;
+    char buffer[BUFFER_SIZE + 1];
+    int ret = 0;
+
+    fs.open(getPath().c_str(),  std::fstream::in | std::fstream::app); 
+    if (fs.fail())
+    {
+        throw(FileDisappearedException());
+    }
+
+    fs.seekg(_byte_send);
+    fs.read(buffer, BUFFER_SIZE);
+    
+
+    buffer[fs.gcount()] = '\0'; //gcount cannot be negative, no possibility of underflow
+    ret = ::send(getFd(), buffer, fs.gcount(), 0);
+    if (ret == -1)
+    {
+         throw(UnableToSendException());
+    }
+    _byte_send += ret;
+    if (ret == fs.gcount() && fs.eof())
+    {
+        setIsFinished(TRUE);
+        if (_fields.getError() == BAD_REQUEST)
+            throw(BadRequestException());
+    }
+    fs.close();
+}
+
+void AMethod::sendHeader()
+{
+    int ret;
+    ret = send(getFd(), getHeader().c_str(), getHeader().size(), 0); //https://linux.die.net/man/2/send
+    if (ret == -1)
+    {
+         throw(UnableToSendException());
+    }
 }

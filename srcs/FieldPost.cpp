@@ -93,7 +93,7 @@ AMethod *FieldPost::getAMethod()
         return (createErrorMethod(config));
     }
     _final_path = construct_path_post(getPath(), location);
-    if (location.getUploadFolder().empty() == FALSE)
+    if (location.getUploadFolder().empty() == FALSE && !(isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0"))
     {
         _final_path = createPathUploadFolder(location.getUploadFolder());
     }
@@ -152,21 +152,29 @@ AMethod *FieldPost::createErrorMethod(Config config)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this, _error);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 
 void FieldPost::checkValidPath()
 {
+    std::cout << _final_path << std::endl;
     if (check_valid_path(_path) == FALSE)
+    {   
+        std::cout << 1 << std::endl;
         _error = BAD_REQUEST;
+    }
     if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
     {
         if (_content_type.find("multipart/form-data;") != 0)
+        {
             _error = BAD_REQUEST;
+            std::cout << 2 << std::endl;
+        }
     }
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
+        std::cout << 3 << std::endl;
         _error = BAD_REQUEST;
     }   
 
@@ -179,7 +187,7 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
 
     trim(upload_folder, '.');
     if (_final_path.find(upload_folder) == std::string::npos)
-        temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
+        temp_path = upload_folder + splitted_path[splitted_path.size() - 1];
     else 
         temp_path = "." + upload_folder;
     return (temp_path);

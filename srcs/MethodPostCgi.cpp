@@ -140,7 +140,7 @@ void MethodPostCgi::exec()
 		_cgi->exec();
 		if (_cgi->getStatus() == TRUE)
 		{
-			remove(_path.c_str());
+            std::cout << "we are to remove " << _path << std::endl;
 			setIsFinished(TRUE);
 		}	
 	}

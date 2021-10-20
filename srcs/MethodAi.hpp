@@ -7,7 +7,6 @@ class MethodAi : public AMethod
 {
     private :
         std::string _ai_file;
-        void sendHeader();
         void sendBody();
     
     public :
