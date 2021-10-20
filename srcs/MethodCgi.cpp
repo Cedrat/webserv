@@ -86,23 +86,17 @@ void MethodCgi::execCGI( char ** args, char ** env )
 					S_IRUSR | S_IWUSR | std::ios::binary);
 	}
 	
-
-
 	if ((tmp_out < 0) || (tmp_in < 0))
 	{
-		std::cerr << "Tmp file opening failed" << std::endl;
+		setErrorResponse(500);
+		_pid_ended = TRUE;
 		return ;
 	}
 
-	//Ecriture du body dans le cas de POST
-	//write(tmp_in, _body.c_str(), _body.size());
 	lseek(tmp_in, 0, SEEK_SET);
-
-
 	_pid = fork();
 	if (_pid == -1)     //Error
 	{
-		std::cerr << "Error with fork()" << std::endl;
 		remove(this->_tmp_in.c_str());
 		return ;
 	}
@@ -110,7 +104,6 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	{
 		dup2(tmp_in, STDIN_FILENO);
 		dup2(tmp_out, STDOUT_FILENO);
-
 		if ((execve(args[0], args, env)) < 0)
 		{
 			close(tmp_in);
@@ -133,7 +126,7 @@ void MethodCgi::readCgiFile()
 	FILE* f = fopen(this->_tmp_out.c_str(), "r");
 	if (f == NULL)
 	{
-		setErrorResponse();
+		setErrorResponse(SERVER_ERROR);
 		return ;
 	}
 
@@ -153,7 +146,7 @@ void MethodCgi::readCgiFile()
 			fclose(f);
 			remove(this->_tmp_out.c_str());
 			this->_tmp_out = "";
-			setErrorResponse();
+			setErrorResponse(BAD_REQUEST);
 			return ;
 		}
 	}
@@ -188,15 +181,13 @@ void MethodCgi::setEnv()
 	this->_env["REQUEST_METHOD="] = this->_method;
 	// Paths and stuff
 	this->_env["PATH_INFO="] = getPathInfo();
-	//this->_env["PATH_TRANSLATED="] = "test_cgi/POST_test_02.php";   //path sans la partie www/, juste fin du chemin vers fichier ?
+	this->_env["PATH_TRANSLATED="] = getPathInfo();
 	this->_env["QUERY_STRING="] = _fields.getQuery();
 	this->_env["REQUEST_URI="] = this->_path + _fields.getQuery();
-	this->_env["SCRIPT_NAME="] = construct_path(_location.getCgiBinary(), _location);
 	this->_env["SCRIPT_FILENAME="] = this->_path;
 	this->_env["REMOTE_HOST="] = _fields.getHostName();
 	this->_env["CONTENT_LENGTH="] = getFileSize();
 	this->_env["CONTENT_TYPE="] = this->_content_type;
-	//this->_env["DOCUMENT_ROOT="] = "/mnt/nfs/homes/dchampda/Documents/webserv/www/cgi_bin";
 }
 
 
@@ -212,7 +203,11 @@ std::string MethodCgi::createTmpFile()
 
 	fd = mkstemp(_tmp_file_name);
 	if (fd < 0)
-		throw(EmergencyExit());
+	{
+		setErrorResponse(500);
+		_pid_ended = TRUE;
+		return ;
+	}
 	else
 		close(fd);
 
@@ -323,7 +318,7 @@ void    MethodCgi::extractHeader()
 	}
 	else
 	{
-		setErrorResponse();
+		setErrorResponse(BAD_REQUEST);
 		return ;
 	}
 	adaptHeader();
@@ -344,11 +339,11 @@ void MethodCgi::adaptHeader()
 /**************************************************************
 Error management
 **************************************************************/
-void    MethodCgi::setErrorResponse()
+void    MethodCgi::setErrorResponse(int error)
 {
-	std::string path_error = _config.getPathError(BAD_REQUEST);
+	std::string path_error = _config.getPathError(error);
 
-	_header_cgi = "HTTP/1.1 " + get_string_error(BAD_REQUEST);
+	_header_cgi = "HTTP/1.1 " + get_string_error(error);
 	_header_cgi += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
 	_header_cgi += date_string() + " \n\n";
 
@@ -386,18 +381,3 @@ void MethodCgi::sendBody()
 		setIsFinished(TRUE);
 	}
 }
-
-
-
-/*
-	A FAIRE :
-
-Variables d'environnement
-	-> les variables actuellement desactivees
-
-Retravailler STDIN. Creer fichier de la même 
-manière que pour STDOUT au lieu d'utiliser un FILE *
-
-Nettoyage
-
-*/
