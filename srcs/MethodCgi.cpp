@@ -2,14 +2,14 @@
 #include "AField.hpp"
 #include "define.hpp"
 
-MethodCgi::MethodCgi(int fd, std::string path, std::string header, Config config, Location location, std::string body, std::string method, AField & field, std::string content_type) 
-	: AMethod(fd, path, header, field), _config(config), _location(location), _body(body), _method(method), _header_cgi(""), _body_cgi(""), _sent(0), _content_type(content_type)
+MethodCgi::MethodCgi(int fd, std::string path, std::string header, 
+					Config config, Location location, std::string body, 
+					std::string method, AField & field, std::string content_type) 
+	: AMethod(fd, path, header, field), _config(config), _location(location), 
+	_body(body), _method(method), _tmp_out(""), _tmp_in(""), _header_cgi(""), 
+	_body_cgi(""), _sent(0), _read_ended(FALSE), _pid_ended(FALSE), _readed(0), _content_type(content_type)
 {
-	_tmp_out = "";
-	_tmp_in = "";
-	_read_ended = FALSE;
-	_pid_ended = FALSE;
-	_readed = 0;
+
 }
 
 MethodCgi::~MethodCgi()
@@ -32,10 +32,10 @@ void MethodCgi::exec()
 	{
 		if (waitpid(_pid, NULL, WNOHANG) != 0 && _pid_ended == FALSE)
 		{
-			_pid_ended = TRUE;      //CGI process terminé
+			_pid_ended = TRUE;
 		}
 		if (_pid_ended == TRUE && _read_ended == FALSE)
-			readCgiFile();          //read non bloquant
+			readCgiFile();
 		else if (_pid_ended == TRUE && _read_ended == TRUE)
 		{
 			send(getFd(), _header_cgi.c_str(), _header_cgi.size(), 0);
@@ -88,7 +88,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 	
 	if ((tmp_out < 0) || (tmp_in < 0))
 	{
-		setErrorResponse(500);
+		setErrorResponse(SERVER_ERROR);
 		_pid_ended = TRUE;
 		return ;
 	}
@@ -126,7 +126,7 @@ void MethodCgi::readCgiFile()
 	FILE* f = fopen(this->_tmp_out.c_str(), "r");
 	if (f == NULL)
 	{
-		setErrorResponse(SERVER_ERROR);
+		setErrorResponse(BAD_REQUEST);
 		return ;
 	}
 
@@ -140,7 +140,6 @@ void MethodCgi::readCgiFile()
 
 	if (ferror(f))
 	{
-		std::cerr << "Error reading tmp" << std::endl;
 		if (_tmp_out != "")
 		{
 			fclose(f);

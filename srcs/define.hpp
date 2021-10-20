@@ -29,6 +29,8 @@ typedef int fd;
 #define MAX_REQUEST_SIZE 8000
 #define BUFFER_SIZE 10000
 
+#define PATH_TMP "./tmp/"
+
 
 # include <cstdio> //For size_t define;
 

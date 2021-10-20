@@ -84,7 +84,11 @@ AMethod *FieldPost::getAMethod()
         return (createErrorMethod(config));
     }
     _final_path = construct_path_post(getPath(), location);
-    if (location.getUploadFolder().empty() == FALSE)
+    if (isCgiPath(_path, location.getCgiExtension()))
+    {
+        _final_path = createPathUploadCgi(PATH_TMP);
+    }
+    else if (location.getUploadFolder().empty() == TRUE)
     {
         _final_path = createPathUploadFolder(location.getUploadFolder());
     }
@@ -166,6 +170,26 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     std::string temp_path;
 
     temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
+    return (temp_path);
+}
+
+std::string FieldPost::createPathUploadCgi(std::string upload_folder)
+{
+    char tmp_file_name[] = "tmpXXXXXX";
+    std::string temp_path;
+
+    int	fd;
+
+	fd = mkstemp(tmp_file_name);
+	if (fd < 0)
+    {
+        _error = (SERVER_ERROR);
+        return ("");
+    }	
+	else
+		close(fd);
+    temp_path = upload_folder + tmp_file_name;
+
     return (temp_path);
 }
 

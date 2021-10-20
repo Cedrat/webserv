@@ -1,14 +1,11 @@
 #include "MethodPostCgi.hpp"
 
-MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_received, AField &field,
-		Config config, Location location, std::string content_type )
+MethodPostCgi::MethodPostCgi( int fd, std::string path, std::string request_received, 
+                    AField &field, Config config, Location location, std::string content_type )
 	: AMethod(fd, path, request_received, field), _config(config), _location(location), _body(""),
-	_content_type(content_type), _cgi_init(FALSE)
+	_content_type(content_type), _cgi_init(FALSE), _byte_received(0), _file_received(FALSE),
+    _byte_send(0), _error(NO_CONTENT)
 {
-	_byte_received = 0;
-	_file_received = FALSE;
-	_byte_send = 0;
-	_error = NO_CONTENT;
 	_path_file = construct_path_post(_fields.getPath(), location);
 }
 
