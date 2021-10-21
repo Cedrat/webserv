@@ -1,9 +1,9 @@
 #include "MethodUpload.hpp"
 #include "AMethod.hpp"
-#include "AField.hpp"
-#include "FieldPost.hpp"
+#include "../fields/AField.hpp"
+#include "../fields/FieldPost.hpp"
 #include "../includes/utils.hpp"
-#include "ChunkedRequest.hpp"
+#include "../parsing/ChunkedRequest.hpp"
 
 
 

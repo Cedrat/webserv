@@ -1,7 +1,7 @@
 #include "AMethod.hpp"
-#include "define.hpp"
-#include "CustomException.hpp"
-#include "AField.hpp"
+#include "../includes/define.hpp"
+#include "../includes/CustomException.hpp"
+#include "../fields/AField.hpp"
 
 AMethod::AMethod(int fd, std::string path, std::string header, AField &field)
     : _fd(fd), _header_sent(FALSE), _request_sent(FALSE), _is_finished(FALSE),

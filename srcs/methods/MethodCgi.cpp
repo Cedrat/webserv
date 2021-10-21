@@ -1,6 +1,6 @@
 #include "MethodCgi.hpp"
-#include "AField.hpp"
-#include "define.hpp"
+#include "../fields/AField.hpp"
+#include "../includes/define.hpp"
 
 MethodCgi::MethodCgi(int fd, std::string path, std::string header, 
 					Config config, Location location, std::string body, 

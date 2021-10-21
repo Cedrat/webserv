@@ -1,5 +1,5 @@
 #include "MethodAi.hpp"
-#include "AField.hpp"
+#include "../fields/AField.hpp"
 
 MethodAi::MethodAi(int fd, std::string ai_file, std::string header, AField &field) : AMethod(fd, "", header, field) , _ai_file(ai_file)
 {

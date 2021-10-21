@@ -1,6 +1,6 @@
 NAME = webserv
 
-VPATH =objs:./srcs:srcs/methods
+VPATH =objs:./srcs:srcs/methods:srcs/fields:srcs/server:srcs/config:srcs/includes:srcs/parsing:srcs/server:srcs/utils
 #vpath %.hpp :./srcs:srcs/methods:./includes
 
 SRCS =  AField.cpp                      ConfigParser.cpp                Location.cpp                    SocketClient.cpp                check_if_file_exist.cpp         create_ai.cpp                   get_file_size.cpp  	             regexp.cpp \
@@ -28,14 +28,14 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -Weffc++
 RM = rm -f
 
 $(PATH_OBJS)%.o :%.cpp
-	$(CXX) $(CXXFLAGS) ${DEBUG} ${INCLUDES} -c $< -o $@
+	$(CXX) $(CXXFLAGS) ${DEBUG}  -c $< -o $@
 
 
 all : 		${PATH_OBJS} ${NAME} 
 
 
 ${NAME}:	${OBJS} ${OBJS_CONFIG}
-			$(CXX) ${CXXFLAGS} ${DEBUG}  ${INCLUDES} ${OBJS}  -o $@
+			$(CXX) ${CXXFLAGS} ${DEBUG}   ${OBJS}  -o $@
 
 clean :		
 			${RM} ${OBJS}

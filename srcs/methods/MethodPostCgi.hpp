@@ -2,9 +2,9 @@
 # define METHODPOSTCGI_HPP
 
 # include "MethodPost.hpp"
-# include "define.hpp"
-# include "ChunkedRequest.hpp"
-# include "AField.hpp"
+# include "../includes/define.hpp"
+# include "../parsing/ChunkedRequest.hpp"
+# include "../fields/AField.hpp"
 # include "MethodCgi.hpp"
 
 class ChunkedRequest;

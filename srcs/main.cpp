@@ -1,7 +1,7 @@
 
-#include "ConfigParser.hpp"
-#include "Server.hpp"
-#include "CustomException.hpp"
+#include "config/ConfigParser.hpp"
+#include "server/Server.hpp"
+#include "includes/CustomException.hpp"
 
 std::string config_path(int argc, char **argv)
 {
