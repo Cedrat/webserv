@@ -203,7 +203,7 @@ std::string MethodCgi::createTmpFile()
 	fd = mkstemp(_tmp_file_name);
 	if (fd < 0)
 	{
-		setErrorResponse(500);
+		setErrorResponse(SERVER_ERROR);
 		_pid_ended = TRUE;
 		return ("");
 	}
@@ -250,7 +250,7 @@ char ** MethodCgi::setArgs()
 {
 	std::string     binary_path = construct_path(_location.getCgiBinary(), _location);
 	char 			**args = new char*[3];
-
+std::cout << binary_path << std::endl;
 	args[0] = new char[binary_path.size() + 1];
 	args[0] = strcpy(args[0], binary_path.c_str());
 
