@@ -125,7 +125,7 @@ AMethod *FieldGet::createErrorMethod(Config config, Location location)
     header +=  date_string() + "\n\n";
     
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this, _error);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header,  *this);
     return (method);
 }
 

@@ -113,7 +113,7 @@ AMethod * RequestInProgress::getAnswer(pollfd &s_pollfd)
         header = "HTTP/1.1 " + get_string_error(error) + "\nContent-Length: " + int_to_string(get_file_size(file_path)) + "\n\n";
 
         method = "ERREUR";
-        return (new Erreur(_socket_fd, file_path, header,  * new FieldGet(_str_request, *this, s_pollfd), error));
+        return (new Erreur(_socket_fd, file_path, header,  * new FieldGet(_str_request, *this, s_pollfd)));
     }
 
     method = extract_method(_str_request);

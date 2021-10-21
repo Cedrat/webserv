@@ -14,6 +14,7 @@
 # define POLL_TIME 1 * 1000 // one second.
 
 # define OK 200
+# define CREATED 201
 # define NO_CONTENT 204
 # define MOVED_PERMANENTLY 301
 # define BAD_REQUEST 400
@@ -27,7 +28,7 @@
 typedef int fd;
 
 #define MAX_REQUEST_SIZE 8000
-#define BUFFER_SIZE 10000
+#define BUFFER_SIZE 128000
 
 #define PATH_TMP "./tmp/"
 

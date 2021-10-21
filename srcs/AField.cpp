@@ -65,6 +65,13 @@ int const &AField::getContentLength() const
     throw "bad bad bad";
 }
 
+std::string const &AField::getContentType() const
+{
+    std::cerr << "bad call to getContentType" << std::endl;
+    throw "bad bad bad";
+}
+
+
 
 RequestInProgress const & AField::getDataRequest() const
 {
@@ -91,7 +98,7 @@ AMethod *AField::createRedirMethod(Config config, Location location)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this, _error);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 

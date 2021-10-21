@@ -2,6 +2,7 @@
 #include "FieldPost.hpp"
 #include "Erreur.hpp"
 #include "MethodPost.hpp"
+#include "MethodUpload.hpp"
  
 FieldPost::FieldPost(std::string str_request, RequestInProgress data_request, pollfd & s_pollfd) : AField(str_request, data_request, s_pollfd)
 {
@@ -33,6 +34,11 @@ int const & FieldPost::getContentLength() const
     return (_content_length);
 }
 
+std::string  const & FieldPost::getContentType() const 
+{
+    return (_content_type);
+}
+
 void FieldPost::setContentLength(std::string const & length)
 {
     _str_content_length = length;
@@ -40,7 +46,9 @@ void FieldPost::setContentLength(std::string const & length)
 
 void FieldPost::fillField()
 {
-    std::vector<std::string> splitted_request = split_string(_str_request, "\n");
+    std::string copy_str_request = _str_request;
+    copy_str_request.erase(_str_request.find("\r\n\r\n"), _str_request.size() -1);
+    std::vector<std::string> splitted_request = split_string(copy_str_request, "\n");
     std::vector<std::string> splitted_line;
 
     _method = split_string(splitted_request[0], " ")[0];
@@ -67,7 +75,7 @@ void FieldPost::fillField()
         {
             trim_field(splitted_line[1]);
             _content_type = splitted_line[1].c_str();
-        }
+        }                   
     } 
 } 
 
@@ -88,7 +96,7 @@ AMethod *FieldPost::getAMethod()
     {
         _final_path = createPathUploadCgi(PATH_TMP);
     }
-    else if (location.getUploadFolder().empty() == TRUE)
+    else if (location.getUploadFolder().empty() == FALSE)
     {
         _final_path = createPathUploadFolder(location.getUploadFolder());
     }
@@ -111,7 +119,9 @@ AMethod *FieldPost::getAMethod()
 	{
 		return (createCgiMethod(config, location));
 	}
-    return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this));
+    if (location.getUploadFolder().empty() == FALSE && _content_type.find("multipart/form-data;") == 0)
+        return (new MethodUpload(_data_request.getFd(), _final_path, _str_request, *this ));
+    return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this ));
 }
 
 void FieldPost::verifyMissingData()
@@ -145,20 +155,29 @@ AMethod *FieldPost::createErrorMethod(Config config)
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
     header +=  date_string() + "\n\n";
 
-    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this, _error);
+    AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
     return (method);
 }
 
 void FieldPost::checkValidPath()
 {
+    std::cout << _final_path << std::endl;
     if (check_valid_path(_path) == FALSE)
+    {   
+        std::cout << 1 << std::endl;
         _error = BAD_REQUEST;
+    }
     if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
     {
-        _error = BAD_REQUEST;
+        if (_content_type.find("multipart/form-data;") != 0)
+        {
+            _error = BAD_REQUEST;
+            std::cout << 2 << std::endl;
+        }
     }
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
+        std::cout << 3 << std::endl;
         _error = BAD_REQUEST;
     }   
 
@@ -169,7 +188,11 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     std::vector<std::string> splitted_path = split_string(_final_path, "/");
     std::string temp_path;
 
-    temp_path = upload_folder+ splitted_path[splitted_path.size() - 1];
+    trim(upload_folder, '.');
+    if (_final_path.find(upload_folder) == std::string::npos)
+        temp_path = upload_folder + splitted_path[splitted_path.size() - 1];
+    else 
+        temp_path = "." + upload_folder;
     return (temp_path);
 }
 

@@ -14,7 +14,7 @@
 pollfd * create_a_listenable_socket(size_t port, int host)
 {
    struct sockaddr_in   my_addr;
-   struct pollfd *mypollfd = new  pollfd; //think to delete
+   struct pollfd *mypollfd = new  pollfd; 
    fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	fcntl(new_socket, F_SETFL, O_NONBLOCK);
