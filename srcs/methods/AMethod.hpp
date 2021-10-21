@@ -19,6 +19,7 @@ class AMethod
 		AField  	 &_fields;
 
 		int  _byte_send;
+		std::string _body_received;
 
 	public :
 		AMethod(int fd, std::string path, std::string header, AField &fields);
@@ -42,6 +43,8 @@ class AMethod
 
 		void sendBody();
 		void sendHeader();
+		void receiveData();
+		void writeFile();
 };
 
 #endif

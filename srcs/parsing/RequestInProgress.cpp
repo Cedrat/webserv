@@ -41,7 +41,7 @@ void RequestInProgress::receiveData()
         throw EOFException();
     }
     if (ret < 0)
-        ret = 0;
+        throw(UnableToReadException());
     buffer[ret] = 0;
     str_request.append(buffer, ret);
     if (!(_str_request.empty() && str_request == "\r\n"))

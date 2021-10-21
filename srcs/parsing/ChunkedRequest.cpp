@@ -114,7 +114,7 @@ void ChunkedRequest::writeProcessedData(int fd)
     int ret;
     ret = write(fd, _processed_data.c_str(), _processed_data.size());
     if (ret < 0)
-        return ;
+        throw(FileDisappearedException());
     else if (ret == 0)
     {
         throw (EOFException());

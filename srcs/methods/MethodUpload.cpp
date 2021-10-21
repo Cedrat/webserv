@@ -116,32 +116,6 @@ std::string MethodUpload::extractBodyRequest()
     return (copy_request);
 }
 
-void MethodUpload::receiveData()
-{
-    char buffer[BUFFER_SIZE + 1];
-    int ret;
-    
-    ret = read(_fd, buffer, BUFFER_SIZE);
-    buffer[ret] = 0;
-    _body_received.append(buffer, ret);
-
-    // check length body_received and content-Length
-    // If content-Length inferior to size body
-    // pass pollfd to pollout and prepare header request and body request kiss.
-
-}
-
-
-void MethodUpload::writeFile()
-{
-    std::fstream file;
-
-    file.open(_path.c_str(), std::fstream::out | std::fstream::binary | std::fstream::app);
-
-    file.write(_body_received.c_str(),_body_received.size());
-
-    file.close();
-}
 
 void MethodUpload::writeProcessedDataChunked()
 {

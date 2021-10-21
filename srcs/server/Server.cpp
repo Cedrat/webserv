@@ -18,6 +18,9 @@ pollfd * create_a_listenable_socket(size_t port, int host)
    fd  new_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	fcntl(new_socket, F_SETFL, O_NONBLOCK);
+	int enable = -1;
+	if (setsockopt(new_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    	throw("Error when create socket");
 	if (new_socket == -1)
 		throw  "Error when create socket";
 	memset(&my_addr, 0, sizeof(my_addr));
@@ -146,6 +149,10 @@ void Server::acceptConnection(void)
 			try {
 				exec_pollin(_sockets[i], poll_fd_copy[i].fd);
 			}
+			catch (UnableToReadException const &e)
+			{
+				removeClient(i);
+			}
 			catch (CloseSocketException const &e)
 			{
 				removeClient(i);
@@ -155,6 +162,11 @@ void Server::acceptConnection(void)
 		{
 			try {
 				exec_pollout(_sockets[i]);
+			}
+			catch (UnableToSendException const &e)
+			{
+				std::cout << e.what() << std::endl;
+				removeClient(i);
 			}
 			catch (CloseSocketException const &e)
 			{

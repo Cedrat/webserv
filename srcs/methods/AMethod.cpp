@@ -5,7 +5,7 @@
 
 AMethod::AMethod(int fd, std::string path, std::string header, AField &field)
     : _fd(fd), _header_sent(FALSE), _request_sent(FALSE), _is_finished(FALSE),
-    _path(path), _header(header), _fields(field) , _byte_send(0)
+    _path(path), _header(header), _fields(field) , _byte_send(0) , _body_received("")
 {
 
 }
@@ -107,4 +107,42 @@ void AMethod::sendHeader()
     {
          throw(UnableToSendException());
     }
+}
+
+void AMethod::receiveData()
+{
+    char buffer[BUFFER_SIZE + 1];
+    int ret;
+    
+    ret = read(_fd, buffer, BUFFER_SIZE);
+    if (ret == 0)
+    {
+        throw(EOFException());
+    }
+    if (ret == -1)
+    {
+        throw(UnableToReadException());
+    }
+    buffer[ret] = 0;
+    _body_received.append(buffer, ret);
+}
+
+void AMethod::writeFile()
+{
+    std::fstream file;
+
+    file.open(_path.c_str(), std::fstream::out | std::fstream::binary | std::fstream::app);
+
+    if (file.fail())
+    {
+        throw(FileDisappearedException());
+    }
+
+    file.write(_body_received.c_str(),_body_received.size());
+
+    if (file.fail())
+    {
+        throw(CloseSocketException());
+    }
+    file.close();
 }

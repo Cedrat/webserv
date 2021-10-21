@@ -7,7 +7,7 @@
 # define SERVER 0
 # define CLIENT 1
 
-# define BACKLOG 10
+# define BACKLOG 100
 
 # define TIMEOUT 60
 

@@ -350,13 +350,20 @@ void MethodCgi::sendBody()
 
 	ss.write(_body_cgi.c_str(), _body_cgi.size());
 
+	if (ss.fail())
+	{
+		throw(CloseSocketException());
+	}
 	ss.seekg(_sent);
 	ss.read(buffer, BUFFER_SIZE);
 	buffer[ss.gcount()] = '\0';
 
 	ret = ::send(getFd(), buffer, ss.gcount(), 0);
+	if (ret == -1)
+    {
+         throw(UnableToSendException());
+    }
 	_sent += ret;
-
 	if (ret == ss.gcount() && ss.eof())
 	{
 		setIsFinished(TRUE);

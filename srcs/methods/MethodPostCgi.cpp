@@ -57,17 +57,6 @@ void MethodPostCgi::init()
     }
 }
 
-void MethodPostCgi::writeFile()
-{
-    std::fstream file;
-
-    file.open(_path.c_str(), std::fstream::out | std::fstream::binary | std::fstream::app);
-
-    file.write(_body_received.c_str(),_body_received.size());
-
-    file.close();
-}
-
 void MethodPostCgi::writeProcessedDataChunked()
 {
     int fd = open(getPath().c_str(),  O_APPEND| O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
@@ -164,14 +153,4 @@ std::string MethodPostCgi::extractBodyRequest()
     copy_request.erase(0, _header.find("\r\n\r\n") + 4);
 
     return (copy_request);
-}
-
-void MethodPostCgi::receiveData()
-{
-    char buffer[BUFFER_SIZE + 1];
-    int ret;
-    
-    ret = read(_fd, buffer, BUFFER_SIZE);
-    buffer[ret] = 0;
-    _body_received.append(buffer, ret);
 }

@@ -21,7 +21,6 @@ class MethodPostCgi : public AMethod
         bool        _cgi_init;
         MethodCgi * _cgi;
 
-        std::string _body_received;
         int         _byte_received;
         bool        _file_received;
         int         _byte_send;
@@ -32,8 +31,6 @@ class MethodPostCgi : public AMethod
         std::string _tmp_path;
 
         std::string extractBodyRequest();
-        void        receiveData();
-        void        writeFile();
         void        writePreparation();
 
         void        setHeader();

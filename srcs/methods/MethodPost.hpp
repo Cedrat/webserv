@@ -7,7 +7,6 @@ class ChunkedRequest;
 class MethodPost: public AMethod
 {
     protected :
-        std::string _body_received;
         int         _byte_received;
         bool        _file_received;
         int         _error;
@@ -17,8 +16,6 @@ class MethodPost: public AMethod
         std::string _tmp_path;
 
         std::string extractBodyRequest();
-        void        receiveData();
-        void        writeFile();
         void        writePreparation();
 
         void        setHeader();

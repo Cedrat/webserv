@@ -46,9 +46,18 @@ class EOFException : public CloseSocketException
 
 class UnableToSendException : public CloseSocketException
 {
+    public : 
+        virtual const char* what() const throw()
+        {
+            return ("send failed.. but the socket was passed by poll?");
+        }
+};
+
+class UnableToReadException : public CloseSocketException
+{
     virtual const char* what() const throw()
     {
-        return ("send failed.. but the socket was passed by poll?");
+        return ("read failed.. but the socket was passed by poll?");
     }
 };
 

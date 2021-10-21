@@ -91,6 +91,7 @@ AMethod *FieldPost::getAMethod()
     {
         return (createErrorMethod(config));
     }
+
     _final_path = construct_path_post(getPath(), location);
     if (isCgiPath(_path, location.getCgiExtension()))
     {
@@ -119,6 +120,7 @@ AMethod *FieldPost::getAMethod()
 	{
 		return (createCgiMethod(config, location));
 	}
+
     if (location.getUploadFolder().empty() == FALSE && _content_type.find("multipart/form-data;") == 0)
         return (new MethodUpload(_data_request.getFd(), _final_path, _str_request, *this ));
     return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this ));
@@ -186,7 +188,7 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
 
     trim(upload_folder, '.');
     if (_final_path.find(upload_folder) == std::string::npos)
-        temp_path = upload_folder + splitted_path[splitted_path.size() - 1];
+        temp_path = "." + upload_folder + splitted_path[splitted_path.size() - 1];
     else 
         temp_path = "." + upload_folder;
     return (temp_path);
