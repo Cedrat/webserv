@@ -81,3 +81,28 @@ std::vector<std::string> splitLine( std::string line )
 
     return formattedLine;
 }
+
+std::string createRandomFileName(std::string path)
+{
+    char alphanum[] = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+
+    std::srand(time(0));
+    bool is_not_available = TRUE;
+    int size_name = 10;
+    std::string name_file;
+
+    while (is_not_available)
+    {
+        name_file.resize(size_name);
+        for (int i = 0; i < size_name; i++)
+        {
+            name_file[i] = alphanum[std::rand()%62];
+        }
+        if (check_if_file_exist(path + name_file) == FALSE)
+            is_not_available = FALSE;
+    }
+    name_file = path + name_file;
+    std::ofstream file(name_file.c_str());
+    file.close();
+    return (name_file);
+}

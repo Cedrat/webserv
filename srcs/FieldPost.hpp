@@ -16,7 +16,6 @@ class FieldPost : public AField
         AMethod *createErrorMethod(Config config);
         AMethod *createCgiMethod(Config config, Location location);
         std::string createPathUploadFolder(std::string upload_folder);
-        std::string createPathUploadCgi(std::string upload_folder);
         void    checkValidPath();
         void    checkBodySize(Config const & config);
         void    verifyPath(); 
