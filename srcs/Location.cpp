@@ -149,7 +149,7 @@ void Location::checkTmpFolderExist()
 void Location::setUncalledDirectives()
 {
 	if (_root == UNSET)
-		_root = "";
+		_root = "-1";
 	if (_methods[0] == UNSET)
 		_methods[0] = "GET";
 	if (_default_file == UNSET)

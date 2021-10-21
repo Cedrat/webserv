@@ -28,7 +28,7 @@ std::string create_alias(std::string path, Location location)
 {
     std::string alias = location.getRoot();
     std::string path_location = location.getLocation();
-    std::cout << path_location << " " << path << " " << alias <<  std::endl;
+
     if (path_location.rfind("/") == path_location.size() - 1)
         path.replace(0, path_location.size() -1 , alias);
     else if (path.find("/../") != std::string::npos)
