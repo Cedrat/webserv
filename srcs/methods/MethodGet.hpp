@@ -10,7 +10,7 @@ class MethodGet : public AMethod
 
     public :
         MethodGet(int fd, std::string path, std::string header, AField & field);
-        virtual ~MethodGet();
+        ~MethodGet();
 
         void init();
         void exec();

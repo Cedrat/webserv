@@ -1,27 +1,24 @@
-#include "MethodGet.hpp"
+#include "Erreur.hpp"
 #include "../includes/define.hpp"
 #include "../fields/AField.hpp"
 #include "../includes/CustomException.hpp"
 
-
-MethodGet::MethodGet(int fd, std::string path, std::string header, AField  &data_field) : AMethod(fd, path, header, data_field)
+Erreur::Erreur(int fd, std::string path, std::string header, AField &field) : 
+AMethod(fd, path, header, field)
 {
 
 }
 
-MethodGet::~MethodGet()
+Erreur::~Erreur()
 {
     delete &_fields;
 }
-
-
-void MethodGet::init()
+void Erreur::init() 
 {
-   _fields.setPollout(); 
-   _byte_send = 0; 
+    _fields.setPollout();
 }
 
-void MethodGet::exec()
+void Erreur::exec()
 {
     if (getHeaderSent() == FALSE)
     {
@@ -31,5 +28,6 @@ void MethodGet::exec()
     else
     {
         sendBody();
+        setIsFinished(TRUE);
     }
 }

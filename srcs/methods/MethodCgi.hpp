@@ -3,8 +3,8 @@
 
 # include "AMethod.hpp"
 # include "../includes/utils.hpp"
-# include "Config.hpp"
-# include "CustomException.hpp"
+# include "../config/Config.hpp"
+# include "../includes/CustomException.hpp"
 
 # define BUFFER_CGI 50
 

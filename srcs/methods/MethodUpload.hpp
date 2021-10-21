@@ -9,7 +9,6 @@ class ChunkedRequest;
 class MethodUpload: public AMethod
 {
     protected :
-        std::string _body_received;
         int         _byte_received;
         bool        _file_received;
         int         _byte_send;
@@ -21,8 +20,6 @@ class MethodUpload: public AMethod
 
         CurrentStatus _status;
         std::string extractBodyRequest();
-        void        receiveData();
-        void        writeFile();
         void        writePreparation();
         void        removeBeginDecorations();
         void        removeEndDecorations();
