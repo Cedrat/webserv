@@ -20,8 +20,8 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
 	_fields.setPollout();
-	this->_tmp_out = createTmpFile();
-	this->_tmp_in = createTmpFile();
+	this->_tmp_out = createRandomFileName(PATH_TMP);
+	this->_tmp_in = createRandomFileName(PATH_TMP);
 	setEnv();
 	processCGI();
 }
@@ -195,24 +195,6 @@ void MethodCgi::setEnv()
 /**************************************************************
 Utils
 **************************************************************/
-std::string MethodCgi::createTmpFile()
-{
-	char _tmp_file_name[] = "tmp/tmpXXXXXX";
-	int	fd;
-
-	fd = mkstemp(_tmp_file_name);
-	if (fd < 0)
-	{
-		setErrorResponse(500);
-		_pid_ended = TRUE;
-		return ("");
-	}
-	else
-		close(fd);
-
-	return  _tmp_file_name;
-}
-
 void MethodCgi::freeEnv( char ** env )
 {
 	for(int i = 0; env[i]; i++)

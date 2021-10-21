@@ -94,7 +94,7 @@ AMethod *FieldPost::getAMethod()
     _final_path = construct_path_post(getPath(), location);
     if (isCgiPath(_path, location.getCgiExtension()))
     {
-        _final_path = createPathUploadCgi(PATH_TMP);
+        _final_path = createRandomFileName(PATH_TMP);
     }
     else if (location.getUploadFolder().empty() == FALSE)
     {
@@ -161,10 +161,8 @@ AMethod *FieldPost::createErrorMethod(Config config)
 
 void FieldPost::checkValidPath()
 {
-    std::cout << _final_path << std::endl;
     if (check_valid_path(_path) == FALSE)
     {   
-        std::cout << 1 << std::endl;
         _error = BAD_REQUEST;
     }
     if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
@@ -172,12 +170,10 @@ void FieldPost::checkValidPath()
         if (_content_type.find("multipart/form-data;") != 0)
         {
             _error = BAD_REQUEST;
-            std::cout << 2 << std::endl;
         }
     }
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
-        std::cout << 3 << std::endl;
         _error = BAD_REQUEST;
     }   
 
@@ -194,27 +190,6 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     else 
         temp_path = "." + upload_folder;
     return (temp_path);
-}
-
-std::string FieldPost::createPathUploadCgi(std::string upload_folder)
-{
-    int	fd;
-    std::string temp_path;
-
-    temp_path = upload_folder + "tmpXXXXXX";
-
-    char *tmp_file_name = new char [temp_path.size() + 1];
-    strcpy(tmp_file_name, temp_path.c_str());
-
-	fd = mkstemp(tmp_file_name);
-	if (fd < 0)
-    {
-        _error = (SERVER_ERROR);
-        return ("");
-    }	
-	else
-		close(fd);
-    return (tmp_file_name);
 }
 
 void FieldPost::checkBodySize(Config const &config)

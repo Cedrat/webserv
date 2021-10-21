@@ -131,6 +131,7 @@ void MethodPostCgi::exec()
 		_cgi->exec();
 		if (_cgi->getStatus() == TRUE)
 		{
+            remove(this->_path.c_str());
 			setIsFinished(TRUE);
 		}	
 	}

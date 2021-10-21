@@ -148,8 +148,8 @@ void Location::checkTmpFolderExist()
 
 void Location::setUncalledDirectives()
 {
-	if (_root == UNSET) //Recuperer root du serveur si pas de root dans location
-		_root = "";
+	if (_root == UNSET)
+		_root = "./www";
 	if (_methods[0] == UNSET)
 		_methods[0] = "GET";
 	if (_default_file == UNSET)
