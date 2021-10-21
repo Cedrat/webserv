@@ -102,7 +102,6 @@ std::string createRandomFileName(std::string path)
             is_not_available = FALSE;
     }
     name_file = path + name_file;
-    std::ofstream file(name_file.c_str());
-    file.close();
+
     return (name_file);
 }

@@ -44,6 +44,7 @@ class MethodCgi : public AMethod
         char **     setArgs();
         void        freeEnv( char ** env );
         void        freeArgs( char ** args );
+        std::string createTmpFile();
         
         void        exec();
         void        processCGI();
