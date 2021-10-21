@@ -48,6 +48,8 @@ class AField
         void setPollout();
         void setPollin();
 
+        void setError(int const error);
+
         bool methodNotAuthorized(Location const & location);
 
         virtual void fillField() = 0;

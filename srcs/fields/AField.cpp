@@ -113,3 +113,8 @@ void AField::setPollin()
    _pollfd.events = POLLIN;
    _pollfd.revents = 0; 
 }
+
+void AField::setError(int const error)
+{
+    _error = error;
+}
