@@ -136,6 +136,16 @@ void Location::setRedirect( std::vector<std::string> line )
 		throw std::invalid_argument("Error : location block can't contain more than one rewrite directive");
 }
 
+void Location::checkTmpFolderExist()
+{
+	struct stat st;
+
+	mkdir(PATH_TMP, 0777);
+	if (stat(PATH_TMP, &st) == -1) {
+		throw std::invalid_argument("Error : Can't create tmp folder for CGI");
+	}        
+}
+
 void Location::setUncalledDirectives()
 {
 	if (_root == UNSET) //Recuperer root du serveur si pas de root dans location
@@ -144,18 +154,10 @@ void Location::setUncalledDirectives()
 		_methods[0] = "GET";
 	if (_default_file == UNSET)
 		_default_file = "";
-		else
-	if (_upload_folder == UNSET)
-	{
-		for (size_t i = 0; i < _methods.size(); i++)
-		{
-			if (_methods[i] == "POST")
-				throw std::invalid_argument("Error : You must specify an upload directory if you use the POST method");
-		}  
-	}
 	if (_redirect == UNSET)
 		_redirect = "";
-	//upload_folder reste = "-1" si pas de methode POST
+	if (_upload_folder == "-1")
+		_upload_folder = "";
 	//redirect reste = "-1" si pas specifie
 	//On ne change pas cgi (= 0, 0), comme ça on sait qu'il n'est pas demandé
 }
@@ -280,6 +282,7 @@ bool Location::checkCgi()
 			return false;
 		} 
 	}
+	checkTmpFolderExist();
 	return true;
 }
 
@@ -300,6 +303,23 @@ bool Location::isEqual(const Location & rhs) const
 {
 	return _location == rhs.getLocation();
 }
+
+bool Location::checkIfMethodIsPresent(std::string method) const
+ {
+	 std::vector<std::string> methods;
+	 
+	 methods = getMethods();
+
+	std::vector<std::string>::iterator it_begin = methods.begin();
+	std::vector<std::string>::iterator it_end = methods.end();
+
+	for (int i = 0; it_begin != it_end; i++, it_begin++)
+	{
+		if (methods[i] == method)
+			return (TRUE);
+	}
+	return (FALSE);
+ }
 
 
 
@@ -379,28 +399,3 @@ void Location::debug()
 	std::cout << "Redirection " << _redirect << std::endl;
 	std::cout << "*** End ***\n" << std::endl;
 }
-
-
-
-
-
-
-
-
-
- bool Location::checkIfMethodIsPresent(std::string method) const
- {
-	 std::vector<std::string> methods;
-	 
-	 methods = getMethods();
-
-	std::vector<std::string>::iterator it_begin = methods.begin();
-	std::vector<std::string>::iterator it_end = methods.end();
-
-	for (int i = 0; it_begin != it_end; i++, it_begin++)
-	{
-		if (methods[i] == method)
-			return (TRUE);
-	}
-	return (FALSE);
- }

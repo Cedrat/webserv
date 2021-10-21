@@ -16,6 +16,7 @@ std::map<int, std::string> error_table()
     error_list[413] = "413 Request Entity Too Large";
     error_list[414] = "URI Too Long";
     error_list[418] = "418 I'm a teapot";
+    error_list[500] = "500 Internal Server Error";
     error_list[501] = "501 Not Implemented";
     error_list[503] = "503 Service Unavailable";
     error_list[505] = "505 Version not Supported";

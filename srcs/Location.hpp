@@ -1,10 +1,11 @@
 #ifndef LOCATION_HPP
 # define LOCATION_HPP
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include "../includes/utils.hpp"
+# include <iostream>
+# include <vector>
+# include <map>
+# include "../includes/utils.hpp"
+# include "define.hpp"
 # include "../includes/Syntax.hpp"
 
 # define UNSET "-1"
@@ -40,6 +41,7 @@ class Location
         void setUploadFolder( std::vector<std::string> line );
         void setCgi( std::vector<std::string> line );
         void setRedirect( std::vector<std::string> line );
+        void checkTmpFolderExist();
         void setUncalledDirectives();
 
         //Verification des valeurs

@@ -71,7 +71,6 @@ void FieldPost::fillField()
             trim_field(splitted_line[1]);
             _transfert_encoding = splitted_line[1].c_str();
         }
-        /* Faire recup conent-type ici, avec value dans Field et un getter*/
         else if (str_to_lower(splitted_line[0]) == "content-type")
         {
             trim_field(splitted_line[1]);
@@ -93,7 +92,11 @@ AMethod *FieldPost::getAMethod()
         return (createErrorMethod(config));
     }
     _final_path = construct_path_post(getPath(), location);
-    if (location.getUploadFolder().empty() == FALSE && !(isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0"))
+    if (isCgiPath(_path, location.getCgiExtension()))
+    {
+        _final_path = createPathUploadCgi(PATH_TMP);
+    }
+    else if (location.getUploadFolder().empty() == FALSE)
     {
         _final_path = createPathUploadFolder(location.getUploadFolder());
     }
@@ -191,6 +194,27 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     else 
         temp_path = "." + upload_folder;
     return (temp_path);
+}
+
+std::string FieldPost::createPathUploadCgi(std::string upload_folder)
+{
+    int	fd;
+    std::string temp_path;
+
+    temp_path = upload_folder + "tmpXXXXXX";
+
+    char *tmp_file_name = new char [temp_path.size() + 1];
+    strcpy(tmp_file_name, temp_path.c_str());
+
+	fd = mkstemp(tmp_file_name);
+	if (fd < 0)
+    {
+        _error = (SERVER_ERROR);
+        return ("");
+    }	
+	else
+		close(fd);
+    return (tmp_file_name);
 }
 
 void FieldPost::checkBodySize(Config const &config)

@@ -21,6 +21,7 @@
 # define NOT_FOUND 404
 # define METHOD_NOT_ALLOWED 405
 # define ENTITY_TOO_LARGE 413
+# define SERVER_ERROR 500
 # define NOT_SUPPORTED 505
 
 
@@ -28,6 +29,8 @@ typedef int fd;
 
 #define MAX_REQUEST_SIZE 8000
 #define BUFFER_SIZE 128000
+
+#define PATH_TMP "./tmp/"
 
 
 # include <cstdio> //For size_t define;
