@@ -84,7 +84,7 @@ AMethod *FieldGet::getAMethod()
         _error = METHOD_NOT_ALLOWED;
         return (createErrorMethod(config, location));
     }
-	if (check_if_file_exist(_final_path) == FALSE)
+	if (check_if_file_exist(_final_path) == FALSE || is_folder(_final_path.c_str()))
 	{
 		_error = NOT_FOUND;
 		return (createErrorMethod(config, location));
