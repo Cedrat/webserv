@@ -1,5 +1,6 @@
 #include "MethodAi.hpp"
 #include "../fields/AField.hpp"
+#include "../includes/CustomException.hpp"
 
 MethodAi::MethodAi(int fd, std::string ai_file, std::string header, AField &field) : AMethod(fd, "", header, field) , _ai_file(ai_file)
 {
@@ -32,6 +33,12 @@ void MethodAi::exec()
 void MethodAi::sendBody()
 {
     signal(SIGPIPE, SIG_IGN);
-    ::send(getFd(), _ai_file.c_str(), _ai_file.size(), 0);
+
+    int ret;
+    ret = ::send(getFd(), _ai_file.c_str(), _ai_file.size(), 0);
+    if (ret == -1)
+    {
+         throw(UnableToSendException());
+    }
     setIsFinished(TRUE);
 }
