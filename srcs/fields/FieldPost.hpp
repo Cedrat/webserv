@@ -13,7 +13,7 @@ class FieldPost : public AField
         int         _content_length;
         std::string _content_type;
 
-        AMethod *createErrorMethod(Config config);
+        AMethod *createErrorMethod(Config config, Location location);
         AMethod *createCgiMethod(Config config, Location location);
         std::string createPathUploadFolder(std::string upload_folder);
         void    checkValidPath();
