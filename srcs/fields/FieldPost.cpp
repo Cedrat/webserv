@@ -91,7 +91,11 @@ AMethod *FieldPost::getAMethod()
     {
         return (createErrorMethod(config));
     }
-
+    if (methodNotAuthorized(location))
+    {
+        _error = METHOD_NOT_ALLOWED;
+        return (createErrorMethod(config));
+    }
     _final_path = construct_path_post(getPath(), location);
     if (isCgiPath(_path, location.getCgiExtension()))
     {
