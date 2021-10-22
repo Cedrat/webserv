@@ -104,7 +104,13 @@ void Location::setDefaultFile( std::vector<std::string> line )
 void Location::setUploadFolder( std::vector<std::string> line )
 {
 	if (_upload_folder == UNSET)
+	{
 		_upload_folder = line[1];
+		if (_upload_folder[_upload_folder.size() - 1] != '/')
+		{
+			_upload_folder += "/";
+		}
+	}
 	else
 		throw std::invalid_argument("Error : location block can't contain more than one upload_folder directive");
 }
