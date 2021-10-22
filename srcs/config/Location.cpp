@@ -189,7 +189,6 @@ bool Location::checkLocation()
 	// un path '/' match toutes les requêtes
 	if (_location.size() == 1 && _location[0] == '/')
 		return true;
-	//On accepte uniquement les char alnum et le '/', le '.', le '-' et le '_'
 	if (!isAcceptableURI(_location))
 	{
 		throw std::invalid_argument("Error in location path : Invalid character.");
