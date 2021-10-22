@@ -43,7 +43,6 @@ ConfigParser & ConfigParser::operator=( ConfigParser const & rhs )
 	{
 		this->_serverNb = rhs._serverNb;
 		this->_locationNb = rhs._locationNb;
-		//this->_configFile = rhs._configFile;
 		if (this->_server.empty() == FALSE)
 			this->_server.clear();
 		this->_server = rhs._server;
@@ -178,8 +177,6 @@ Enregistrement des structures de données
 **************************************************************/
 bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * server )
 {
-	//if (_serverNb < 100) ?
-
 	if (line.size() == 1)
 	{
 		//On defini serveur par defaut, on check les donnees et absence de doublon
@@ -195,6 +192,8 @@ bool ConfigParser::closeServerBlock( std::vector<std::string> line, Config * ser
 		}
 		_server.push_back(*server);
 		_server[_serverNb].setLocation(_location);
+		if (_locationNb == 0)
+			throw std::invalid_argument("You need at least one location bloc");
 		_location.clear();
 		_locationNb = 0;
 		_serverNb++;

@@ -20,8 +20,8 @@ MethodCgi::~MethodCgi()
 void MethodCgi::init()
 {
 	_fields.setPollout();
-	this->_tmp_out = createRandomFileName(PATH_TMP);
-	this->_tmp_in = createRandomFileName(PATH_TMP);
+	this->_tmp_out = createTmpFile();
+	this->_tmp_in = createTmpFile();
 	setEnv();
 	processCGI();
 }
@@ -72,7 +72,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 					O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK, 
 					S_IRUSR | S_IWUSR | std::ios::binary);
 	int     tmp_in;
-	
+
 	if (_body.empty() == TRUE)
 	{
 		tmp_in = open(this->_tmp_in.c_str(), 
@@ -85,7 +85,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 					O_RDWR | O_NONBLOCK, 
 					S_IRUSR | S_IWUSR | std::ios::binary);
 	}
-	
+
 	if ((tmp_out < 0) || (tmp_in < 0))
 	{
 		setErrorResponse(SERVER_ERROR);
@@ -95,6 +95,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 
 	lseek(tmp_in, 0, SEEK_SET);
 	_pid = fork();
+
 	if (_pid == -1)     //Error
 	{
 		remove(this->_tmp_in.c_str());
@@ -110,7 +111,9 @@ void MethodCgi::execCGI( char ** args, char ** env )
 			close(tmp_out);
 			remove(this->_tmp_out.c_str());
 			remove(this->_tmp_in.c_str());
-			exit(-1);
+			freeEnv(env);
+			freeArgs(args);
+			throw(EmergencyExit());
 		}
 	}
 	else  //Parent
@@ -129,7 +132,6 @@ void MethodCgi::readCgiFile()
 		setErrorResponse(BAD_REQUEST);
 		return ;
 	}
-
 	size_t  ret;
 	char    buffer[BUFFER_CGI + 1] = {0};
 
@@ -195,6 +197,24 @@ void MethodCgi::setEnv()
 /**************************************************************
 Utils
 **************************************************************/
+std::string MethodCgi::createTmpFile()
+{
+	char _tmp_file_name[] = "tmp/tmpXXXXXX";
+	int	fd;
+
+	fd = mkstemp(_tmp_file_name);
+	if (fd < 0)
+	{
+		setErrorResponse(500);
+		_pid_ended = TRUE;
+		return ("");
+	}
+	else
+		close(fd);
+
+	return  _tmp_file_name;
+}
+
 void MethodCgi::freeEnv( char ** env )
 {
 	for(int i = 0; env[i]; i++)
@@ -230,7 +250,7 @@ char ** MethodCgi::convertEnv()
 
 char ** MethodCgi::setArgs()
 {
-	std::string     binary_path = construct_path(_location.getCgiBinary(), _location);
+	std::string     binary_path = _location.getCgiBinary();
 	char 			**args = new char*[3];
 
 	args[0] = new char[binary_path.size() + 1];
@@ -290,7 +310,6 @@ Headers
 void    MethodCgi::extractHeader()
 {
 	size_t  end_header;
-
 	if(((end_header = _body_cgi.find("\r\n\r\n")) != std::string::npos) 
 		|| ((end_header = _body_cgi.find("\n\n")) != std::string::npos))
 	{
