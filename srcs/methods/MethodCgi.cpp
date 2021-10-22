@@ -95,6 +95,7 @@ void MethodCgi::execCGI( char ** args, char ** env )
 
 	lseek(tmp_in, 0, SEEK_SET);
 	_pid = fork();
+
 	if (_pid == -1)     //Error
 	{
 		remove(this->_tmp_in.c_str());
@@ -110,7 +111,9 @@ void MethodCgi::execCGI( char ** args, char ** env )
 			close(tmp_out);
 			remove(this->_tmp_out.c_str());
 			remove(this->_tmp_in.c_str());
-			exit(-1);
+			freeEnv(env);
+			freeArgs(args);
+			throw(EmergencyExit());
 		}
 	}
 	else  //Parent
