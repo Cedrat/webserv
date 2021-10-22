@@ -89,12 +89,12 @@ AMethod *FieldPost::getAMethod()
     Location location = find_best_location(getPath(), config);
     if (_error != OK)
     {
-        return (createErrorMethod(config));
+        return (createErrorMethod(config, location));
     }
     if (methodNotAuthorized(location))
     {
         _error = METHOD_NOT_ALLOWED;
-        return (createErrorMethod(config));
+        return (createErrorMethod(config, location));
     }
     _final_path = construct_path_post(getPath(), location);
     if (isCgiPath(_path, location.getCgiExtension()))
@@ -108,7 +108,7 @@ AMethod *FieldPost::getAMethod()
     checkValidPath();
     if (_error != OK)
     {
-        return (createErrorMethod(config));
+        return (createErrorMethod(config, location));
     }
     verifyRedirect(location);
     if (_error == MOVED_PERMANENTLY)
@@ -118,7 +118,7 @@ AMethod *FieldPost::getAMethod()
     checkBodySize(config);
     if (_error != OK)
     {
-        return (createErrorMethod(config));
+        return (createErrorMethod(config, location));
     }
     if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
 	{
@@ -152,13 +152,17 @@ void FieldPost::verifyData()
         _content_length = atoi(_str_content_length.c_str());
     }
 }
-AMethod *FieldPost::createErrorMethod(Config config)
+AMethod *FieldPost::createErrorMethod(Config config, Location location)
 {
     std::string header;
     std::string path_error = config.getPathError(_error);
     
     header = "HTTP/1.1 " + get_string_error(_error);
     header += "\nContent-Length: " + int_to_string(get_file_size(path_error)) + "\n";
+    if(_error == METHOD_NOT_ALLOWED)
+    {
+        header+= fields_allowed(location);
+    }
     header +=  date_string() + "\n\n";
 
     AMethod *method = new Erreur(_data_request.getFd(), path_error, header, *this);
