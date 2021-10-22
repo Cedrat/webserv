@@ -153,7 +153,7 @@ void Location::setUncalledDirectives()
 	if (_methods[0] == UNSET)
 		_methods[0] = "GET";
 	if (_default_file == UNSET)
-		_default_file = "/";
+		_default_file = "index.html";
 	if (_redirect == UNSET)
 		_redirect = "";
 	if (_upload_folder == "-1")
