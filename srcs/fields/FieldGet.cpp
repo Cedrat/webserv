@@ -84,15 +84,15 @@ AMethod *FieldGet::getAMethod()
         _error = METHOD_NOT_ALLOWED;
         return (createErrorMethod(config, location));
     }
+	if (isAIPath(_final_path, location) && check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
+	{
+		return(createAiMethod());
+	}
 	if (check_if_file_exist(_final_path) == FALSE || is_folder(_final_path.c_str()))
 	{
 		_error = NOT_FOUND;
 		return (createErrorMethod(config, location));
 	}	
-	if (isAIPath(_final_path, location))
-	{
-		return(createAiMethod());
-	}
 	if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
 	{
 		return(createCgiMethod(config, location));
