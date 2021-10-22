@@ -153,7 +153,7 @@ void Location::setUncalledDirectives()
 	if (_methods[0] == UNSET)
 		_methods[0] = "GET";
 	if (_default_file == UNSET)
-		_default_file = "index.html";
+		_default_file = "/";
 	if (_redirect == UNSET)
 		_redirect = "";
 	if (_upload_folder == "-1")
@@ -189,7 +189,6 @@ bool Location::checkLocation()
 	// un path '/' match toutes les requêtes
 	if (_location.size() == 1 && _location[0] == '/')
 		return true;
-	//On accepte uniquement les char alnum et le '/', le '.', le '-' et le '_'
 	if (!isAcceptableURI(_location))
 	{
 		throw std::invalid_argument("Error in location path : Invalid character.");
