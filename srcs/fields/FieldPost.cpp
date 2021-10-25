@@ -105,7 +105,7 @@ AMethod *FieldPost::getAMethod()
     {
         _final_path = createPathUploadFolder(location.getUploadFolder());
     }
-    checkValidPath();
+    checkValidPath(location);
     if (_error != OK)
     {
         return (createErrorMethod(config, location));
@@ -123,10 +123,12 @@ AMethod *FieldPost::getAMethod()
     if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
 	{
 		return (createCgiMethod(config, location));
-	}
-
+    }
+	
     if (location.getUploadFolder().empty() == FALSE && _content_type.find("multipart/form-data;") == 0)
+    {
         return (new MethodUpload(_data_request.getFd(), _final_path, _str_request, *this ));
+    }
     return (new MethodPost(_data_request.getFd(), _final_path, _str_request, *this ));
 }
 
@@ -169,21 +171,23 @@ AMethod *FieldPost::createErrorMethod(Config config, Location location)
     return (method);
 }
 
-void FieldPost::checkValidPath()
+void FieldPost::checkValidPath(Location location)
 {
-    if (check_valid_path(_path) == FALSE)
+        if (check_valid_path(_path) == FALSE)
     {   
+        std::cout << 1 << std::endl;
         _error = BAD_REQUEST;
     }
     if (check_if_file_exist(_final_path) && is_folder(_final_path.c_str()))
     {
-        if (_content_type.find("multipart/form-data;") != 0)
+        if (_content_type.find("multipart/form-data;") != 0 || location.getUploadFolder().empty())
         {
             _error = BAD_REQUEST;
         }
     }
     if (check_if_file_exist(remove_chars_after_the_last_token(_final_path, '/')) == FALSE)
     {
+        std::cout << 3 << std::endl;
         _error = BAD_REQUEST;
     }   
 
@@ -195,10 +199,14 @@ std::string FieldPost::createPathUploadFolder(std::string upload_folder)
     std::string temp_path;
 
     trim(upload_folder, '.');
+    std::cout << _content_type << std::endl;
     if (_final_path.find(upload_folder) == std::string::npos)
         temp_path = "." + upload_folder + splitted_path[splitted_path.size() - 1];
-    else 
+    else if (_content_type.find("multipart/form-data;") == 0)
         temp_path = "." + upload_folder;
+    else 
+        temp_path = "." + upload_folder + splitted_path[splitted_path.size() - 1];
+    std::cout << temp_path << std::endl;
     return (temp_path);
 }
 

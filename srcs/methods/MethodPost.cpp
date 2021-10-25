@@ -26,12 +26,6 @@ void MethodPost::init()
 {
     _fields.setPollin();
     _body_received = extractBodyRequest();
-    if (_fields.getContentType().find("multipart/form-data;") == 0)
-    {
-        std::string extension;
-        extension = extract_extension(_header);
-        _path += create_tmp_file_with_extension(extension);
-    }
     if (_fields.getTransfertEncoding() == "chunked")
     {
         _body_received = "\r\n" + _body_received;
