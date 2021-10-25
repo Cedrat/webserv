@@ -205,6 +205,8 @@ bool Location::checkLocation()
 
 bool Location::checkRoot()
 {
+	if (_root == "./" || _root.find("../") != std::string::npos)
+		return false;
 	if (!isAcceptableURI(_root))
 	{
 		throw std::invalid_argument("Error in root directive : Invalid character.");
