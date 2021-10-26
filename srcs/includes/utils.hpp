@@ -41,6 +41,7 @@ typedef int fd;
 #define FALSE 0
 #define TRUE 1
 
+bool check_authorization(const char * path);
 std::string create_tmp_file_with_extension(std::string extension);
 std::string extract_extension(std::string body);
 std::string createTmpFile();

@@ -93,6 +93,11 @@ AMethod *FieldGet::getAMethod()
 		_error = NOT_FOUND;
 		return (createErrorMethod(config, location));
 	}	
+	if (check_authorization(_final_path.c_str()) == FALSE)
+	{
+		_error = FORBIDDEN;
+		return (createErrorMethod(config, location));
+	}
 	if (isCgiPath(_path, location.getCgiExtension()) && location.getCgiExtension() != "0" && location.getCgiBinary() != "0")
 	{
 		return(createCgiMethod(config, location));

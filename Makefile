@@ -10,7 +10,7 @@ Config.cpp                      Formatting.cpp                  Server.cpp      
 isCgiPath.cpp MethodCgi.cpp \
 FieldDelete.cpp					delete_f.cpp 					FieldPost.cpp					date_string.cpp					is_not_number.cpp				trim_fields.cpp 				remove_chars_after_the_last_token.cpp decompose_path.cpp \
 MethodPost.cpp					extract_header_request.cpp		ChunkedRequest.cpp				atoi_hexa.cpp					MethodPostCgi.cpp 				fields_allowed.cpp create_tmp_file.cpp \
-upload_utilitaries.cpp MethodUpload.cpp
+upload_utilitaries.cpp MethodUpload.cpp check_authorization.cpp
 
 
 PATH_OBJS = ./objs/
