@@ -1,48 +1,61 @@
-#include "Server.hpp"
-#include "Socket.hpp"
-#include "Config.hpp"
 
-Location default_location()
+#include "config/ConfigParser.hpp"
+#include "server/Server.hpp"
+#include "includes/CustomException.hpp"
+
+std::string config_path(int argc, char **argv)
 {
-   Location location;
-
-   location.setAutoIndex(FALSE);
-   location.addMethod("GET");
-   location.setDefaultFile("index.html");
-   location.setUploadFolder("/upload/");
-   location.setRoot(".");
-   location.setLocation(".");
-   return (location);
+	if (argc == 2)
+	{
+		std::string path(argv[1]);
+		return (path);
+	}
+	else if (argc == 1)
+	{
+		std::string path("./srcs/step.conf");
+		return (path);
+	}
+	else
+	{
+		return ("");
+	}
 }
 
-Config default_config()
+int main(int argc, char **argv)
 {
-   Config config;
-   Location location;
+	Server server;
+	
+	std::string file(config_path(argc, argv));
+	if (file == "")
+	{
+		std::cerr << "./webserv need zero or one argument:\n0: default.conf will be used.\n1: give me a good config file!" << std::endl;
+		return EXIT_FAILURE;
+	}
+	try
+	{
+		ConfigParser conf(file.c_str());
+		for(int i = 0; i < conf.getServerNb(); i++)
+			server.addConfig(conf.getOneServer(i));
+	}
+	catch(ParserExit const& e)
+	{
+		return 0;
+	}
 
-    config.setPrincipalServer(TRUE);
-    config.setHost(0);
-    config.setPort(7995);
-    config.setServerOrClient(SERVER);
-    config.setMaxBodySize(1024);
-    config.addServerName("localhost");
-    config.addErrorPages(404, "/error/404.html");
-    location = default_location();
-    config.addLocation(location);
-    return (config);
-}
-
-int main()
-{
-    Server server;
-    Socket socket;
-    Config config;
-    Config config2;
-    
-    config2.setPort(7996);
-    config2.setServerOrClient(SERVER);
-    server.addSocketServer(config2);
-    config = default_config();
-    server.addSocketServer(config);
-    server.launchingServ();
+	try {
+		server.createSocketsServer();
+	}
+	catch(EmergencyExit const& e)
+	{
+		server.endServer();
+			return 0;
+	}
+	try{
+		server.launchingServer();
+	}
+	catch (EmergencyExit const &e)
+	{
+		std::cout << "Server has quitted ! Good Night ! " << std::endl;
+		return (0);
+	}
 }
